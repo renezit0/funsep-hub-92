@@ -69,8 +69,9 @@ export function PasswordsPage() {
       const { data: beneficiariosData, error: benError } = await supabase
         .from('cadben')
         .select('matricula, nome, cpf, situacao')
-        .eq('situacao', 1) // Apenas ativos
+        .in('situacao', [1, 2]) // Situação 1 e 2
         .order('nome');
+
 
       if (benError) throw benError;
       setBeneficiarios(beneficiariosData || []);
