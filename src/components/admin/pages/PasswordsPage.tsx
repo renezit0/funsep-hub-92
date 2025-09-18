@@ -67,10 +67,11 @@ export function PasswordsPage() {
 
       // Carregar beneficiários
       const { data: beneficiariosData, error: benError } = await supabase
-      .from('cadben')
-      .select('matricula, nome, cpf, situacao')
-      .in('situacao', [1, 2]) // ativos e inativos (2)
-      .order('nome');
+      .from("cadben")
+      .select("matricula, nome, cpf, situacao")
+      .in("situacao", [1, 2])
+      .order("nome")
+      .range(0, 9999); // traria até 10.000 registros
 
       if (benError) throw benError;
       setBeneficiarios(beneficiariosData || []);
