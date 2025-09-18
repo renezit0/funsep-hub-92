@@ -205,26 +205,47 @@ export function PasswordsPage() {
   });
 
   // Filtro corrigido para beneficiários com debug
-  const filteredBeneficiarios = React.useMemo(() => {
-    console.log('Filtro sendo executado:', {
-      beneficiarioSearch,
-      totalBeneficiarios: beneficiarios.length,
-      searchLength: beneficiarioSearch.length
-    });
-
+  const filteredBeneficiarios = useMemo(() => {
+    console.log('=== DEBUG FILTRO ===');
+    console.log('Termo de busca:', beneficiarioSearch);
+    console.log('Total beneficiários:', beneficiarios.length);
+    
     if (!beneficiarioSearch || beneficiarioSearch.trim().length < 2) {
-      console.log('Busca muito curta ou vazia');
       return [];
     }
     
-    const searchTerm = beneficiarioSearch.toLowerCase().trim();
+    // Debug: Verificar estrutura dos primeiros dados
+    if (beneficiarios.length > 0) {
+      console.log('Estrutura do primeiro beneficiário:', beneficiarios[0]);
+      console.log('Primeiros 5 nomes:', beneficiarios.slice(0, 5).map(b => ({
+        nome: b.nome,
+        tipo: typeof b.nome,
+        length: b.nome?.length
+      })));
+    }
     
-    const filtered = beneficiarios.filter(ben => {
-      if (!ben) return false;
+    const searchTerm = beneficiarioSearch.toLowerCase().trim();
+    console.log('Termo normalizado:', searchTerm);
+    
+    const filtered = beneficiarios.filter((ben, index) => {
+      if (!ben) {
+        console.log(`Beneficiário ${index} é nulo`);
+        return false;
+      }
       
-      const nome = (ben.nome || '').toLowerCase();
-      const matricula = (ben.matricula || '').toString();
-      const cpf = (ben.cpf || '').toString();
+      const nome = ben.nome ? ben.nome.toString().toLowerCase().trim() : '';
+      const matricula = ben.matricula ? ben.matricula.toString() : '';
+      const cpf = ben.cpf ? ben.cpf.toString() : '';
+      
+      // Debug detalhado para os primeiros registros
+      if (index < 5) {
+        console.log(`Beneficiário ${index}:`, {
+          nome: nome,
+          matricula: matricula,
+          nomeIncludes: nome.includes(searchTerm),
+          searchTerm: searchTerm
+        });
+      }
       
       const matchNome = nome.includes(searchTerm);
       const matchMatricula = matricula.includes(beneficiarioSearch);
@@ -233,7 +254,7 @@ export function PasswordsPage() {
       return matchNome || matchMatricula || matchCpf;
     });
     
-    console.log('Resultados filtrados:', filtered.length);
+    console.log('Resultados encontrados:', filtered.length);
     if (filtered.length > 0) {
       console.log('Primeiros resultados:', filtered.slice(0, 3));
     }
