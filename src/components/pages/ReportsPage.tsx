@@ -1,331 +1,268 @@
 import React, { useState, useEffect } from "react";
+import { ChartBar, Download, FileText, Info, Calendar } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { FileText, Download, Calendar, User, UserCheck } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import jsPDF from 'jspdf';
-
-interface ReportData {
-  matricula: number;
-  nome: string;
-  cpf: number | string;  
-  situacao: number;
-  [key: string]: any; // Para suportar outras propriedades das tabelas
-}
+import html2canvas from 'html2canvas';
 
 export function ReportsPage() {
+  const { session } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [reportData, setReportData] = useState<ReportData[]>([]);
-  const [reportType, setReportType] = useState<'personal' | 'family'>('personal');
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reportType, setReportType] = useState<'a_pagar' | 'pagos' | 'ir'>('a_pagar');
   const [dateRange, setDateRange] = useState({
-    start: '',
-    end: ''
+    dataInicio: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
+    dataFim: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().split('T')[0]
   });
-  const { session, isAuthenticated } = useAuth();
+  const { toast } = useToast();
 
-  const isBeneficiary = session?.user.cargo === 'BENEFICIÁRIO';
-  const userMatricula = isBeneficiary ? session?.sigla.replace('BEN-', '') : null;
-
-  useEffect(() => {
-    if (isAuthenticated && isBeneficiary) {
-      loadPersonalData();
-    }
-  }, [isAuthenticated, isBeneficiary]);
-
-  const loadPersonalData = async () => {
-    if (!userMatricula) return;
-
-    try {
-      setLoading(true);
-      
-      const { data, error } = await supabase
-        .from('cadben')
-        .select('*')
-        .eq('matricula', parseInt(userMatricula));
-
-      if (error) throw error;
-      setReportData(data || []);
-    } catch (error) {
-      console.error('Erro ao carregar dados pessoais:', error);
-      toast.error('Erro ao carregar dados pessoais');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadFamilyData = async () => {
-    if (!userMatricula) return;
-
-    try {
-      setLoading(true);
-      
-      const { data, error } = await supabase
-        .from('caddep')
-        .select('*')
-        .eq('matricula', parseInt(userMatricula));
-
-      if (error) throw error;
-      setReportData(data || []);
-    } catch (error) {
-      console.error('Erro ao carregar dados familiares:', error);
-      toast.error('Erro ao carregar dados familiares');
-    } finally {
-      setLoading(false);
-    }
+  const openReportModal = (type: 'a_pagar' | 'pagos' | 'ir') => {
+    setReportType(type);
+    setReportModalOpen(true);
   };
 
   const generateReport = async () => {
-    if (!isAuthenticated || !isBeneficiary) {
-      toast.error('Acesso restrito a beneficiários');
+    if (!session || !session.user || !session.user.sigla) {
+      toast({
+        title: "Erro de autenticação",
+        description: "Usuário não autenticado ou sem matrícula.",
+        variant: "destructive",
+      });
       return;
     }
 
+    const matricula = parseInt(session.user.sigla.replace('BEN-', ''));
+    if (isNaN(matricula)) {
+      toast({
+        title: "Erro",
+        description: "Matrícula do beneficiário inválida.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      setLoading(true);
-      
-      if (reportType === 'personal') {
-        await loadPersonalData();
-      } else {
-        await loadFamilyData();
+      const { data, error } = await supabase.functions.invoke('generate-report', {
+        body: {
+          matricula: matricula,
+          dataInicio: dateRange.dataInicio,
+          dataFim: dateRange.dataFim,
+          reportType: reportType,
+        },
+      });
+
+      if (error) {
+        console.error('Erro ao chamar função de relatório:', error);
+        throw error;
       }
 
-      toast.success('Relatório gerado com sucesso!');
-    } catch (error) {
-      console.error('Erro ao gerar relatório:', error);
-      toast.error('Erro ao gerar relatório');
+      const { html, filename } = data;
+
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = html;
+      tempDiv.style.position = 'absolute';
+      tempDiv.style.left = '-9999px';
+      tempDiv.style.top = '-9999px';
+      tempDiv.style.width = '794px';
+      tempDiv.style.maxWidth = '794px';
+      tempDiv.style.backgroundColor = '#ffffff';
+      tempDiv.style.fontFamily = 'Arial, sans-serif';
+      tempDiv.style.fontSize = '12px';
+      tempDiv.style.lineHeight = '1.4';
+      tempDiv.style.padding = '0';
+      tempDiv.style.margin = '0';
+      tempDiv.style.boxSizing = 'border-box';
+      tempDiv.style.overflow = 'visible';
+      tempDiv.style.zIndex = '-1';
+      document.body.appendChild(tempDiv);
+
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      const canvas = await html2canvas(tempDiv, {
+        scale: 2.5,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        width: 794,
+        height: Math.max(1123, tempDiv.scrollHeight),
+        windowWidth: 794,
+        windowHeight: 1123,
+        scrollX: 0,
+        scrollY: 0,
+        x: 0,
+        y: 0,
+        onclone: (clonedDoc) => {
+          const clonedElement = clonedDoc.querySelector('body > div') as HTMLElement;
+          if (clonedElement) {
+            clonedElement.style.width = '794px';
+            clonedElement.style.maxWidth = '794px';
+          }
+        }
+      });
+
+      document.body.removeChild(tempDiv);
+
+      const imgData = canvas.toDataURL('image/png', 1.0);
+      const pdf = new jsPDF('p', 'mm', 'a4');
+
+      const marginLeft = 15;
+      const marginTop = 15;
+      const marginRight = 15;
+      const marginBottom = 15;
+
+      const pageWidth = 210;
+      const pageHeight = 297;
+      const contentWidth = pageWidth - marginLeft - marginRight;
+      const contentHeight = pageHeight - marginTop - marginBottom;
+
+      const imgWidth = contentWidth;
+      const imgHeight = (canvas.height * contentWidth) / canvas.width;
+
+      let heightLeft = imgHeight;
+      let position = marginTop;
+
+      pdf.addImage(imgData, 'PNG', marginLeft, position, imgWidth, imgHeight);
+      heightLeft -= contentHeight;
+
+      while (heightLeft >= 0) {
+        position = marginTop - (imgHeight - heightLeft);
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', marginLeft, position, imgWidth, imgHeight);
+        heightLeft -= contentHeight;
+      }
+
+      pdf.save(filename);
+
+      toast({
+        title: "Relatório gerado com sucesso",
+        description: "O relatório foi baixado automaticamente",
+      });
+
+      setReportModalOpen(false);
+    } catch (error: any) {
+      console.error('Erro completo ao gerar relatório:', error);
+
+      if (error.message?.includes('não encontrado')) {
+        toast({
+          title: "Sem dados",
+          description: "Nenhum procedimento encontrado para o período selecionado",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Erro",
+          description: `Erro ao gerar relatório: ${error.message || 'Erro desconhecido'}`, 
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }
   };
-
-  const downloadPDF = () => {
-    if (reportData.length === 0) {
-      toast.error('Gere um relatório primeiro');
-      return;
-    }
-
-    const pdf = new jsPDF();
-    
-    // Cabeçalho
-    pdf.setFontSize(20);
-    pdf.text('FUNSEP - Relatório Pessoal', 20, 30);
-    
-    pdf.setFontSize(12);
-    pdf.text(`Beneficiário: ${session?.user.nome}`, 20, 50);
-    pdf.text(`Matrícula: ${userMatricula}`, 20, 60);
-    pdf.text(`Data: ${new Date().toLocaleDateString('pt-BR')}`, 20, 70);
-    
-    // Tipo do relatório
-    const tipoRelatorio = reportType === 'personal' ? 'Dados Pessoais' : 'Dependentes';
-    pdf.text(`Tipo: ${tipoRelatorio}`, 20, 80);
-    
-    // Dados
-    let yPosition = 100;
-    
-    if (reportType === 'personal') {
-      const data = reportData[0];
-      if (data) {
-        pdf.text(`Nome: ${data.nome || '-'}`, 20, yPosition);
-        yPosition += 10;
-        pdf.text(`CPF: ${data.cpf || '-'}`, 20, yPosition);
-        yPosition += 10;
-        pdf.text(`Situação: ${data.situacao === 1 ? 'Ativo' : 'Inativo'}`, 20, yPosition);
-        yPosition += 10;
-        pdf.text(`Email: ${data.email || '-'}`, 20, yPosition);
-      }
-    } else {
-      pdf.text('Dependentes:', 20, yPosition);
-      yPosition += 15;
-      
-      reportData.forEach((dep, index) => {
-        pdf.text(`${index + 1}. ${dep.nome || '-'}`, 25, yPosition);
-        yPosition += 8;
-        pdf.text(`   CPF: ${dep.cpf || '-'}`, 25, yPosition);
-        yPosition += 8;
-        pdf.text(`   Situação: ${dep.situacao === 1 ? 'Ativo' : 'Inativo'}`, 25, yPosition);
-        yPosition += 12;
-      });
-    }
-    
-    // Salvar PDF
-    const fileName = `relatorio_${reportType}_${userMatricula}_${new Date().toISOString().split('T')[0]}.pdf`;
-    pdf.save(fileName);
-    
-    toast.success('PDF baixado com sucesso!');
-  };
-
-  if (!isAuthenticated) {
-    return (
-      <div className="space-y-6">
-        <div className="text-center py-12">
-          <UserCheck className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-          <h2 className="text-2xl font-semibold mb-2">Acesso Restrito</h2>
-          <p className="text-muted-foreground">
-            Faça login para acessar seus relatórios pessoais
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isBeneficiary) {
-    return (
-      <div className="space-y-6">
-        <div className="text-center py-12">
-          <User className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-          <h2 className="text-2xl font-semibold mb-2">Acesso de Administrador</h2>
-          <p className="text-muted-foreground">
-            Esta seção é destinada a beneficiários. Administradores devem usar o painel administrativo.
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold flex items-center gap-2">
-          <FileText className="h-8 w-8" />
+          <ChartBar className="h-8 w-8" />
           Meus Relatórios
         </h1>
         <p className="text-muted-foreground">
-          Gere e baixe relatórios com seus dados pessoais e familiares
+          Acesse seus relatórios de procedimentos e imposto de renda.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Configurações do Relatório */}
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              Configurações
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label>Tipo de Relatório</Label>
-              <Select value={reportType} onValueChange={(value: 'personal' | 'family') => setReportType(value)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="personal">Dados Pessoais</SelectItem>
-                  <SelectItem value="family">Dependentes</SelectItem>
-                </SelectContent>
-              </Select>
+      <Card className="border-l-4 border-l-primary">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-3">
+            <Info className="h-5 w-5 text-primary" />
+            <div>
+              <p className="font-semibold">Relatórios Disponíveis</p>
+              <p className="text-sm text-muted-foreground">
+                Gere seus relatórios de procedimentos a pagar, pagos e imposto de renda.
+              </p>
             </div>
+          </div>
+        </CardContent>
+      </Card>
 
+      <Card>
+        <CardHeader>
+          <CardTitle>Gerar Relatórios</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Button
+            onClick={() => openReportModal('a_pagar')}
+            className="bg-green-600 hover:bg-green-700 text-white gap-2"
+          >
+            <FileText className="h-4 w-4" />
+            Relatório a Pagar
+          </Button>
+          <Button
+            onClick={() => openReportModal('pagos')}
+            className="bg-blue-600 hover:bg-blue-700 text-white gap-2"
+          >
+            <Download className="h-4 w-4" />
+            Relatório de Pagos
+          </Button>
+          <Button
+            onClick={() => openReportModal('ir')}
+            className="bg-purple-600 hover:bg-purple-700 text-white gap-2"
+          >
+            <FileText className="h-4 w-4" />
+            Relatório de IR
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Dialog open={reportModalOpen} onOpenChange={setReportModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Selecionar Período</DialogTitle>
+            <DialogDescription>
+              Selecione o período para gerar o relatório de {reportType === 'a_pagar' ? 'procedimentos a pagar' : reportType === 'pagos' ? 'procedimentos pagos' : 'Imposto de Renda'}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Data Inicial</Label>
+              <Label htmlFor="dataInicio">Data Início:</Label>
               <Input
+                id="dataInicio"
                 type="date"
-                value={dateRange.start}
-                onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
+                value={dateRange.dataInicio}
+                onChange={(e) => setDateRange({ ...dateRange, dataInicio: e.target.value })}
               />
             </div>
-
             <div className="space-y-2">
-              <Label>Data Final</Label>
+              <Label htmlFor="dataFim">Data Fim:</Label>
               <Input
+                id="dataFim"
                 type="date"
-                value={dateRange.end}
-                onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
+                value={dateRange.dataFim}
+                onChange={(e) => setDateRange({ ...dateRange, dataFim: e.target.value })}
               />
             </div>
-
-            <div className="flex gap-2 pt-4">
-              <Button 
-                onClick={generateReport} 
-                disabled={loading}
-                className="flex-1"
-              >
-                {loading ? "Gerando..." : "Gerar Relatório"}
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                onClick={downloadPDF}
-                disabled={reportData.length === 0}
-              >
-                <Download className="h-4 w-4" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Visualização do Relatório */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>
-              {reportType === 'personal' ? 'Dados Pessoais' : 'Dependentes'}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="flex items-center justify-center h-32">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              </div>
-            ) : reportData.length > 0 ? (
-              <div className="space-y-4">
-                {reportType === 'personal' ? (
-                  <div className="space-y-3">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label className="text-sm font-medium">Nome</Label>
-                        <p className="text-sm text-muted-foreground">{reportData[0]?.nome || '-'}</p>
-                      </div>
-                      <div>
-                        <Label className="text-sm font-medium">CPF</Label>
-                        <p className="text-sm text-muted-foreground">{reportData[0]?.cpf || '-'}</p>
-                      </div>
-                      <div>
-                        <Label className="text-sm font-medium">Matrícula</Label>
-                        <p className="text-sm text-muted-foreground">{reportData[0]?.matricula || '-'}</p>
-                      </div>
-                      <div>
-                        <Label className="text-sm font-medium">Situação</Label>
-                        <Badge variant={reportData[0]?.situacao === 1 ? 'default' : 'secondary'}>
-                          {reportData[0]?.situacao === 1 ? 'Ativo' : 'Inativo'}
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {reportData.map((dep, index) => (
-                      <div key={index} className="border rounded-lg p-3">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-medium">{dep.nome || `Dependente ${index + 1}`}</h4>
-                          <Badge variant={dep.situacao === 1 ? 'default' : 'secondary'}>
-                            {dep.situacao === 1 ? 'Ativo' : 'Inativo'}
-                          </Badge>
-                        </div>
-                        <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
-                          <div>CPF: {dep.cpf || '-'}</div>
-                          <div>Matrícula: {dep.matricula}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Clique em "Gerar Relatório" para visualizar seus dados</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+            <Button onClick={generateReport} className="w-full gap-2" disabled={loading}>
+              {loading ? "Gerando..." : <><Download className="h-4 w-4" /> Gerar Relatório</>}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
