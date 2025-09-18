@@ -79,8 +79,8 @@ class AdminAuthService {
       return await this.createSession(`BEN-${user.matricula}`, {
         sigla: `BEN-${user.matricula}`,
         nome: user.nome || senhaRecord.nome,
-        cargo: 'ASSOCIADO',
-        secao: 'ASSOCIADOS'
+        cargo: 'ASSOCIADO FUNSEP',
+        secao: 'ASSOCIADOS FUNSEP'
       });
     } catch (error) {
       return { success: false, error: 'Erro interno do servidor' };
