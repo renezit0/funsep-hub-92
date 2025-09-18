@@ -68,28 +68,15 @@ export function PasswordsPage() {
       if (senhasError) throw senhasError;
       setSenhas(senhasData || []);
 
-      // Carregar TODOS os beneficiários - com debug
-      console.log('Iniciando busca de beneficiários...');
+      // Carregar todos os beneficiários
       const { data: beneficiariosData, error: benError } = await supabase
         .from("cadben")
         .select("matricula, nome, cpf, situacao")
         .in("situacao", [1, 2])
         .order("nome");
 
-      console.log('Resultado da busca:', { beneficiariosData, benError });
-      console.log('Total de beneficiários encontrados:', beneficiariosData?.length || 0);
-      
-      if (benError) {
-        console.error('Erro na consulta de beneficiários:', benError);
-        throw benError;
-      }
-      
+      if (benError) throw benError;
       setBeneficiarios(beneficiariosData || []);
-      
-      // Debug dos primeiros registros
-      if (beneficiariosData && beneficiariosData.length > 0) {
-        console.log('Primeiros 3 beneficiários:', beneficiariosData.slice(0, 3));
-      }
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
       toast.error('Erro ao carregar dados');
@@ -204,62 +191,55 @@ export function PasswordsPage() {
       senha.matricula?.toString().includes(searchTerm);
   });
 
-  // Filtro corrigido para beneficiários com debug
+  // Função para remover acentos e normalizar texto
+  const normalizeText = (text: string): string => {
+    return text
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+      .trim();
+  };
+
+  // Função para verificar se é número
+  const isNumeric = (str: string): boolean => {
+    return /^\d+$/.test(str.trim());
+  };
+
+  // Filtro otimizado para beneficiários
   const filteredBeneficiarios = useMemo(() => {
-    console.log('=== DEBUG FILTRO ===');
-    console.log('Termo de busca:', beneficiarioSearch);
-    console.log('Total beneficiários:', beneficiarios.length);
-    
-    if (!beneficiarioSearch || beneficiarioSearch.trim().length < 2) {
+    if (!beneficiarioSearch || beneficiarioSearch.trim().length === 0) {
       return [];
     }
+
+    const searchTerm = beneficiarioSearch.trim();
+    const isNumberSearch = isNumeric(searchTerm);
     
-    // Debug: Verificar estrutura dos primeiros dados
-    if (beneficiarios.length > 0) {
-      console.log('Estrutura do primeiro beneficiário:', beneficiarios[0]);
-      console.log('Primeiros 5 nomes:', beneficiarios.slice(0, 5).map(b => ({
-        nome: b.nome,
-        tipo: typeof b.nome,
-        length: b.nome?.length
-      })));
+    // Regras de busca:
+    // - Para números (matrícula/CPF): busca exata
+    // - Para texto: mínimo 3 caracteres
+    if (!isNumberSearch && searchTerm.length < 3) {
+      return [];
     }
+
+    const normalizedSearch = normalizeText(searchTerm);
     
-    const searchTerm = beneficiarioSearch.toLowerCase().trim();
-    console.log('Termo normalizado:', searchTerm);
-    
-    const filtered = beneficiarios.filter((ben, index) => {
-      if (!ben) {
-        console.log(`Beneficiário ${index} é nulo`);
-        return false;
-      }
+    const filtered = beneficiarios.filter(ben => {
+      if (!ben) return false;
       
-      const nome = ben.nome ? ben.nome.toString().toLowerCase().trim() : '';
+      const nome = ben.nome ? normalizeText(ben.nome.toString()) : '';
       const matricula = ben.matricula ? ben.matricula.toString() : '';
       const cpf = ben.cpf ? ben.cpf.toString() : '';
       
-      // Debug detalhado para os primeiros registros
-      if (index < 5) {
-        console.log(`Beneficiário ${index}:`, {
-          nome: nome,
-          matricula: matricula,
-          nomeIncludes: nome.includes(searchTerm),
-          searchTerm: searchTerm
-        });
+      if (isNumberSearch) {
+        // Para números: busca exata em matrícula ou CPF
+        return matricula === searchTerm || cpf.includes(searchTerm);
+      } else {
+        // Para texto: busca por nome (mínimo 3 caracteres)
+        return nome.includes(normalizedSearch);
       }
-      
-      const matchNome = nome.includes(searchTerm);
-      const matchMatricula = matricula.includes(beneficiarioSearch);
-      const matchCpf = cpf.includes(beneficiarioSearch);
-      
-      return matchNome || matchMatricula || matchCpf;
     });
     
-    console.log('Resultados encontrados:', filtered.length);
-    if (filtered.length > 0) {
-      console.log('Primeiros resultados:', filtered.slice(0, 3));
-    }
-    
-    return filtered.slice(0, 50);
+    return filtered.slice(0, 50); // Limita a 50 resultados
   }, [beneficiarios, beneficiarioSearch]);
 
   if (loading) {
@@ -323,21 +303,12 @@ export function PasswordsPage() {
                   <Label htmlFor="beneficiarioSearch">Buscar Beneficiário</Label>
                   <Input
                     id="beneficiarioSearch"
-                    placeholder="Digite nome, matrícula ou CPF..."
+                    placeholder="Nome (min. 3 letras) ou matrícula/CPF completo..."
                     value={beneficiarioSearch}
                     onChange={(e) => setBeneficiarioSearch(e.target.value)}
                   />
                   
-                  {/* Debug info - remover depois */}
-                  {process.env.NODE_ENV === 'development' && (
-                    <div className="text-xs bg-gray-100 p-2 rounded">
-                      Debug: Total beneficiários: {beneficiarios.length} | 
-                      Busca: "{beneficiarioSearch}" | 
-                      Filtrados: {filteredBeneficiarios.length}
-                    </div>
-                  )}
-                  
-                  {beneficiarioSearch && beneficiarioSearch.length >= 2 && (
+                  {beneficiarioSearch && (
                     <div className="max-h-60 overflow-y-auto border rounded-md">
                       {filteredBeneficiarios.length > 0 ? (
                         filteredBeneficiarios.map((ben) => (
@@ -360,16 +331,17 @@ export function PasswordsPage() {
                         ))
                       ) : (
                         <div className="text-sm text-muted-foreground p-2">
-                          Nenhum beneficiário encontrado para "{beneficiarioSearch}"
-                          {beneficiarios.length === 0 && " (Nenhum beneficiário carregado)"}
+                          {(() => {
+                            const searchTerm = beneficiarioSearch.trim();
+                            const isNumber = /^\d+$/.test(searchTerm);
+                            
+                            if (!isNumber && searchTerm.length < 3) {
+                              return "Digite pelo menos 3 letras para buscar nomes";
+                            }
+                            return `Nenhum beneficiário encontrado para "${beneficiarioSearch}"`;
+                          })()}
                         </div>
                       )}
-                    </div>
-                  )}
-                  
-                  {beneficiarioSearch && beneficiarioSearch.length < 2 && (
-                    <div className="text-xs text-muted-foreground p-2 border rounded-md">
-                      Digite pelo menos 2 caracteres para buscar
                     </div>
                   )}
                 </div>
