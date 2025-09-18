@@ -80,7 +80,7 @@ class AdminAuthService {
         sigla: `BEN-${user.matricula}`,
         nome: user.nome || senhaRecord.nome,
         cargo: 'ASSOCIADO FUNSEP',
-        secao: 'ASSOCIADOS FUNSEP'
+        secao: 'BENEFICIARIOS'
       });
     } catch (error) {
       return { success: false, error: 'Erro interno do servidor' };
