@@ -68,15 +68,40 @@ export function PasswordsPage() {
       if (senhasError) throw senhasError;
       setSenhas(senhasData || []);
 
-      // Carregar todos os beneficiários
-      const { data: beneficiariosData, error: benError } = await supabase
-        .from("cadben")
-        .select("matricula, nome, cpf, situacao")
-        .in("situacao", [1, 2])
-        .order("nome");
+      // Carregar TODOS os beneficiários - removendo limitação do Supabase
+      console.log('Carregando beneficiários...');
+      
+      let allBeneficiarios: Beneficiario[] = [];
+      let hasMore = true;
+      let offset = 0;
+      const limit = 1000;
 
-      if (benError) throw benError;
-      setBeneficiarios(beneficiariosData || []);
+      while (hasMore) {
+        const { data: batch, error: benError, count } = await supabase
+          .from("cadben")
+          .select("matricula, nome, cpf, situacao", { count: 'exact' })
+          .in("situacao", [1, 2])
+          .order("nome")
+          .range(offset, offset + limit - 1);
+
+        if (benError) throw benError;
+
+        if (batch && batch.length > 0) {
+          allBeneficiarios = [...allBeneficiarios, ...batch];
+          offset += limit;
+          
+          // Se retornou menos que o limite, não há mais dados
+          hasMore = batch.length === limit;
+          
+          console.log(`Carregados ${allBeneficiarios.length} beneficiários até agora...`);
+        } else {
+          hasMore = false;
+        }
+      }
+
+      console.log(`Total final de beneficiários carregados: ${allBeneficiarios.length}`);
+      setBeneficiarios(allBeneficiarios);
+      
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
       toast.error('Erro ao carregar dados');
