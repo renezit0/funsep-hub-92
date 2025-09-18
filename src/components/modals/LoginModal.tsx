@@ -148,7 +148,7 @@ export function LoginModal({ isOpen, onClose, onSuccess }: LoginModalProps) {
                 </div>
                 
                 <div>
-                  <p className="font-medium text-foreground">🏢 Beneficiários FUNSEP:</p>
+                  <p className="font-medium text-foreground">🏢 Associados FUNSEP:</p>
                   <p className="text-muted-foreground">
                     Use seu CPF + senha cadastrada no sistema
                   </p>
