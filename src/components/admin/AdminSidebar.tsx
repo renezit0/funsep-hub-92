@@ -1,5 +1,5 @@
 import React from "react";
-import { Shield, Home, Users, UserPlus, UserCog, FileText, ChartBar, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, UserPlus, Shield, Key, Newspaper, FileText, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AdminSession } from "@/services/adminAuth";
 import { AdminPageType } from "@/pages/AdminDashboard";
@@ -25,13 +25,14 @@ interface AdminSidebarProps {
   onLogout: () => void;
 }
 
-const navigationItems = [
-  { id: 'dashboard' as AdminPageType, label: 'Dashboard', icon: Home },
+const navigation = [
+  { id: 'dashboard' as AdminPageType, label: 'Dashboard', icon: LayoutDashboard },
   { id: 'beneficiarios' as AdminPageType, label: 'Beneficiários', icon: Users },
   { id: 'dependentes' as AdminPageType, label: 'Dependentes', icon: UserPlus },
-  { id: 'usuarios' as AdminPageType, label: 'Usuários', icon: UserCog },
-  { id: 'noticias' as AdminPageType, label: 'Notícias', icon: FileText },
-  { id: 'relatorios' as AdminPageType, label: 'Relatórios', icon: ChartBar },
+  { id: 'usuarios' as AdminPageType, label: 'Usuários', icon: Shield },
+  { id: 'senhas' as AdminPageType, label: 'Senhas', icon: Key },
+  { id: 'noticias' as AdminPageType, label: 'Notícias', icon: Newspaper },
+  { id: 'relatorios' as AdminPageType, label: 'Relatórios', icon: FileText },
 ];
 
 export function AdminSidebar({ currentPage, onPageChange, session, onLogout }: AdminSidebarProps) {
@@ -57,7 +58,7 @@ export function AdminSidebar({ currentPage, onPageChange, session, onLogout }: A
           <SidebarGroupLabel>Administração</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navigationItems.map((item) => {
+              {navigation.map((item) => {
                 const Icon = item.icon;
                 const isActive = currentPage === item.id;
                 

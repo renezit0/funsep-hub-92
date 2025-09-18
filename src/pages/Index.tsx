@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Book, Gavel, FileText, BarChart3, Settings, Key } from "lucide-react";
+import { Book, Gavel, FileText, BarChart3, Settings } from "lucide-react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { LoginModal } from "@/components/modals/LoginModal";
@@ -12,7 +12,7 @@ import { HealthTipsPage } from "@/components/pages/HealthTipsPage";
 import { LinksPage } from "@/components/pages/LinksPage";
 import { StatutePage } from "@/components/pages/StatutePage";
 import { PlaceholderPage } from "@/components/pages/PlaceholderPage";
-import { PasswordManagementPage } from "@/components/admin/pages/PasswordManagementPage";
+import { ReportsPage } from "@/components/pages/ReportsPage";
 
 const pageConfig = {
   home: { title: "Início", component: HomePage, type: "home" as const },
@@ -21,9 +21,8 @@ const pageConfig = {
   instructions: { title: "Instruções", component: InstructionsPage, type: "regular" as const },
   statute: { title: "Estatuto", component: StatutePage, type: "regular" as const },
   requests: { title: "Requerimentos", component: PlaceholderPage, icon: FileText, type: "placeholder" as const },
-  reports: { title: "Relatórios", component: PlaceholderPage, icon: BarChart3, type: "placeholder" as const },
+  reports: { title: "Relatórios", component: ReportsPage, type: "regular" as const },
   admin: { title: "Administração", component: PlaceholderPage, icon: Settings, type: "placeholder" as const },
-  passwords: { title: "Gerenciar Senhas", component: PasswordManagementPage, type: "regular" as const },
   contact: { title: "Localização e Contato", component: ContactPage, type: "regular" as const },
   healthtips: { title: "Dicas de Saúde", component: HealthTipsPage, type: "regular" as const },
   links: { title: "Links", component: LinksPage, type: "regular" as const },
@@ -100,8 +99,8 @@ const Index = () => {
           {currentPageConfig.type === "regular" && currentPage === "statute" && (
             <StatutePage />
           )}
-          {currentPageConfig.type === "regular" && currentPage === "passwords" && (
-            <PasswordManagementPage />
+          {currentPageConfig.type === "regular" && currentPage === "reports" && (
+            <ReportsPage />
           )}
         </main>
       </div>

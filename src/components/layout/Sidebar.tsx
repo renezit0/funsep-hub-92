@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Home, Newspaper, Star, Book, Gavel, FileText, BarChart3, Settings, Mail, MapPin, Heart, ExternalLink, User, LogIn, Shield, LogOut, Key } from "lucide-react";
+import { Home, Newspaper, Star, Book, Gavel, FileText, BarChart3, Settings, Mail, MapPin, Heart, ExternalLink, User, LogIn, Shield, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import funsepLogo from "@/assets/funsep-logo.png";
@@ -22,7 +22,6 @@ const navigation = [
   { id: "requests", label: "Requerimentos", icon: FileText },
   { id: "reports", label: "Relatórios", icon: BarChart3 },
   { id: "admin", label: "Administração", icon: Settings },
-  { id: "passwords", label: "Gerenciar Senhas", icon: Key },
   { id: "contact", label: "Localização e Contato", icon: MapPin },
   { id: "healthtips", label: "Dicas de Saúde", icon: Heart },
   { id: "links", label: "Links", icon: ExternalLink },
@@ -70,8 +69,18 @@ export function Sidebar({ currentPage, onPageChange, onLoginClick, isOpen, onTog
             const Icon = item.icon;
             const isActive = currentPage === item.id;
             
-            // Hide admin-only items if not admin
-            if ((item.id === "reports" || item.id === "admin" || item.id === "passwords") && !isAdmin) {
+            // Handle admin redirect
+            if (item.id === "admin") {
+              if (isAdmin) {
+                window.location.href = '/admin';
+                return;
+              } else {
+                return null; // Hide if not admin
+              }
+            }
+            
+            // Hide other admin-only items if not admin  
+            if ((item.id === "reports") && !isAdmin) {
               return null;
             }
             

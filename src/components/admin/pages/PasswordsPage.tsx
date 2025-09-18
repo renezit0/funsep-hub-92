@@ -33,7 +33,7 @@ interface Beneficiario {
   situacao: number;
 }
 
-export function PasswordManagementPage() {
+export function PasswordsPage() {
   const [senhas, setSenhas] = useState<Senha[]>([]);
   const [beneficiarios, setBeneficiarios] = useState<Beneficiario[]>([]);
   const [loading, setLoading] = useState(true);
