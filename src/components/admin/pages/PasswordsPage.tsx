@@ -65,11 +65,12 @@ export function PasswordsPage() {
       if (senhasError) throw senhasError;
       setSenhas(senhasData || []);
 
-      // Carregar beneficiários      const { data: beneficiariosData, error: benError } = await supabase
-        .from(\'cadben\')
-        .select(\'matricula, nome, cpf, situacao\')
-        .in(\'situacao\', [1, 2])
-        .order(\'nome\');
+      // Carregar beneficiários
+      const { data: beneficiariosData, error: benError } = await supabase
+        .from('cadben')
+        .select('matricula, nome, cpf, situacao')
+        .eq('situacao', 1) // Apenas ativos
+        .order('nome');
 
       if (benError) throw benError;
       setBeneficiarios(beneficiariosData || []);
