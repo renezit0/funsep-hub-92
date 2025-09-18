@@ -53,35 +53,35 @@ export function PasswordsPage() {
   }, []);
 
   const loadData = async () => {
-    try {
-      setLoading(true);
-      
-      // Carregar senhas existentes
-      const { data: senhasData, error: senhasError } = await supabase
-        .from('senhas')
-        .select('*')
-        .order('created_at', { ascending: false });
+  try {
+    setLoading(true);
+    
+    // Carregar senhas existentes
+    const { data: senhasData, error: senhasError } = await supabase
+      .from('senhas')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-      if (senhasError) throw senhasError;
-      setSenhas(senhasData || []);
+    if (senhasError) throw senhasError;
+    setSenhas(senhasData || []);
 
-      // Carregar beneficiários
-      const { data: beneficiariosData, error: benError } = await supabase
-        .from('cadben')
-        .select('matricula, nome, cpf, situacao')
-        .in('situacao', [1, 2]) // Situação 1 e 2
-        .order('nome');
+    // Carregar beneficiários - usando OR que é mais confiável
+    const { data: beneficiariosData, error: benError } = await supabase
+      .from('cadben')
+      .select('matricula, nome, cpf, situacao')
+      .or('situacao.eq.1,situacao.eq.2')
+      .order('nome');
 
-
-      if (benError) throw benError;
-      setBeneficiarios(beneficiariosData || []);
-    } catch (error) {
-      console.error('Erro ao carregar dados:', error);
-      toast.error('Erro ao carregar dados');
-    } finally {
-      setLoading(false);
-    }
-  };
+    if (benError) throw benError;
+    setBeneficiarios(beneficiariosData || []);
+    
+  } catch (error) {
+    console.error('Erro ao carregar dados:', error);
+    toast.error('Erro ao carregar dados');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
