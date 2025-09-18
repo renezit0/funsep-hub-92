@@ -415,6 +415,47 @@ export type Database = {
         }
         Relationships: []
       }
+      senhas: {
+        Row: {
+          cpf: string
+          created_at: string
+          created_by_sigla: string | null
+          id: string
+          matricula: number | null
+          nome: string | null
+          senha: string
+          updated_at: string
+        }
+        Insert: {
+          cpf: string
+          created_at?: string
+          created_by_sigla?: string | null
+          id?: string
+          matricula?: number | null
+          nome?: string | null
+          senha: string
+          updated_at?: string
+        }
+        Update: {
+          cpf?: string
+          created_at?: string
+          created_by_sigla?: string | null
+          id?: string
+          matricula?: number | null
+          nome?: string | null
+          senha?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_senhas_matricula"
+            columns: ["matricula"]
+            isOneToOne: false
+            referencedRelation: "cadben"
+            referencedColumns: ["matricula"]
+          },
+        ]
+      }
       tabbeneficios: {
         Row: {
           classe: string | null
@@ -478,6 +519,7 @@ export type Database = {
       usuarios: {
         Row: {
           cargo: string | null
+          cpf: string | null
           id: number
           nome: string | null
           secao: string
@@ -487,6 +529,7 @@ export type Database = {
         }
         Insert: {
           cargo?: string | null
+          cpf?: string | null
           id?: number
           nome?: string | null
           secao: string
@@ -496,6 +539,7 @@ export type Database = {
         }
         Update: {
           cargo?: string | null
+          cpf?: string | null
           id?: number
           nome?: string | null
           secao?: string

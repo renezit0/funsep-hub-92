@@ -11,21 +11,56 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
-export function LoginModal({ isOpen, onClose }: LoginModalProps) {
+export function LoginModal({ isOpen, onClose, onSuccess }: LoginModalProps) {
   const [cpf, setCpf] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { login } = useAuth();
+  const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement login logic
-    console.log("Login attempt:", { cpf, password, remember });
+    setIsLoading(true);
+
+    try {
+      const cleanCpf = cpf.replace(/\D/g, "");
+      const result = await login(cleanCpf, password);
+      
+      if (result.success) {
+        toast({
+          title: "Login realizado com sucesso",
+          description: "Bem-vindo ao sistema!",
+        });
+        onSuccess?.();
+        onClose();
+        setCpf("");
+        setPassword("");
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Erro no login",
+          description: result.error || "CPF ou senha inválidos",
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Erro interno do servidor",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const formatCPF = (value: string) => {
@@ -57,6 +92,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 onChange={(e) => setCpf(formatCPF(e.target.value))}
                 maxLength={14}
                 required
+                disabled={isLoading}
               />
             </div>
             
@@ -68,6 +104,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={isLoading}
               />
               <div className="text-sm text-muted-foreground space-y-1">
                 <p className="font-medium">Primeira vez?</p>
@@ -89,9 +126,9 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
             </Label>
           </div>
 
-          <Button type="submit" className="w-full gap-2">
+          <Button type="submit" className="w-full gap-2" disabled={isLoading}>
             <LogIn className="h-4 w-4" />
-            Entrar
+            {isLoading ? "Entrando..." : "Entrar"}
           </Button>
 
           {/* Login Information Card */}
@@ -104,19 +141,19 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
               
               <div className="space-y-2 text-sm">
                 <div>
-                  <p className="font-medium text-foreground">🏢 Beneficiários FUNSEP (Primeira vez):</p>
+                  <p className="font-medium text-foreground">👤 Administradores:</p>
                   <p className="text-muted-foreground">
-                    Use seu CPF + senha: <span className="italic">matrícula + matrícula funcional</span>
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Após o primeiro acesso, você definirá uma senha pessoal
+                    Use seu CPF cadastrado + senha administrativa
                   </p>
                 </div>
                 
                 <div>
-                  <p className="font-medium text-foreground">👤 Usuários Cadastrados:</p>
+                  <p className="font-medium text-foreground">🏢 Beneficiários FUNSEP:</p>
                   <p className="text-muted-foreground">
-                    Use seu CPF + senha pessoal definida anteriormente
+                    Use seu CPF + senha cadastrada no sistema
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Procure um administrador para cadastrar sua senha de acesso
                   </p>
                 </div>
               </div>

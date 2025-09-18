@@ -5,7 +5,7 @@ interface AuthContextType {
   session: AdminSession | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (sigla: string, senha: string) => Promise<{ success: boolean; error?: string }>;
+  login: (cpf: string, senha: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
 }
 
@@ -39,8 +39,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const login = async (sigla: string, senha: string) => {
-    const result = await adminAuth.login(sigla, senha);
+  const login = async (cpf: string, senha: string) => {
+    const result = await adminAuth.login(cpf, senha);
     if (result.success && result.session) {
       setSession(result.session);
     }

@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { Home, Newspaper, Star, Book, Gavel, FileText, BarChart3, Settings, Mail, MapPin, Heart, ExternalLink, User, LogIn, Shield, LogOut } from "lucide-react";
+import { Home, Newspaper, Star, Book, Gavel, FileText, BarChart3, Settings, Mail, MapPin, Heart, ExternalLink, User, LogIn, Shield, LogOut, Key } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import funsepLogo from "@/assets/funsep-logo.png";
-import { AdminLoginModal } from "@/components/modals/AdminLoginModal";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface SidebarProps {
@@ -23,22 +22,20 @@ const navigation = [
   { id: "requests", label: "Requerimentos", icon: FileText },
   { id: "reports", label: "Relatórios", icon: BarChart3 },
   { id: "admin", label: "Administração", icon: Settings },
+  { id: "passwords", label: "Gerenciar Senhas", icon: Key },
   { id: "contact", label: "Localização e Contato", icon: MapPin },
   { id: "healthtips", label: "Dicas de Saúde", icon: Heart },
   { id: "links", label: "Links", icon: ExternalLink },
 ];
 
 export function Sidebar({ currentPage, onPageChange, onLoginClick, isOpen, onToggle }: SidebarProps) {
-  const [showAdminLogin, setShowAdminLogin] = useState(false);
   const { isAuthenticated, session, logout } = useAuth();
-
-  const handleAdminSuccess = () => {
-    window.location.href = '/admin';
-  };
 
   const handleLogout = async () => {
     await logout();
   };
+
+  const isAdmin = session?.user.cargo && ['GERENTE', 'DESENVOLVEDOR', 'ANALISTA DE SISTEMAS'].includes(session.user.cargo);
 
   return (
     <>
@@ -73,8 +70,8 @@ export function Sidebar({ currentPage, onPageChange, onLoginClick, isOpen, onTog
             const Icon = item.icon;
             const isActive = currentPage === item.id;
             
-            // Hide reports and admin items if not authenticated
-            if ((item.id === "reports" || item.id === "admin") && !isAuthenticated) {
+            // Hide admin-only items if not admin
+            if ((item.id === "reports" || item.id === "admin" || item.id === "passwords") && !isAdmin) {
               return null;
             }
             
@@ -147,24 +144,7 @@ export function Sidebar({ currentPage, onPageChange, onLoginClick, isOpen, onTog
             )}
           </div>
           
-          {!isAuthenticated && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full gap-2 text-xs"
-              onClick={() => setShowAdminLogin(true)}
-            >
-              <Shield className="h-3 w-3" />
-              Acesso Admin
-            </Button>
-          )}
         </div>
-        
-        <AdminLoginModal 
-          isOpen={showAdminLogin}
-          onClose={() => setShowAdminLogin(false)}
-          onSuccess={handleAdminSuccess}
-        />
       </aside>
     </>
   );

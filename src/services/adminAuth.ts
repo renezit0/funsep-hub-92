@@ -19,68 +19,105 @@ export interface AdminSession {
 class AdminAuthService {
   private sessionKey = 'admin_session';
 
-  async login(sigla: string, senha: string): Promise<{ success: boolean; session?: AdminSession; error?: string }> {
+  async login(cpf: string, senha: string): Promise<{ success: boolean; session?: AdminSession; error?: string }> {
     try {
-      console.log('Tentando login com:', { sigla: sigla.toUpperCase(), senha });
+      console.log('Tentando login com CPF:', { cpf, senha });
       
-      // Verificar credenciais na tabela usuarios
-      const { data: users, error: userError } = await supabase
+      // Primeiro, verificar se é admin (CPF existe na tabela usuarios)
+      const { data: adminUsers, error: adminError } = await supabase
         .from('usuarios')
         .select('*')
-        .eq('sigla', sigla.toUpperCase())
+        .eq('cpf', cpf)
         .eq('senha', senha);
 
-      console.log('Resultado da consulta:', { users, userError });
-
-      if (userError) {
-        console.error('Erro na consulta:', userError);
-        return { success: false, error: 'Erro na consulta: ' + userError.message };
+      if (adminError) {
+        console.error('Erro na consulta admin:', adminError);
+        return { success: false, error: 'Erro na consulta: ' + adminError.message };
       }
 
-      if (!users || users.length === 0) {
-        return { success: false, error: 'Credenciais inválidas' };
-      }
-
-      const user = users[0];
-
-      // Gerar token de sessão
-      const token = uuidv4();
-      const expiresAt = new Date();
-      expiresAt.setHours(expiresAt.getHours() + 24);
-
-      // Criar sessão no banco
-      const { error: sessionError } = await supabase
-        .from('admin_sessions')
-        .insert({
-          sigla,
-          token,
-          expires_at: expiresAt.toISOString(),
-          is_active: true
-        });
-
-      if (sessionError) {
-        return { success: false, error: 'Erro ao criar sessão' };
-      }
-
-      const session: AdminSession = {
-        token,
-        sigla,
-        expires_at: expiresAt.toISOString(),
-        user: {
+      if (adminUsers && adminUsers.length > 0) {
+        // É um admin
+        const user = adminUsers[0];
+        return await this.createSession(user.sigla, {
           sigla: user.sigla,
           nome: user.nome,
           cargo: user.cargo,
           secao: user.secao
-        }
-      };
+        });
+      }
 
-      // Salvar sessão no localStorage
-      localStorage.setItem(this.sessionKey, JSON.stringify(session));
+      // Se não é admin, verificar na tabela senhas
+      const { data: senhaData, error: senhaError } = await supabase
+        .from('senhas')
+        .select('*')
+        .eq('cpf', cpf)
+        .eq('senha', senha);
+
+      if (senhaError) {
+        console.error('Erro na consulta senha:', senhaError);
+        return { success: false, error: 'Erro na consulta: ' + senhaError.message };
+      }
+
+      if (!senhaData || senhaData.length === 0) {
+        return { success: false, error: 'CPF ou senha inválidos' };
+      }
+
+      const senhaRecord = senhaData[0];
       
-      return { success: true, session };
+      // Buscar dados do beneficiário na tabela cadben
+      const { data: beneficiario, error: benError } = await supabase
+        .from('cadben')
+        .select('*')
+        .eq('matricula', senhaRecord.matricula);
+
+      if (benError || !beneficiario || beneficiario.length === 0) {
+        return { success: false, error: 'Dados do beneficiário não encontrados' };
+      }
+
+      const user = beneficiario[0];
+      
+      return await this.createSession(`BEN-${user.matricula}`, {
+        sigla: `BEN-${user.matricula}`,
+        nome: user.nome || senhaRecord.nome,
+        cargo: 'BENEFICIÁRIO',
+        secao: 'BENEFICIÁRIOS'
+      });
     } catch (error) {
       return { success: false, error: 'Erro interno do servidor' };
     }
+  }
+
+  private async createSession(sigla: string, userData: AdminUser) {
+    // Gerar token de sessão
+    const token = uuidv4();
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 24);
+
+    // Criar sessão no banco
+    const { error: sessionError } = await supabase
+      .from('admin_sessions')
+      .insert({
+        sigla,
+        token,
+        expires_at: expiresAt.toISOString(),
+        is_active: true
+      });
+
+    if (sessionError) {
+      return { success: false, error: 'Erro ao criar sessão' };
+    }
+
+    const session: AdminSession = {
+      token,
+      sigla,
+      expires_at: expiresAt.toISOString(),
+      user: userData
+    };
+
+    // Salvar sessão no localStorage
+    localStorage.setItem(this.sessionKey, JSON.stringify(session));
+    
+    return { success: true, session };
   }
 
   async logout(): Promise<void> {
