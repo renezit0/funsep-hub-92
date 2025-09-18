@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,15 +68,28 @@ export function PasswordsPage() {
       if (senhasError) throw senhasError;
       setSenhas(senhasData || []);
 
-      // Carregar TODOS os beneficiários - removendo a limitação range
+      // Carregar TODOS os beneficiários - com debug
+      console.log('Iniciando busca de beneficiários...');
       const { data: beneficiariosData, error: benError } = await supabase
         .from("cadben")
         .select("matricula, nome, cpf, situacao")
         .in("situacao", [1, 2])
         .order("nome");
 
-      if (benError) throw benError;
+      console.log('Resultado da busca:', { beneficiariosData, benError });
+      console.log('Total de beneficiários encontrados:', beneficiariosData?.length || 0);
+      
+      if (benError) {
+        console.error('Erro na consulta de beneficiários:', benError);
+        throw benError;
+      }
+      
       setBeneficiarios(beneficiariosData || []);
+      
+      // Debug dos primeiros registros
+      if (beneficiariosData && beneficiariosData.length > 0) {
+        console.log('Primeiros 3 beneficiários:', beneficiariosData.slice(0, 3));
+      }
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
       toast.error('Erro ao carregar dados');
@@ -191,15 +204,42 @@ export function PasswordsPage() {
       senha.matricula?.toString().includes(searchTerm);
   });
 
-  // Filtro corrigido para beneficiários
-  const filteredBeneficiarios = beneficiarios.filter(ben => {
-    if (beneficiarioSearch === "") return false; // Só mostra se estiver digitando
+  // Filtro corrigido para beneficiários com debug
+  const filteredBeneficiarios = React.useMemo(() => {
+    console.log('Filtro sendo executado:', {
+      beneficiarioSearch,
+      totalBeneficiarios: beneficiarios.length,
+      searchLength: beneficiarioSearch.length
+    });
+
+    if (!beneficiarioSearch || beneficiarioSearch.trim().length < 2) {
+      console.log('Busca muito curta ou vazia');
+      return [];
+    }
     
-    const searchLower = beneficiarioSearch.toLowerCase();
-    return ben.nome?.toLowerCase().includes(searchLower) ||
-           ben.matricula?.toString().includes(beneficiarioSearch) ||
-           ben.cpf?.toString().includes(beneficiarioSearch);
-  }).slice(0, 50); // Limita a 50 resultados para performance
+    const searchTerm = beneficiarioSearch.toLowerCase().trim();
+    
+    const filtered = beneficiarios.filter(ben => {
+      if (!ben) return false;
+      
+      const nome = (ben.nome || '').toLowerCase();
+      const matricula = (ben.matricula || '').toString();
+      const cpf = (ben.cpf || '').toString();
+      
+      const matchNome = nome.includes(searchTerm);
+      const matchMatricula = matricula.includes(beneficiarioSearch);
+      const matchCpf = cpf.includes(beneficiarioSearch);
+      
+      return matchNome || matchMatricula || matchCpf;
+    });
+    
+    console.log('Resultados filtrados:', filtered.length);
+    if (filtered.length > 0) {
+      console.log('Primeiros resultados:', filtered.slice(0, 3));
+    }
+    
+    return filtered.slice(0, 50);
+  }, [beneficiarios, beneficiarioSearch]);
 
   if (loading) {
     return (
@@ -266,31 +306,49 @@ export function PasswordsPage() {
                     value={beneficiarioSearch}
                     onChange={(e) => setBeneficiarioSearch(e.target.value)}
                   />
-                  {beneficiarioSearch && filteredBeneficiarios.length > 0 && (
-                    <div className="max-h-60 overflow-y-auto border rounded-md">
-                      {filteredBeneficiarios.map((ben) => (
-                        <button
-                          key={ben.matricula}
-                          type="button"
-                          className="w-full text-left p-2 hover:bg-accent flex items-center justify-between"
-                          onClick={() => handleBeneficiarioSelect(ben)}
-                        >
-                          <div>
-                            <div className="font-medium">{ben.nome}</div>
-                            <div className="text-sm text-muted-foreground">
-                              CPF: {formatCPF(ben.cpf.toString())}
-                            </div>
-                          </div>
-                          <Badge variant={ben.situacao === 1 ? "outline" : "destructive"}>
-                            Mat: {ben.matricula}
-                          </Badge>
-                        </button>
-                      ))}
+                  
+                  {/* Debug info - remover depois */}
+                  {process.env.NODE_ENV === 'development' && (
+                    <div className="text-xs bg-gray-100 p-2 rounded">
+                      Debug: Total beneficiários: {beneficiarios.length} | 
+                      Busca: "{beneficiarioSearch}" | 
+                      Filtrados: {filteredBeneficiarios.length}
                     </div>
                   )}
-                  {beneficiarioSearch && filteredBeneficiarios.length === 0 && (
-                    <div className="text-sm text-muted-foreground p-2 border rounded-md">
-                      Nenhum beneficiário encontrado
+                  
+                  {beneficiarioSearch && beneficiarioSearch.length >= 2 && (
+                    <div className="max-h-60 overflow-y-auto border rounded-md">
+                      {filteredBeneficiarios.length > 0 ? (
+                        filteredBeneficiarios.map((ben) => (
+                          <button
+                            key={ben.matricula}
+                            type="button"
+                            className="w-full text-left p-2 hover:bg-accent flex items-center justify-between"
+                            onClick={() => handleBeneficiarioSelect(ben)}
+                          >
+                            <div>
+                              <div className="font-medium">{ben.nome}</div>
+                              <div className="text-sm text-muted-foreground">
+                                CPF: {formatCPF(ben.cpf.toString())}
+                              </div>
+                            </div>
+                            <Badge variant={ben.situacao === 1 ? "outline" : "destructive"}>
+                              Mat: {ben.matricula}
+                            </Badge>
+                          </button>
+                        ))
+                      ) : (
+                        <div className="text-sm text-muted-foreground p-2">
+                          Nenhum beneficiário encontrado para "{beneficiarioSearch}"
+                          {beneficiarios.length === 0 && " (Nenhum beneficiário carregado)"}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  {beneficiarioSearch && beneficiarioSearch.length < 2 && (
+                    <div className="text-xs text-muted-foreground p-2 border rounded-md">
+                      Digite pelo menos 2 caracteres para buscar
                     </div>
                   )}
                 </div>
