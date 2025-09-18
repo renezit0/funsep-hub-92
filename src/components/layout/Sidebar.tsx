@@ -79,8 +79,9 @@ export function Sidebar({ currentPage, onPageChange, onLoginClick, isOpen, onTog
               }
             }
             
-            // Hide other admin-only items if not admin  
-            if ((item.id === "reports") && !isAdmin) {
+            // Hide other admin-only items if not admin or beneficiary
+            const isBeneficiary = session?.user.cargo === 'BENEFICIÁRIO';
+            if ((item.id === "reports") && !isAdmin && !isBeneficiary) {
               return null;
             }
             
