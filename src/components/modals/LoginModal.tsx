@@ -86,10 +86,10 @@ export function LoginModal({
               <Label htmlFor="password">Senha</Label>
               <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} required disabled={isLoading} />
               <div className="text-sm text-muted-foreground space-y-1">
-                <p className="font-medium">Primeira vez?</p>
-                <p>• solicite seu cadastro</p>
-                <p>• Associado FUNSEP: Use <span className="font-medium">matrícula + matrícula funcional</span></p>
-                <p className="italic">Exemplo: se matrícula=4163 e mat.funcional=3794, use: 41633794</p>
+                
+                
+                
+                
               </div>
             </div>
           </div>
@@ -116,10 +116,8 @@ export function LoginModal({
               
               <div className="space-y-2 text-sm">
                 <div>
-                  <p className="font-medium text-foreground">👤 Administradores:</p>
-                  <p className="text-muted-foreground">
-                    Use seu CPF cadastrado + senha administrativa
-                  </p>
+                  
+                  
                 </div>
                 
                 <div>
