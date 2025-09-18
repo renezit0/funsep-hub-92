@@ -40,6 +40,9 @@ export function PasswordsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingSenha, setEditingSenha] = useState<Senha | null>(null);
+  
+  // Separar o campo de busca do formulário
+  const [beneficiarioSearch, setBeneficiarioSearch] = useState("");
   const [formData, setFormData] = useState({
     cpf: "",
     senha: "",
@@ -65,13 +68,12 @@ export function PasswordsPage() {
       if (senhasError) throw senhasError;
       setSenhas(senhasData || []);
 
-      // Carregar beneficiários
+      // Carregar TODOS os beneficiários - removendo a limitação range
       const { data: beneficiariosData, error: benError } = await supabase
-      .from("cadben")
-      .select("matricula, nome, cpf, situacao")
-      .in("situacao", [1, 2])
-      .order("nome")
-      .range(0, 9999); // traria até 10.000 registros
+        .from("cadben")
+        .select("matricula, nome, cpf, situacao")
+        .in("situacao", [1, 2])
+        .order("nome");
 
       if (benError) throw benError;
       setBeneficiarios(beneficiariosData || []);
@@ -120,6 +122,7 @@ export function PasswordsPage() {
       }
 
       setFormData({ cpf: "", senha: "", matricula: "", nome: "" });
+      setBeneficiarioSearch("");
       setShowCreateModal(false);
       setEditingSenha(null);
       loadData();
@@ -159,6 +162,7 @@ export function PasswordsPage() {
       matricula: senha.matricula.toString(),
       nome: senha.nome
     });
+    setBeneficiarioSearch("");
     setShowCreateModal(true);
   };
 
@@ -177,6 +181,7 @@ export function PasswordsPage() {
       nome: beneficiario.nome,
       cpf: beneficiario.cpf.toString()
     });
+    setBeneficiarioSearch(beneficiario.nome);
   };
 
   const filteredSenhas = senhas.filter(senha => {
@@ -186,11 +191,15 @@ export function PasswordsPage() {
       senha.matricula?.toString().includes(searchTerm);
   });
 
+  // Filtro corrigido para beneficiários
   const filteredBeneficiarios = beneficiarios.filter(ben => {
-    return formData.matricula === "" ||
-      ben.nome?.toLowerCase().includes(formData.matricula.toLowerCase()) ||
-      ben.matricula?.toString().includes(formData.matricula);
-  });
+    if (beneficiarioSearch === "") return false; // Só mostra se estiver digitando
+    
+    const searchLower = beneficiarioSearch.toLowerCase();
+    return ben.nome?.toLowerCase().includes(searchLower) ||
+           ben.matricula?.toString().includes(beneficiarioSearch) ||
+           ben.cpf?.toString().includes(beneficiarioSearch);
+  }).slice(0, 50); // Limita a 50 resultados para performance
 
   if (loading) {
     return (
@@ -231,6 +240,7 @@ export function PasswordsPage() {
           if (!open) {
             setEditingSenha(null);
             setFormData({ cpf: "", senha: "", matricula: "", nome: "" });
+            setBeneficiarioSearch("");
           }
         }}>
           <DialogTrigger asChild>
@@ -249,30 +259,40 @@ export function PasswordsPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="matricula">Buscar Beneficiário</Label>
+                  <Label htmlFor="beneficiarioSearch">Buscar Beneficiário</Label>
                   <Input
-                    id="matricula"
-                    placeholder="Digite nome ou matrícula..."
-                    value={formData.matricula}
-                    onChange={(e) => setFormData({ ...formData, matricula: e.target.value })}
+                    id="beneficiarioSearch"
+                    placeholder="Digite nome, matrícula ou CPF..."
+                    value={beneficiarioSearch}
+                    onChange={(e) => setBeneficiarioSearch(e.target.value)}
                   />
-                  {formData.matricula && filteredBeneficiarios.length > 0 && (
-                  <div className="max-h-60 overflow-y-auto border rounded-md">
-                    {filteredBeneficiarios.map((ben) => (
-                      <button
-                        key={ben.matricula}
-                        type="button"
-                        className="w-full text-left p-2 hover:bg-accent flex items-center justify-between"
-                        onClick={() => handleBeneficiarioSelect(ben)}
-                      >
-                        <span>{ben.nome}</span>
-                        <Badge variant={ben.situacao === 1 ? "outline" : "destructive"}>
-                          Mat: {ben.matricula}
-                        </Badge>
-                      </button>
-                    ))}
-                  </div>
-                )}
+                  {beneficiarioSearch && filteredBeneficiarios.length > 0 && (
+                    <div className="max-h-60 overflow-y-auto border rounded-md">
+                      {filteredBeneficiarios.map((ben) => (
+                        <button
+                          key={ben.matricula}
+                          type="button"
+                          className="w-full text-left p-2 hover:bg-accent flex items-center justify-between"
+                          onClick={() => handleBeneficiarioSelect(ben)}
+                        >
+                          <div>
+                            <div className="font-medium">{ben.nome}</div>
+                            <div className="text-sm text-muted-foreground">
+                              CPF: {formatCPF(ben.cpf.toString())}
+                            </div>
+                          </div>
+                          <Badge variant={ben.situacao === 1 ? "outline" : "destructive"}>
+                            Mat: {ben.matricula}
+                          </Badge>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {beneficiarioSearch && filteredBeneficiarios.length === 0 && (
+                    <div className="text-sm text-muted-foreground p-2 border rounded-md">
+                      Nenhum beneficiário encontrado
+                    </div>
+                  )}
                 </div>
                 
                 <div className="space-y-2">
@@ -309,6 +329,17 @@ export function PasswordsPage() {
                     required
                   />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="matricula">Matrícula</Label>
+                <Input
+                  id="matricula"
+                  value={formData.matricula}
+                  onChange={(e) => setFormData({ ...formData, matricula: e.target.value })}
+                  required
+                  readOnly={!editingSenha} // Só permite edição manual quando editando
+                />
               </div>
               
               <div className="flex gap-2 pt-4">
