@@ -67,10 +67,10 @@ export function PasswordsPage() {
 
       // Carregar beneficiários
       const { data: beneficiariosData, error: benError } = await supabase
-        .from('cadben')
-        .select('matricula, nome, cpf, situacao')
-        .eq('situacao', 1) // Apenas ativos
-        .order('nome');
+      .from('cadben')
+      .select('matricula, nome, cpf, situacao')
+      .in('situacao', [1, 2]) // ativos e inativos (2)
+      .order('nome');
 
       if (benError) throw benError;
       setBeneficiarios(beneficiariosData || []);
@@ -256,20 +256,22 @@ export function PasswordsPage() {
                     onChange={(e) => setFormData({ ...formData, matricula: e.target.value })}
                   />
                   {formData.matricula && filteredBeneficiarios.length > 0 && (
-                    <div className="max-h-40 overflow-y-auto border rounded-md">
-                      {filteredBeneficiarios.slice(0, 5).map((ben) => (
-                        <button
-                          key={ben.matricula}
-                          type="button"
-                          className="w-full text-left p-2 hover:bg-accent flex items-center justify-between"
-                          onClick={() => handleBeneficiarioSelect(ben)}
-                        >
-                          <span>{ben.nome}</span>
-                          <Badge variant="outline">Mat: {ben.matricula}</Badge>
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                  <div className="max-h-60 overflow-y-auto border rounded-md">
+                    {filteredBeneficiarios.map((ben) => (
+                      <button
+                        key={ben.matricula}
+                        type="button"
+                        className="w-full text-left p-2 hover:bg-accent flex items-center justify-between"
+                        onClick={() => handleBeneficiarioSelect(ben)}
+                      >
+                        <span>{ben.nome}</span>
+                        <Badge variant={ben.situacao === 1 ? "outline" : "destructive"}>
+                          Mat: {ben.matricula}
+                        </Badge>
+                      </button>
+                    ))}
+                  </div>
+                )}
                 </div>
                 
                 <div className="space-y-2">
