@@ -27,7 +27,7 @@ interface AdminSidebarProps {
 
 const navigation = [
   { id: 'dashboard' as AdminPageType, label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'beneficiarios' as AdminPageType, label: 'Beneficiários', icon: Users },
+  { id: 'beneficiarios' as AdminPageType, label: 'Associados', icon: Users },
   { id: 'dependentes' as AdminPageType, label: 'Dependentes', icon: UserPlus },
   { id: 'usuarios' as AdminPageType, label: 'Usuários', icon: Shield },
   { id: 'senhas' as AdminPageType, label: 'Senhas', icon: Key },

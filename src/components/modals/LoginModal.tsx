@@ -109,7 +109,7 @@ export function LoginModal({ isOpen, onClose, onSuccess }: LoginModalProps) {
               <div className="text-sm text-muted-foreground space-y-1">
                 <p className="font-medium">Primeira vez?</p>
                 <p>• Usuários cadastrados: Use sua senha pessoal</p>
-                <p>• Beneficiários FUNSEP: Use <span className="font-medium">matrícula + matrícula funcional</span></p>
+                <p>• Associado FUNSEP: Use <span className="font-medium">matrícula + matrícula funcional</span></p>
                 <p className="italic">Exemplo: se matrícula=4163 e mat.funcional=3794, use: 41633794</p>
               </div>
             </div>

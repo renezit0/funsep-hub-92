@@ -141,7 +141,7 @@ export function DependentsPage() {
           Dependentes
         </h1>
         <p className="text-muted-foreground">
-          Gerenciamento de dependentes dos beneficiários FUNSEP
+          Gerenciamento de dependentes dos associados FUNSEP
         </p>
       </div>
 

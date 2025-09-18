@@ -61,16 +61,16 @@ export function DashboardPage() {
 
   const statCards = [
     {
-      title: "Total de Beneficiários",
+      title: "Total de Associados",
       value: stats.totalBeneficiarios,
       icon: Users,
-      description: "Todos os beneficiários cadastrados"
+      description: "Todos os associados cadastrados"
     },
     {
-      title: "Beneficiários Ativos",
+      title: "Asssociados Ativos",
       value: stats.beneficiariosAtivos,
       icon: Activity,
-      description: "Beneficiários com situação ativa"
+      description: "Associados com situação ativa"
     },
     {
       title: "Total de Dependentes",
@@ -144,7 +144,7 @@ export function DashboardPage() {
         <CardContent>
           <div className="space-y-4">
             <div>
-              <h3 className="font-semibold">Status dos Beneficiários</h3>
+              <h3 className="font-semibold">Status dos Asssociados</h3>
               <ul className="text-sm text-muted-foreground mt-2 space-y-1">
                 <li>• <strong>1:</strong> Ativo</li>
                 <li>• <strong>2:</strong> Reativado</li>
@@ -154,7 +154,7 @@ export function DashboardPage() {
             <div>
               <h3 className="font-semibold">Sobre o Sistema</h3>
               <p className="text-sm text-muted-foreground mt-2">
-                Este painel permite gerenciar beneficiários, dependentes e usuários do sistema FUNSEP.
+                Este painel permite gerenciar associados, dependentes e usuários do sistema FUNSEP.
                 Use o menu lateral para navegar entre as diferentes seções.
               </p>
             </div>

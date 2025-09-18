@@ -47,7 +47,7 @@ export function ReportsPage() {
     if (isNaN(matricula)) {
       toast({
         title: "Erro",
-        description: "Matrícula do beneficiário inválida.",
+        description: "Matrícula do associado inválida.",
         variant: "destructive",
       });
       return;

@@ -117,7 +117,7 @@ export function BeneficiariesPage() {
   if (loading) {
     return (
       <div className="space-y-4 sm:space-y-6">
-        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Beneficiários</h1>
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Associados</h1>
         <div className="flex items-center justify-center h-32 sm:h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
@@ -130,10 +130,10 @@ export function BeneficiariesPage() {
       <div>
         <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold flex items-center gap-2">
           <Users className="h-6 w-6 sm:h-8 sm:w-8" />
-          Beneficiários
+          Associados
         </h1>
         <p className="text-sm sm:text-base text-muted-foreground">
-          Gerenciamento de beneficiários FUNSEP
+          Gerenciamento de associados FUNSEP
         </p>
       </div>
 
@@ -182,7 +182,7 @@ export function BeneficiariesPage() {
             {hasSearched ? (
               `${filteredBeneficiaries.length} beneficiários encontrados`
             ) : (
-              "Digite no campo de busca para encontrar beneficiários"
+              "Digite no campo de busca para encontrar associados"
             )}
             {filteredBeneficiaries.length === 100 && (
               <span className="text-sm text-muted-foreground block">
@@ -196,7 +196,7 @@ export function BeneficiariesPage() {
             {!hasSearched ? (
               <div className="text-center py-8 text-muted-foreground">
                 <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Use o campo de busca acima para encontrar beneficiários</p>
+                <p>Use o campo de busca acima para encontrar associados</p>
                 <p className="text-sm">Digite nome, matrícula ou CPF</p>
               </div>
             ) : loading ? (
@@ -261,7 +261,7 @@ export function BeneficiariesPage() {
             {hasSearched && (!Array.isArray(filteredBeneficiaries) || filteredBeneficiaries.length === 0) && (
               <div className="text-center py-8 text-muted-foreground">
                 <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Nenhum beneficiário encontrado</p>
+                <p>Nenhum associado encontrado</p>
                 <p className="text-sm">Tente ajustar os termos da busca</p>
               </div>
             )}
