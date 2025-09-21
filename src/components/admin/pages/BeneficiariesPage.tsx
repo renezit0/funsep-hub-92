@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, Users } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Search, Filter, Users, Eye } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Beneficiary {
@@ -25,6 +26,7 @@ export function BeneficiariesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<number | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [selectedBeneficiary, setSelectedBeneficiary] = useState<Beneficiary | null>(null);
 
   const searchBeneficiaries = async () => {
     if (!searchTerm.trim()) {
@@ -214,7 +216,90 @@ export function BeneficiariesPage() {
                     <h3 className="font-semibold text-sm sm:text-base leading-tight">
                       {beneficiary.nome || 'Nome não informado'}
                     </h3>
-                    {getStatusBadge(beneficiary.situacao)}
+                    <div className="flex items-center gap-2">
+                      {getStatusBadge(beneficiary.situacao)}
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSelectedBeneficiary(beneficiary)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                          <DialogHeader>
+                            <DialogTitle>Detalhes do Associado</DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div>
+                                <h4 className="font-semibold text-sm text-muted-foreground mb-2">DADOS PESSOAIS</h4>
+                                <div className="space-y-2">
+                                  <div>
+                                    <strong>Nome:</strong> {beneficiary.nome || '-'}
+                                  </div>
+                                  <div>
+                                    <strong>CPF:</strong> {beneficiary.cpf ? formatCPF(beneficiary.cpf) : '-'}
+                                  </div>
+                                  <div>
+                                    <strong>Data de Nascimento:</strong> {formatDate(beneficiary.dtnasc)}
+                                  </div>
+                                  <div>
+                                    <strong>Sexo:</strong> {beneficiary.sexo || '-'}
+                                  </div>
+                                  <div>
+                                    <strong>Status:</strong> {getStatusBadge(beneficiary.situacao)}
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div>
+                                <h4 className="font-semibold text-sm text-muted-foreground mb-2">LOCALIZAÇÃO</h4>
+                                <div className="space-y-2">
+                                  <div>
+                                    <strong>Cidade:</strong> {beneficiary.cidade || '-'}
+                                  </div>
+                                  <div>
+                                    <strong>UF:</strong> {beneficiary.uf || '-'}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div>
+                              <h4 className="font-semibold text-sm text-muted-foreground mb-2">CONTATO</h4>
+                              <div className="space-y-2">
+                                <div>
+                                  <strong>Email:</strong> {beneficiary.email || '-'}
+                                </div>
+                                <div>
+                                  <strong>Telefone:</strong> {beneficiary.telefone || '-'}
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div>
+                              <h4 className="font-semibold text-sm text-muted-foreground mb-2">INFORMAÇÕES ADMINISTRATIVAS</h4>
+                              <div className="space-y-2">
+                                <div>
+                                  <strong>Matrícula:</strong> {beneficiary.matricula || '-'}
+                                </div>
+                                <div>
+                                  <strong>Situação:</strong> 
+                                  <span className="ml-2">
+                                    {beneficiary.situacao === 1 ? 'Ativo' : 
+                                     beneficiary.situacao === 2 ? 'Reativado' :
+                                     beneficiary.situacao === 3 ? 'Inativo' : 'Desconhecido'}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
                   </div>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-xs sm:text-sm text-muted-foreground">
