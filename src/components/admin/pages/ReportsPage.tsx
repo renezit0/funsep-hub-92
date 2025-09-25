@@ -44,7 +44,7 @@ export function ReportsPage() {
   });
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [selectedBeneficiary, setSelectedBeneficiary] = useState<Beneficiary | null>(null);
-  const [reportType, setReportType] = useState<'a_pagar' | 'pagos'>('a_pagar');
+  const [reportType, setReportType] = useState<'a_pagar' | 'pagos' | 'ir'>('a_pagar');
   const [dateRange, setDateRange] = useState({
     dataInicio: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
     dataFim: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().split('T')[0]
@@ -141,7 +141,7 @@ export function ReportsPage() {
     return company?.nome || 'N/A';
   };
 
-  const openReportModal = (beneficiary: Beneficiary, type: 'a_pagar' | 'pagos') => {
+  const openReportModal = (beneficiary: Beneficiary, type: 'a_pagar' | 'pagos' | 'ir') => {
     setSelectedBeneficiary(beneficiary);
     setReportType(type);
     setReportModalOpen(true);
@@ -433,7 +433,15 @@ export function ReportsPage() {
                         <Badge variant="outline">Em breve</Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline">Em breve</Badge>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => openReportModal(beneficiary, 'ir')}
+                          className="bg-purple-600 hover:bg-purple-700 text-white border-purple-600"
+                        >
+                          <FileText className="h-4 w-4" />
+                          IR
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))
