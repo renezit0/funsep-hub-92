@@ -664,12 +664,10 @@ async function generateIRReport(supabase: any, beneficiary: any, matricula: numb
   try {
     const ano = new Date(dataInicio).getFullYear()
     
-    console.log('Gerando relatório IR para:', { matricula, ano })
-    
-    // Buscar dados de IR do titular (IRPFT) - usando campos corretos
+    // Buscar dados de IR do titular (IRPFT)
     const { data: irTitular, error: irTitularError } = await supabase
       .from('irpft')
-      .select('guiat, ment, vlmen, vlguia')
+      .select('guiat, ment')
       .eq('matricula', matricula)
       .eq('ano', ano)
     
@@ -677,7 +675,16 @@ async function generateIRReport(supabase: any, beneficiary: any, matricula: numb
       console.error('Erro ao buscar IR titular:', irTitularError)
     }
     
-    console.log('IR Titular encontrado:', irTitular)
+    // Buscar dados detalhados IR do titular (IRPFTB)
+    const { data: irTitularDetalhes, error: irTitularDetalhesError } = await supabase
+      .from('irpfd')
+      .select('ment, vlecco, nrodep')
+      .eq('matricula', matricula)
+      .eq('ano', ano)
+    
+    if (irTitularDetalhesError) {
+      console.error('Erro ao buscar IR titular detalhes:', irTitularDetalhesError)
+    }
     
     // Buscar dependentes
     const { data: dependentes, error: dependentesError } = await supabase
@@ -689,64 +696,26 @@ async function generateIRReport(supabase: any, beneficiary: any, matricula: numb
       console.error('Erro ao buscar dependentes:', dependentesError)
     }
     
-    console.log('Dependentes encontrados:', dependentes?.length || 0)
-    
     // Buscar dados de IR dos dependentes (IRPFD)
     const { data: irDependentes, error: irDependentesError } = await supabase
       .from('irpfd')
-      .select('vlmen, vlguia, nrodep, ment')
+      .select('vlmen, vlguia, nrodep')
       .eq('matricula', matricula)
       .eq('ano', ano)
-      .neq('nrodep', 0) // Excluir registros onde nrodep = 0 (que são do titular)
     
     if (irDependentesError) {
       console.error('Erro ao buscar IR dependentes:', irDependentesError)
     }
     
-    console.log('IR Dependentes encontrado:', irDependentes)
-    
-    // Calcular total do titular - usar os valores corretos
-    let totalTitularMensalidade = 0
-    let totalTitularGuia = 0
-    
-    if (irTitular && irTitular.length > 0) {
-      // Somar valores do titular da tabela IRPFT
-      totalTitularMensalidade = irTitular.reduce((acc: number, item: any) => {
-        return acc + (Number(item.vlmen) || Number(item.ment) || 0)
-      }, 0)
-      
-      totalTitularGuia = irTitular.reduce((acc: number, item: any) => {
-        return acc + (Number(item.vlguia) || Number(item.guiat) || 0)
-      }, 0)
-    }
-    
-    // Buscar também dados do titular na tabela IRPFD onde nrodep = 0
-    const { data: irTitularIRPFD, error: irTitularIRPFDError } = await supabase
-      .from('irpfd')
-      .select('vlmen, vlguia, ment')
-      .eq('matricula', matricula)
-      .eq('ano', ano)
-      .eq('nrodep', 0)
-    
-    if (!irTitularIRPFDError && irTitularIRPFD && irTitularIRPFD.length > 0) {
-      console.log('IR Titular IRPFD encontrado:', irTitularIRPFD)
-      
-      // Adicionar valores do titular da tabela IRPFD
-      totalTitularMensalidade += irTitularIRPFD.reduce((acc: number, item: any) => {
-        return acc + (Number(item.vlmen) || Number(item.ment) || 0)
-      }, 0)
-      
-      totalTitularGuia += irTitularIRPFD.reduce((acc: number, item: any) => {
-        return acc + (Number(item.vlguia) || 0)
-      }, 0)
-    }
-    
-    console.log('Totais Titular:', { mensalidade: totalTitularMensalidade, guia: totalTitularGuia })
+    // Calcular total do titular
+    const totalTitular = (irTitular || []).reduce((acc: number, item: any) => {
+      return acc + (Number(item.guiat) || 0) + (Number(item.ment) || 0)
+    }, 0)
     
     // Gerar HTML do relatório IR
     const htmlContent = generateIRReportHTML(
       beneficiary,
-      { mensalidade: totalTitularMensalidade, guia: totalTitularGuia },
+      totalTitular,
       dependentes || [],
       irDependentes || [],
       ano
@@ -773,13 +742,11 @@ async function generateIRReport(supabase: any, beneficiary: any, matricula: numb
 
 function generateIRReportHTML(
   beneficiary: any,
-  totalTitular: { mensalidade: number, guia: number },
+  totalTitular: number,
   dependentes: any[],
   irDependentes: any[],
   ano: number
 ): string {
-  
-  console.log('Gerando HTML com dados:', { beneficiary, totalTitular, dependentesCount: dependentes.length, irDependentesCount: irDependentes.length })
   
   // Criar mapeamento de dependentes
   const dependentesMap = new Map<string, any>()
@@ -789,24 +756,17 @@ function generateIRReportHTML(
   
   // Processar dados de IR dos dependentes
   const dependentesComIR = irDependentes.map(ir => {
-    const dependente = dependentesMap.get(ir.nrodep.toString())
+    const dependente = dependentesMap.get(ir.nrodep)
     return {
       ...ir,
       nome: dependente?.nome || `Dependente ${ir.nrodep}`,
-      cpf: dependente?.cpf || '',
-      vlmen: Number(ir.vlmen) || Number(ir.ment) || 0,
-      vlguia: Number(ir.vlguia) || 0
+      cpf: dependente?.cpf || ''
     }
-  }).filter(dep => dep.vlmen > 0 || dep.vlguia > 0) // Filtrar apenas dependentes com valores
+  })
   
-  // Calcular totais
-  const totalTitularCompleto = totalTitular.mensalidade + totalTitular.guia
-  const totalDependentes = dependentesComIR.reduce((acc, dep) => {
-    return acc + dep.vlmen + dep.vlguia
+  const totalGeral = totalTitular + dependentesComIR.reduce((acc, dep) => {
+    return acc + (Number(dep.vlmen) || 0) + (Number(dep.vlguia) || 0)
   }, 0)
-  const totalGeral = totalTitularCompleto + totalDependentes
-  
-  console.log('Totais calculados:', { totalTitularCompleto, totalDependentes, totalGeral })
 
   return `
 <!DOCTYPE html>
@@ -929,7 +889,7 @@ function generateIRReportHTML(
         DECLARAMOS, para os devidos fins que <strong>${beneficiary.nome.toUpperCase()}</strong>, 
         portador do CPF nº <strong>${formatCPF(beneficiary.cpf)}</strong>, 
         associado deste Funsep/Unimed, plano de saúde número de matrícula ${beneficiary.matricula}, no 
-        exercício de ${ano}/Ano-Calendário ${ano}, pagou ao FUNSEP - CNPJ 20.601.112/0001-91, o valor de R$ 
+        exercício de ${ano}/Ano-Calendário ${ano}, pagou ao FUNSEP - CNPJ 77.730.354/0001-88, o valor de R$ 
         <strong class="currency">${formatCurrency(totalGeral)}</strong> (${formatCurrencyText(totalGeral)}), 
         assim discriminados:
     </div>
@@ -948,19 +908,19 @@ function generateIRReportHTML(
             <tr>
                 <td class="left">${beneficiary.nome.toUpperCase()}</td>
                 <td>${formatCPF(beneficiary.cpf)}</td>
-                <td class="currency right">${formatCurrency(totalTitular.mensalidade)}</td>
-                <td class="currency right">${formatCurrency(totalTitular.guia)}</td>
-                <td class="currency right">${formatCurrency(totalTitularCompleto)}</td>
+                <td class="currency right">${formatCurrency(totalTitular)}</td>
+                <td class="currency right">-</td>
+                <td class="currency right">${formatCurrency(totalTitular)}</td>
             </tr>
-            ${dependentesComIR.map(dep => `
+            ${dependentesComIR.length > 0 ? dependentesComIR.map(dep => `
                 <tr>
                     <td class="left">${dep.nome.toUpperCase()}</td>
                     <td>${formatCPF(dep.cpf)}</td>
-                    <td class="currency right">${formatCurrency(dep.vlmen)}</td>
-                    <td class="currency right">${formatCurrency(dep.vlguia)}</td>
-                    <td class="currency right">${formatCurrency(dep.vlmen + dep.vlguia)}</td>
+                    <td class="currency right">${formatCurrency(dep.vlmen || 0)}</td>
+                    <td class="currency right">${formatCurrency(dep.vlguia || 0)}</td>
+                    <td class="currency right">${formatCurrency((dep.vlmen || 0) + (dep.vlguia || 0))}</td>
                 </tr>
-            `).join('')}
+            `).join('') : ''}
             <tr class="total-row">
                 <td colspan="4" class="right"><strong>TOTAL --></strong></td>
                 <td class="currency right"><strong>${formatCurrency(totalGeral)}</strong></td>
