@@ -235,28 +235,55 @@ export function ReportsPage() {
           <DialogHeader>
             <DialogTitle>Selecionar Período</DialogTitle>
             <DialogDescription>
-              Selecione o período para gerar o relatório de {reportType === 'a_pagar' ? 'procedimentos a pagar' : reportType === 'pagos' ? 'procedimentos pagos' : 'Imposto de Renda'}.
+              {reportType === 'ir' 
+                ? 'Selecione o ano para gerar o relatório de Imposto de Renda.'
+                : `Selecione o período para gerar o relatório de ${reportType === 'a_pagar' ? 'procedimentos a pagar' : 'procedimentos pagos'}.`
+              }
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="dataInicio">Data Início:</Label>
-              <Input
-                id="dataInicio"
-                type="date"
-                value={dateRange.dataInicio}
-                onChange={(e) => setDateRange({ ...dateRange, dataInicio: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="dataFim">Data Fim:</Label>
-              <Input
-                id="dataFim"
-                type="date"
-                value={dateRange.dataFim}
-                onChange={(e) => setDateRange({ ...dateRange, dataFim: e.target.value })}
-              />
-            </div>
+            {reportType === 'ir' ? (
+              <div className="space-y-2">
+                <Label htmlFor="ano">Ano:</Label>
+                <select
+                  id="ano"
+                  value={new Date(dateRange.dataInicio).getFullYear()}
+                  onChange={(e) => {
+                    const ano = e.target.value;
+                    setDateRange({
+                      dataInicio: `${ano}-01-01`,
+                      dataFim: `${ano}-12-31`
+                    });
+                  }}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i).map(year => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="dataInicio">Data Início:</Label>
+                  <Input
+                    id="dataInicio"
+                    type="date"
+                    value={dateRange.dataInicio}
+                    onChange={(e) => setDateRange({ ...dateRange, dataInicio: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="dataFim">Data Fim:</Label>
+                  <Input
+                    id="dataFim"
+                    type="date"
+                    value={dateRange.dataFim}
+                    onChange={(e) => setDateRange({ ...dateRange, dataFim: e.target.value })}
+                  />
+                </div>
+              </>
+            )}
             <Button onClick={generateReport} className="w-full gap-2" disabled={loading}>
               {loading ? "Gerando..." : <><Download className="h-4 w-4" /> Gerar Relatório</>}
             </Button>

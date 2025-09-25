@@ -912,7 +912,7 @@ function generateIRReportHTML(
                 <td class="currency right">-</td>
                 <td class="currency right">${formatCurrency(totalTitular)}</td>
             </tr>
-            ${dependentesComIR.map(dep => `
+            ${dependentesComIR.length > 0 ? dependentesComIR.map(dep => `
                 <tr>
                     <td class="left">${dep.nome.toUpperCase()}</td>
                     <td>${formatCPF(dep.cpf)}</td>
@@ -920,7 +920,7 @@ function generateIRReportHTML(
                     <td class="currency right">${formatCurrency(dep.vlguia || 0)}</td>
                     <td class="currency right">${formatCurrency((dep.vlmen || 0) + (dep.vlguia || 0))}</td>
                 </tr>
-            `).join('')}
+            `).join('') : ''}
             <tr class="total-row">
                 <td colspan="4" class="right"><strong>TOTAL --></strong></td>
                 <td class="currency right"><strong>${formatCurrency(totalGeral)}</strong></td>
