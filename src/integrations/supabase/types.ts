@@ -313,6 +313,114 @@ export type Database = {
           },
         ]
       }
+      irpfd: {
+        Row: {
+          ano: number | null
+          matricula: number | null
+          nrodep: string | null
+          vlguia: number | null
+          vlmen: number | null
+        }
+        Insert: {
+          ano?: number | null
+          matricula?: number | null
+          nrodep?: string | null
+          vlguia?: number | null
+          vlmen?: number | null
+        }
+        Update: {
+          ano?: number | null
+          matricula?: number | null
+          nrodep?: string | null
+          vlguia?: number | null
+          vlmen?: number | null
+        }
+        Relationships: []
+      }
+      irpfdb: {
+        Row: {
+          ano: number | null
+          matricula: number | null
+          nrodep: string | null
+          vlguia: number | null
+          vlmen: number | null
+        }
+        Insert: {
+          ano?: number | null
+          matricula?: number | null
+          nrodep?: string | null
+          vlguia?: number | null
+          vlmen?: number | null
+        }
+        Update: {
+          ano?: number | null
+          matricula?: number | null
+          nrodep?: string | null
+          vlguia?: number | null
+          vlmen?: number | null
+        }
+        Relationships: []
+      }
+      irpft: {
+        Row: {
+          ano: number | null
+          guiaboleto: string | null
+          guiat: number | null
+          matricula: number | null
+          ment: number | null
+          nrodep: string | null
+          vlecco: string | null
+        }
+        Insert: {
+          ano?: number | null
+          guiaboleto?: string | null
+          guiat?: number | null
+          matricula?: number | null
+          ment?: number | null
+          nrodep?: string | null
+          vlecco?: string | null
+        }
+        Update: {
+          ano?: number | null
+          guiaboleto?: string | null
+          guiat?: number | null
+          matricula?: number | null
+          ment?: number | null
+          nrodep?: string | null
+          vlecco?: string | null
+        }
+        Relationships: []
+      }
+      irpftb: {
+        Row: {
+          ano: number | null
+          guiaboleto: string | null
+          guiat: number | null
+          matricula: number | null
+          ment: string | null
+          nrodep: string | null
+          vlecco: string | null
+        }
+        Insert: {
+          ano?: number | null
+          guiaboleto?: string | null
+          guiat?: number | null
+          matricula?: number | null
+          ment?: string | null
+          nrodep?: string | null
+          vlecco?: string | null
+        }
+        Update: {
+          ano?: number | null
+          guiaboleto?: string | null
+          guiat?: number | null
+          matricula?: number | null
+          ment?: string | null
+          nrodep?: string | null
+          vlecco?: string | null
+        }
+        Relationships: []
+      }
       mgumrrapg: {
         Row: {
           datareceb: string | null
