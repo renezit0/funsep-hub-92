@@ -677,7 +677,7 @@ async function generateIRReport(supabase: any, beneficiary: any, matricula: numb
     
     // Buscar dados detalhados IR do titular (IRPFTB)
     const { data: irTitularDetalhes, error: irTitularDetalhesError } = await supabase
-      .from('irpftb')
+      .from('irpfd')
       .select('ment, vlecco, nrodep')
       .eq('matricula', matricula)
       .eq('ano', ano)
