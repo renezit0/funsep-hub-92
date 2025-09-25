@@ -227,69 +227,73 @@ async function generateIRReport(supabase: any, beneficiary: any, matricula: numb
     
     console.log('Gerando relatório IR para:', { matricula, ano })
     
-    // Inicializar totais do titular
+    // Estratégia: testar uma tabela por vez e usar apenas UMA fonte de dados
     let totalTitularMensalidade = 0
     let totalTitularGuia = 0
+    let fonteDados = ''
     
-    // 1. Buscar dados de IR do titular (IRPFT) - usando todos os campos possíveis
+    // PRIMEIRA TENTATIVA: Buscar na tabela IRPFD (mais comum)
     try {
-      const { data: irTitular, error: irTitularError } = await supabase
-        .from('irpft')
-        .select('*')  // Selecionar todos os campos para debug
+      const { data: irTitularIRPFD, error: irTitularIRPFDError } = await supabase
+        .from('irpfd')
+        .select('*')
         .eq('matricula', matricula)
         .eq('ano', ano)
+        .eq('nrodep', 0)  // Somente titular (nrodep = 0)
       
-      if (irTitularError) {
-        console.error('Erro ao buscar IR titular IRPFT:', irTitularError)
-      } else {
-        console.log('IR Titular IRPFT encontrado:', irTitular)
+      console.log('IRPFD Titular - Dados encontrados:', irTitularIRPFD)
+      
+      if (!irTitularIRPFDError && irTitularIRPFD && irTitularIRPFD.length > 0) {
+        // Usar dados do IRPFD
+        totalTitularMensalidade = irTitularIRPFD.reduce((acc: number, item: any) => {
+          const vlmen = Number(item.vlmen) || Number(item.ment) || 0
+          console.log('IRPFD - Mensalidade item:', vlmen)
+          return acc + vlmen
+        }, 0)
         
-        if (irTitular && irTitular.length > 0) {
-          // Tentar diferentes campos possíveis
+        totalTitularGuia = irTitularIRPFD.reduce((acc: number, item: any) => {
+          const vlguia = Number(item.vlguia) || 0
+          console.log('IRPFD - Guia item:', vlguia)
+          return acc + vlguia
+        }, 0)
+        
+        fonteDados = 'IRPFD'
+        console.log('Usando dados do IRPFD - Mensalidade:', totalTitularMensalidade, 'Guia:', totalTitularGuia)
+      }
+    } catch (err) {
+      console.error('Erro na consulta IRPFD titular:', err)
+    }
+    
+    // SEGUNDA TENTATIVA: Se não encontrou no IRPFD, tentar IRPFT
+    if (totalTitularMensalidade === 0 && totalTitularGuia === 0) {
+      try {
+        const { data: irTitular, error: irTitularError } = await supabase
+          .from('irpft')
+          .select('*')
+          .eq('matricula', matricula)
+          .eq('ano', ano)
+        
+        console.log('IRPFT Titular - Dados encontrados:', irTitular)
+        
+        if (!irTitularError && irTitular && irTitular.length > 0) {
           totalTitularMensalidade = irTitular.reduce((acc: number, item: any) => {
-            const vlmen = Number(item.vlmen) || Number(item.ment) || Number(item.vlmensalidade) || 0
+            const vlmen = Number(item.vlmen) || Number(item.ment) || 0
+            console.log('IRPFT - Mensalidade item:', vlmen)
             return acc + vlmen
           }, 0)
           
           totalTitularGuia = irTitular.reduce((acc: number, item: any) => {
-            const vlguia = Number(item.vlguia) || Number(item.guiat) || Number(item.vlparticipacao) || 0
+            const vlguia = Number(item.vlguia) || Number(item.guiat) || 0
+            console.log('IRPFT - Guia item:', vlguia)
             return acc + vlguia
-          }, 0)
-        }
-      }
-    } catch (err) {
-      console.error('Erro na consulta IRPFT:', err)
-    }
-    
-    // 2. Buscar dados do titular na tabela IRPFD onde nrodep = 0
-    try {
-      const { data: irTitularIRPFD, error: irTitularIRPFDError } = await supabase
-        .from('irpfd')
-        .select('*')  // Selecionar todos os campos para debug
-        .eq('matricula', matricula)
-        .eq('ano', ano)
-        .or('nrodep.eq.0,nrodep.is.null')  // nrodep = 0 ou null
-      
-      if (irTitularIRPFDError) {
-        console.error('Erro ao buscar IR titular IRPFD:', irTitularIRPFDError)
-      } else {
-        console.log('IR Titular IRPFD encontrado:', irTitularIRPFD)
-        
-        if (irTitularIRPFD && irTitularIRPFD.length > 0) {
-          // Adicionar valores do titular da tabela IRPFD
-          totalTitularMensalidade += irTitularIRPFD.reduce((acc: number, item: any) => {
-            const vlmen = Number(item.vlmen) || Number(item.ment) || Number(item.vlmensalidade) || 0
-            return acc + vlmen
           }, 0)
           
-          totalTitularGuia += irTitularIRPFD.reduce((acc: number, item: any) => {
-            const vlguia = Number(item.vlguia) || Number(item.vlparticipacao) || 0
-            return acc + vlguia
-          }, 0)
+          fonteDados = 'IRPFT'
+          console.log('Usando dados do IRPFT - Mensalidade:', totalTitularMensalidade, 'Guia:', totalTitularGuia)
         }
+      } catch (err) {
+        console.error('Erro na consulta IRPFT:', err)
       }
-    } catch (err) {
-      console.error('Erro na consulta IRPFD titular:', err)
     }
     
     // 3. Buscar dependentes
@@ -315,7 +319,7 @@ async function generateIRReport(supabase: any, beneficiary: any, matricula: numb
     try {
       const { data: irDependentesData, error: irDependentesError } = await supabase
         .from('irpfd')
-        .select('*')  // Selecionar todos os campos para debug
+        .select('*')
         .eq('matricula', matricula)
         .eq('ano', ano)
         .gt('nrodep', 0)  // Apenas dependentes (nrodep > 0)
@@ -330,7 +334,10 @@ async function generateIRReport(supabase: any, beneficiary: any, matricula: numb
       console.error('Erro na consulta IRPFD dependentes:', err)
     }
     
-    console.log('Totais Titular calculados:', { mensalidade: totalTitularMensalidade, guia: totalTitularGuia })
+    console.log(`=== RESUMO IR ===`)
+    console.log(`Fonte de dados: ${fonteDados}`)
+    console.log(`Titular - Mensalidade: ${totalTitularMensalidade}, Guia: ${totalTitularGuia}`)
+    console.log(`Dependentes: ${irDependentes.length} registros`)
     
     // Gerar HTML do relatório IR
     const htmlContent = generateIRReportHTML(
