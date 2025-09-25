@@ -221,6 +221,365 @@ Deno.serve(async (req) => {
   }
 })
 
+async function generateIRReport(supabase: any, beneficiary: any, matricula: number, dataInicio: string, dataFim: string) {
+  try {
+    const ano = new Date(dataInicio).getFullYear()
+    
+    console.log('Gerando relatório IR para:', { matricula, ano })
+    
+    // Inicializar totais do titular
+    let totalTitularMensalidade = 0
+    let totalTitularGuia = 0
+    
+    // 1. Buscar dados de IR do titular (IRPFT) - usando todos os campos possíveis
+    try {
+      const { data: irTitular, error: irTitularError } = await supabase
+        .from('irpft')
+        .select('*')  // Selecionar todos os campos para debug
+        .eq('matricula', matricula)
+        .eq('ano', ano)
+      
+      if (irTitularError) {
+        console.error('Erro ao buscar IR titular IRPFT:', irTitularError)
+      } else {
+        console.log('IR Titular IRPFT encontrado:', irTitular)
+        
+        if (irTitular && irTitular.length > 0) {
+          // Tentar diferentes campos possíveis
+          totalTitularMensalidade = irTitular.reduce((acc: number, item: any) => {
+            const vlmen = Number(item.vlmen) || Number(item.ment) || Number(item.vlmensalidade) || 0
+            return acc + vlmen
+          }, 0)
+          
+          totalTitularGuia = irTitular.reduce((acc: number, item: any) => {
+            const vlguia = Number(item.vlguia) || Number(item.guiat) || Number(item.vlparticipacao) || 0
+            return acc + vlguia
+          }, 0)
+        }
+      }
+    } catch (err) {
+      console.error('Erro na consulta IRPFT:', err)
+    }
+    
+    // 2. Buscar dados do titular na tabela IRPFD onde nrodep = 0
+    try {
+      const { data: irTitularIRPFD, error: irTitularIRPFDError } = await supabase
+        .from('irpfd')
+        .select('*')  // Selecionar todos os campos para debug
+        .eq('matricula', matricula)
+        .eq('ano', ano)
+        .or('nrodep.eq.0,nrodep.is.null')  // nrodep = 0 ou null
+      
+      if (irTitularIRPFDError) {
+        console.error('Erro ao buscar IR titular IRPFD:', irTitularIRPFDError)
+      } else {
+        console.log('IR Titular IRPFD encontrado:', irTitularIRPFD)
+        
+        if (irTitularIRPFD && irTitularIRPFD.length > 0) {
+          // Adicionar valores do titular da tabela IRPFD
+          totalTitularMensalidade += irTitularIRPFD.reduce((acc: number, item: any) => {
+            const vlmen = Number(item.vlmen) || Number(item.ment) || Number(item.vlmensalidade) || 0
+            return acc + vlmen
+          }, 0)
+          
+          totalTitularGuia += irTitularIRPFD.reduce((acc: number, item: any) => {
+            const vlguia = Number(item.vlguia) || Number(item.vlparticipacao) || 0
+            return acc + vlguia
+          }, 0)
+        }
+      }
+    } catch (err) {
+      console.error('Erro na consulta IRPFD titular:', err)
+    }
+    
+    // 3. Buscar dependentes
+    let dependentes: any[] = []
+    try {
+      const { data: dependentesData, error: dependentesError } = await supabase
+        .from('caddep')
+        .select('nrodep, nome, cpf')
+        .eq('matricula', matricula)
+      
+      if (dependentesError) {
+        console.error('Erro ao buscar dependentes:', dependentesError)
+      } else {
+        dependentes = dependentesData || []
+        console.log('Dependentes encontrados:', dependentes.length)
+      }
+    } catch (err) {
+      console.error('Erro na consulta dependentes:', err)
+    }
+    
+    // 4. Buscar dados de IR dos dependentes (IRPFD) - apenas nrodep > 0
+    let irDependentes: any[] = []
+    try {
+      const { data: irDependentesData, error: irDependentesError } = await supabase
+        .from('irpfd')
+        .select('*')  // Selecionar todos os campos para debug
+        .eq('matricula', matricula)
+        .eq('ano', ano)
+        .gt('nrodep', 0)  // Apenas dependentes (nrodep > 0)
+      
+      if (irDependentesError) {
+        console.error('Erro ao buscar IR dependentes:', irDependentesError)
+      } else {
+        irDependentes = irDependentesData || []
+        console.log('IR Dependentes encontrado:', irDependentes)
+      }
+    } catch (err) {
+      console.error('Erro na consulta IRPFD dependentes:', err)
+    }
+    
+    console.log('Totais Titular calculados:', { mensalidade: totalTitularMensalidade, guia: totalTitularGuia })
+    
+    // Gerar HTML do relatório IR
+    const htmlContent = generateIRReportHTML(
+      beneficiary,
+      { mensalidade: totalTitularMensalidade, guia: totalTitularGuia },
+      dependentes,
+      irDependentes,
+      ano
+    )
+    
+    return new Response(JSON.stringify({ 
+      html: htmlContent,
+      filename: `IR_${beneficiary.nome.replace(/[^A-Z0-9]/gi, '_')}_${matricula}_${ano}.pdf`
+    }), {
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/json',
+      }
+    })
+    
+  } catch (error) {
+    console.error('Erro geral ao gerar relatório IR:', error)
+    return new Response(
+      JSON.stringify({ error: 'Erro ao gerar relatório IR', details: error instanceof Error ? error.message : 'Erro desconhecido' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
+}
+
+function generateIRReportHTML(
+  beneficiary: any,
+  totalTitular: { mensalidade: number, guia: number },
+  dependentes: any[],
+  irDependentes: any[],
+  ano: number
+): string {
+  
+  console.log('Gerando HTML IR com dados:', { 
+    beneficiary: beneficiary?.nome, 
+    totalTitular, 
+    dependentesCount: dependentes.length, 
+    irDependentesCount: irDependentes.length 
+  })
+  
+  // Criar mapeamento de dependentes
+  const dependentesMap = new Map<string, any>()
+  dependentes.forEach(dep => {
+    dependentesMap.set(dep.nrodep.toString(), dep)
+  })
+  
+  // Processar dados de IR dos dependentes
+  const dependentesComIR = irDependentes.map(ir => {
+    const dependente = dependentesMap.get(ir.nrodep?.toString() || '')
+    const vlmen = Number(ir.vlmen) || Number(ir.ment) || Number(ir.vlmensalidade) || 0
+    const vlguia = Number(ir.vlguia) || Number(ir.vlparticipacao) || 0
+    
+    return {
+      ...ir,
+      nome: dependente?.nome || `Dependente ${ir.nrodep}`,
+      cpf: dependente?.cpf || '',
+      vlmen: vlmen,
+      vlguia: vlguia
+    }
+  }).filter(dep => dep.vlmen > 0 || dep.vlguia > 0) // Filtrar apenas dependentes com valores
+  
+  // Calcular totais
+  const totalTitularCompleto = totalTitular.mensalidade + totalTitular.guia
+  const totalDependentes = dependentesComIR.reduce((acc, dep) => {
+    return acc + dep.vlmen + dep.vlguia
+  }, 0)
+  const totalGeral = totalTitularCompleto + totalDependentes
+  
+  console.log('Totais IR calculados:', { totalTitularCompleto, totalDependentes, totalGeral })
+
+  return `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Declaração IR - ${beneficiary.matricula}</title>
+    <style>
+        @page {
+            margin: 0.8cm 1.2cm;
+            size: A4 portrait;
+        }
+        
+        body { 
+            font-family: 'Arial', sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            font-size: 12px;
+            line-height: 1.4;
+            color: #333;
+            background: #fff;
+        }
+        
+        .header { 
+            text-align: center; 
+            margin-bottom: 20px;
+            border-bottom: 2px solid #2c5aa0;
+            padding: 15px 4px 10px 4px;
+        }
+        
+        .logo { 
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .logo img {
+            height: 80px;
+            max-width: 300px;
+            display: block;
+            margin: 0 auto;
+        }
+        
+        .title { 
+            font-size: 18px;
+            font-weight: bold; 
+            margin: 10px 0;
+            color: #2c5aa0;
+        }
+        
+        .declaracao-text {
+            text-align: justify;
+            margin: 20px 0;
+            line-height: 1.6;
+            font-size: 12px;
+        }
+        
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin: 15px 0;
+            font-size: 12px;
+        }
+        
+        th, td { 
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: center; 
+        }
+        
+        th { 
+            background-color: #f0f0f0;
+            font-weight: bold; 
+            font-size: 11px;
+        }
+        
+        .right { text-align: right !important; }
+        .center { text-align: center !important; }
+        .left { text-align: left !important; }
+        
+        .total-row { 
+            background: #e8e8e8;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        
+        .footer { 
+            margin-top: 40px;
+            text-align: center; 
+            font-size: 12px;
+        }
+        
+        .signature {
+            margin-top: 80px;
+            text-align: center;
+        }
+        
+        .signature-line {
+            border-top: 1px solid #000;
+            width: 300px;
+            margin: 0 auto;
+            padding-top: 5px;
+        }
+        
+        .currency {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <img src="/lovable-uploads/e548bfa7-21ab-4b35-866a-211b0aaa1135.png" alt="Logo FUNSEP">
+        </div>
+        <div class="title">DECLARAÇÃO</div>
+    </div>
+
+    <div class="declaracao-text">
+        DECLARAMOS, para os devidos fins que <strong>${beneficiary.nome.toUpperCase()}</strong>, 
+        portador do CPF nº <strong>${formatCPF(beneficiary.cpf)}</strong>, 
+        associado deste Funsep/Unimed, plano de saúde número de matrícula ${beneficiary.matricula}, no 
+        exercício de ${ano}/Ano-Calendário ${ano}, pagou ao FUNSEP - CNPJ 20.601.112/0001-91, o valor de R$ 
+        <strong class="currency">${formatCurrency(totalGeral)}</strong> (${formatCurrencyText(totalGeral)}), 
+        assim discriminados:
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>CPF</th>
+                <th>Mensalidade</th>
+                <th>Participação em guia</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="left">${beneficiary.nome.toUpperCase()}</td>
+                <td>${formatCPF(beneficiary.cpf)}</td>
+                <td class="currency right">${formatCurrency(totalTitular.mensalidade)}</td>
+                <td class="currency right">${formatCurrency(totalTitular.guia)}</td>
+                <td class="currency right">${formatCurrency(totalTitularCompleto)}</td>
+            </tr>
+            ${dependentesComIR.map(dep => `
+                <tr>
+                    <td class="left">${dep.nome.toUpperCase()}</td>
+                    <td>${formatCPF(dep.cpf)}</td>
+                    <td class="currency right">${formatCurrency(dep.vlmen)}</td>
+                    <td class="currency right">${formatCurrency(dep.vlguia)}</td>
+                    <td class="currency right">${formatCurrency(dep.vlmen + dep.vlguia)}</td>
+                </tr>
+            `).join('')}
+            <tr class="total-row">
+                <td colspan="4" class="right"><strong>TOTAL --></strong></td>
+                <td class="currency right"><strong>${formatCurrency(totalGeral)}</strong></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="footer">
+        <p>Curitiba, ${new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+        
+        <div class="signature">
+            <div class="signature-line">
+                <strong>Arinete Léa Spercoski Ribas</strong><br>
+                Gerente Executiva
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+  `
+}
+
 function generateReportHTML(
   beneficiary: Beneficiary, 
   titular: Procedure[], 
@@ -658,289 +1017,6 @@ function formatDate(dateStr: string): string {
 
 function formatCurrency(value: number): string {
   return (value || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-}
-
-async function generateIRReport(supabase: any, beneficiary: any, matricula: number, dataInicio: string, dataFim: string) {
-  try {
-    const ano = new Date(dataInicio).getFullYear()
-    
-    // Buscar dados de IR do titular (IRPFT)
-    const { data: irTitular, error: irTitularError } = await supabase
-      .from('irpft')
-      .select('guiat, ment')
-      .eq('matricula', matricula)
-      .eq('ano', ano)
-    
-    if (irTitularError) {
-      console.error('Erro ao buscar IR titular:', irTitularError)
-    }
-    
-    // Buscar dados detalhados IR do titular (IRPFTB)
-    const { data: irTitularDetalhes, error: irTitularDetalhesError } = await supabase
-      .from('irpfd')
-      .select('ment, vlecco, nrodep')
-      .eq('matricula', matricula)
-      .eq('ano', ano)
-    
-    if (irTitularDetalhesError) {
-      console.error('Erro ao buscar IR titular detalhes:', irTitularDetalhesError)
-    }
-    
-    // Buscar dependentes
-    const { data: dependentes, error: dependentesError } = await supabase
-      .from('caddep')
-      .select('nrodep, nome, cpf')
-      .eq('matricula', matricula)
-    
-    if (dependentesError) {
-      console.error('Erro ao buscar dependentes:', dependentesError)
-    }
-    
-    // Buscar dados de IR dos dependentes (IRPFD)
-    const { data: irDependentes, error: irDependentesError } = await supabase
-      .from('irpfd')
-      .select('vlmen, vlguia, nrodep')
-      .eq('matricula', matricula)
-      .eq('ano', ano)
-    
-    if (irDependentesError) {
-      console.error('Erro ao buscar IR dependentes:', irDependentesError)
-    }
-    
-    // Calcular total do titular
-    const totalTitular = (irTitular || []).reduce((acc: number, item: any) => {
-      return acc + (Number(item.guiat) || 0) + (Number(item.ment) || 0)
-    }, 0)
-    
-    // Gerar HTML do relatório IR
-    const htmlContent = generateIRReportHTML(
-      beneficiary,
-      totalTitular,
-      dependentes || [],
-      irDependentes || [],
-      ano
-    )
-    
-    return new Response(JSON.stringify({ 
-      html: htmlContent,
-      filename: `IR_${beneficiary.nome.replace(/[^A-Z0-9]/gi, '_')}_${matricula}_${ano}.pdf`
-    }), {
-      headers: {
-        ...corsHeaders,
-        'Content-Type': 'application/json',
-      }
-    })
-    
-  } catch (error) {
-    console.error('Erro ao gerar relatório IR:', error)
-    return new Response(
-      JSON.stringify({ error: 'Erro ao gerar relatório IR', details: error instanceof Error ? error.message : 'Erro desconhecido' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
-  }
-}
-
-function generateIRReportHTML(
-  beneficiary: any,
-  totalTitular: number,
-  dependentes: any[],
-  irDependentes: any[],
-  ano: number
-): string {
-  
-  // Criar mapeamento de dependentes
-  const dependentesMap = new Map<string, any>()
-  dependentes.forEach(dep => {
-    dependentesMap.set(dep.nrodep.toString(), dep)
-  })
-  
-  // Processar dados de IR dos dependentes
-  const dependentesComIR = irDependentes.map(ir => {
-    const dependente = dependentesMap.get(ir.nrodep)
-    return {
-      ...ir,
-      nome: dependente?.nome || `Dependente ${ir.nrodep}`,
-      cpf: dependente?.cpf || ''
-    }
-  })
-  
-  const totalGeral = totalTitular + dependentesComIR.reduce((acc, dep) => {
-    return acc + (Number(dep.vlmen) || 0) + (Number(dep.vlguia) || 0)
-  }, 0)
-
-  return `
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Declaração IR - ${beneficiary.matricula}</title>
-    <style>
-        @page {
-            margin: 0.8cm 1.2cm;
-            size: A4 portrait;
-        }
-        
-        body { 
-            font-family: 'Arial', sans-serif; 
-            margin: 0; 
-            padding: 0; 
-            font-size: 12px;
-            line-height: 1.4;
-            color: #333;
-            background: #fff;
-        }
-        
-        .header { 
-            text-align: center; 
-            margin-bottom: 20px;
-            border-bottom: 2px solid #2c5aa0;
-            padding: 15px 4px 10px 4px;
-        }
-        
-        .logo { 
-            margin-bottom: 10px;
-            text-align: center;
-        }
-        
-        .logo img {
-            height: 80px;
-            max-width: 300px;
-            display: block;
-            margin: 0 auto;
-        }
-        
-        .title { 
-            font-size: 18px;
-            font-weight: bold; 
-            margin: 10px 0;
-            color: #2c5aa0;
-        }
-        
-        .declaracao-text {
-            text-align: justify;
-            margin: 20px 0;
-            line-height: 1.6;
-            font-size: 12px;
-        }
-        
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            margin: 15px 0;
-            font-size: 12px;
-        }
-        
-        th, td { 
-            border: 1px solid #000;
-            padding: 8px;
-            text-align: center; 
-        }
-        
-        th { 
-            background-color: #f0f0f0;
-            font-weight: bold; 
-            font-size: 11px;
-        }
-        
-        .right { text-align: right !important; }
-        .center { text-align: center !important; }
-        .left { text-align: left !important; }
-        
-        .total-row { 
-            background: #e8e8e8;
-            font-weight: bold;
-            font-size: 12px;
-        }
-        
-        .footer { 
-            margin-top: 40px;
-            text-align: center; 
-            font-size: 12px;
-        }
-        
-        .signature {
-            margin-top: 80px;
-            text-align: center;
-        }
-        
-        .signature-line {
-            border-top: 1px solid #000;
-            width: 300px;
-            margin: 0 auto;
-            padding-top: 5px;
-        }
-        
-        .currency {
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-        }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <div class="logo">
-            <img src="/lovable-uploads/e548bfa7-21ab-4b35-866a-211b0aaa1135.png" alt="Logo FUNSEP">
-        </div>
-        <div class="title">DECLARAÇÃO</div>
-    </div>
-
-    <div class="declaracao-text">
-        DECLARAMOS, para os devidos fins que <strong>${beneficiary.nome.toUpperCase()}</strong>, 
-        portador do CPF nº <strong>${formatCPF(beneficiary.cpf)}</strong>, 
-        associado deste Funsep/Unimed, plano de saúde número de matrícula ${beneficiary.matricula}, no 
-        exercício de ${ano}/Ano-Calendário ${ano}, pagou ao FUNSEP - CNPJ 77.730.354/0001-88, o valor de R$ 
-        <strong class="currency">${formatCurrency(totalGeral)}</strong> (${formatCurrencyText(totalGeral)}), 
-        assim discriminados:
-    </div>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Nome</th>
-                <th>CPF</th>
-                <th>Mensalidade</th>
-                <th>Participação em guia</th>
-                <th>Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td class="left">${beneficiary.nome.toUpperCase()}</td>
-                <td>${formatCPF(beneficiary.cpf)}</td>
-                <td class="currency right">${formatCurrency(totalTitular)}</td>
-                <td class="currency right">-</td>
-                <td class="currency right">${formatCurrency(totalTitular)}</td>
-            </tr>
-            ${dependentesComIR.length > 0 ? dependentesComIR.map(dep => `
-                <tr>
-                    <td class="left">${dep.nome.toUpperCase()}</td>
-                    <td>${formatCPF(dep.cpf)}</td>
-                    <td class="currency right">${formatCurrency(dep.vlmen || 0)}</td>
-                    <td class="currency right">${formatCurrency(dep.vlguia || 0)}</td>
-                    <td class="currency right">${formatCurrency((dep.vlmen || 0) + (dep.vlguia || 0))}</td>
-                </tr>
-            `).join('') : ''}
-            <tr class="total-row">
-                <td colspan="4" class="right"><strong>TOTAL --></strong></td>
-                <td class="currency right"><strong>${formatCurrency(totalGeral)}</strong></td>
-            </tr>
-        </tbody>
-    </table>
-
-    <div class="footer">
-        <p>Curitiba, ${new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-        
-        <div class="signature">
-            <div class="signature-line">
-                <strong>Arinete Léa Spercoski Ribas</strong><br>
-                Gerente Executiva
-            </div>
-        </div>
-    </div>
-</body>
-</html>
-  `
 }
 
 function formatCPF(cpf: any): string {
