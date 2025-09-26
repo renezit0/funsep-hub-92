@@ -73,9 +73,7 @@ Deno.serve(async (req) => {
 
     // Verificar tipo de relatório e executar lógica apropriada
     if (reportType === 'ir') {
-      const anoExercicio = parseInt(dataInicio.split('-')[0]) // Ano selecionado na interface
-      const anoBanco = anoExercicio - 1 // Ano no banco (sempre ano-1)
-      return await generateIRReport(supabase, beneficiary, matricula, anoExercicio, anoBanco)
+      return await generateIRReport(supabase, beneficiary, matricula, dataInicio, dataFim)
     }
 
     // 2. Buscar procedimentos (para relatórios a_pagar e pagos)
@@ -223,9 +221,11 @@ Deno.serve(async (req) => {
   }
 })
 
-async function generateIRReport(supabase: any, beneficiary: any, matricula: number, anoExercicio: number, anoBanco: number) {
+async function generateIRReport(supabase: any, beneficiary: any, matricula: number, dataInicio: string, dataFim: string) {
   try {
-    console.log('Gerando relatório IR para:', { matricula, anoExercicio, anoBanco })
+    const ano = new Date(dataInicio).getFullYear()
+    
+    console.log('Gerando relatório IR para:', { matricula, ano })
     
     // Estratégia: testar uma tabela por vez e usar apenas UMA fonte de dados
     let totalTitularMensalidade = 0
@@ -235,10 +235,10 @@ async function generateIRReport(supabase: any, beneficiary: any, matricula: numb
     // PRIMEIRA TENTATIVA: Buscar na tabela IRPFD (mais comum)
     try {
       const { data: irTitularIRPFD, error: irTitularIRPFDError } = await supabase
-      .from('irpfd')
-      .select('*')
-      .eq('matricula', matricula)
-      .eq('ano', anoBanco) // Usar anoBanco para buscar no BD
+        .from('irpfd')
+        .select('*')
+        .eq('matricula', matricula)
+        .eq('ano', ano)
         .eq('nrodep', 0)  // Somente titular (nrodep = 0)
       
       console.log('IRPFD Titular - Dados encontrados:', irTitularIRPFD)
@@ -271,7 +271,7 @@ async function generateIRReport(supabase: any, beneficiary: any, matricula: numb
           .from('irpft')
           .select('*')
           .eq('matricula', matricula)
-          .eq('ano', anoBanco) // Usar anoBanco para buscar no BD
+          .eq('ano', ano)
         
         console.log('IRPFT Titular - Dados encontrados:', irTitular)
         
@@ -318,10 +318,10 @@ async function generateIRReport(supabase: any, beneficiary: any, matricula: numb
     let irDependentes: any[] = []
     try {
       const { data: irDependentesData, error: irDependentesError } = await supabase
-      .from('irpfd')
-      .select('*')
-      .eq('matricula', matricula)
-      .eq('ano', anoBanco) // Usar anoBanco para buscar dependentes
+        .from('irpfd')
+        .select('*')
+        .eq('matricula', matricula)
+        .eq('ano', ano)
         .gt('nrodep', 0)  // Apenas dependentes (nrodep > 0)
       
       if (irDependentesError) {
@@ -345,13 +345,12 @@ async function generateIRReport(supabase: any, beneficiary: any, matricula: numb
       { mensalidade: totalTitularMensalidade, guia: totalTitularGuia },
       dependentes,
       irDependentes,
-      anoExercicio,
-      anoBanco
+      ano
     )
     
     return new Response(JSON.stringify({ 
       html: htmlContent,
-      filename: `IR_${beneficiary.nome.replace(/[^A-Z0-9]/gi, '_')}_${matricula}_${anoExercicio}.pdf`
+      filename: `IR_${beneficiary.nome.replace(/[^A-Z0-9]/gi, '_')}_${matricula}_${ano}.pdf`
     }), {
       headers: {
         ...corsHeaders,
@@ -373,8 +372,7 @@ function generateIRReportHTML(
   totalTitular: { mensalidade: number, guia: number },
   dependentes: any[],
   irDependentes: any[],
-  anoExercicio: number,
-  anoBanco: number
+  ano: number
 ): string {
   
   console.log('Gerando HTML IR com dados:', { 
@@ -535,7 +533,7 @@ function generateIRReportHTML(
         DECLARAMOS, para os devidos fins que <strong>${beneficiary.nome.toUpperCase()}</strong>, 
         portador do CPF nº <strong>${formatCPF(beneficiary.cpf)}</strong>, 
         associado deste Funsep/Unimed, plano de saúde número de matrícula ${beneficiary.matricula}, no 
-        exercício de ${anoExercicio}/Ano-Calendário ${anoBanco}, pagou ao FUNSEP - CNPJ 20.601.112/0001-91, o valor de R$ 
+        exercício de ${ano}/Ano-Calendário ${ano-1}, pagou ao FUNSEP - CNPJ 20.601.112/0001-91, o valor de R$ 
         <strong class="currency">${formatCurrency(totalGeral)}</strong> (${formatCurrencyText(totalGeral)}), 
         assim discriminados:
     </div>
