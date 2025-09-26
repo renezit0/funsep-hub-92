@@ -249,7 +249,7 @@ export function ReportsPage() {
                   id="ano"
                   value={new Date(dateRange.dataInicio).getFullYear()}
                   onChange={(e) => {
-                    const ano = e.target.value;
+                    const ano = parseInt(e.target.value);
                     setDateRange({
                       dataInicio: `${ano}-01-01`,
                       dataFim: `${ano}-12-31`
