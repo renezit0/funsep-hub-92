@@ -533,7 +533,7 @@ function generateIRReportHTML(
         DECLARAMOS, para os devidos fins que <strong>${beneficiary.nome.toUpperCase()}</strong>, 
         portador do CPF nº <strong>${formatCPF(beneficiary.cpf)}</strong>, 
         associado deste Funsep/Unimed, plano de saúde número de matrícula ${beneficiary.matricula}, no 
-        exercício de ${ano}/Ano-Calendário ${ano-1}, pagou ao FUNSEP - CNPJ 20.601.112/0001-91, o valor de R$ 
+        exercício de ${ano}/Ano-Calendário ${ano}, pagou ao FUNSEP - CNPJ 20.601.112/0001-91, o valor de R$ 
         <strong class="currency">${formatCurrency(totalGeral)}</strong> (${formatCurrencyText(totalGeral)}), 
         assim discriminados:
     </div>
