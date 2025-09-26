@@ -51,6 +51,7 @@ export default function Index() {
           onMenuToggle={() => setIsMenuOpen(!isMenuOpen)} 
           onLoginClick={() => setCurrentPage('admin')} 
         />
+        <div className="flex h-full w-full">
           <Sidebar 
             currentPage={currentPage} 
             onPageChange={setCurrentPage}
@@ -58,6 +59,7 @@ export default function Index() {
             isOpen={isMenuOpen}
             onToggle={() => setIsMenuOpen(!isMenuOpen)}
           />
+          <main className="flex-1 p-6 lg:ml-64">
             {renderPage()}
           </main>
         </div>
