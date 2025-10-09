@@ -10,9 +10,10 @@ import { UsersPage } from "@/components/admin/pages/UsersPage";
 import { PasswordsPage } from "@/components/admin/pages/PasswordsPage";
 import { NewsPage } from "@/components/admin/pages/NewsPage";
 import { ReportsPage } from "@/components/admin/pages/ReportsPage";
+import { RequestsPage } from "@/components/admin/pages/RequestsPage";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 
-export type AdminPageType = 'dashboard' | 'beneficiarios' | 'dependentes' | 'usuarios' | 'senhas' | 'noticias' | 'relatorios';
+export type AdminPageType = 'dashboard' | 'beneficiarios' | 'dependentes' | 'usuarios' | 'senhas' | 'noticias' | 'relatorios' | 'requerimentos';
 
 export default function AdminDashboard() {
   const [currentPage, setCurrentPage] = useState<AdminPageType>('dashboard');
@@ -73,6 +74,8 @@ export default function AdminDashboard() {
         return <NewsPage />;
       case 'relatorios':
         return <ReportsPage />;
+      case 'requerimentos':
+        return <RequestsPage />;
       default:
         return <DashboardPage />;
     }

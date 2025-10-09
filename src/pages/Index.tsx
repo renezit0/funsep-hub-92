@@ -14,6 +14,7 @@ import { LinksPage } from "@/components/pages/LinksPage";
 import { StatutePage } from "@/components/pages/StatutePage";
 import { PlaceholderPage } from "@/components/pages/PlaceholderPage";
 import { ReportsPage } from "@/components/pages/ReportsPage";
+import { RequestsPage } from "@/components/pages/RequestsPage";
 
 const pageConfig = {
   home: { title: "Início", component: HomePage, type: "home" as const },
@@ -21,7 +22,7 @@ const pageConfig = {
   benefits: { title: "Vantagens", component: BenefitsPage, type: "regular" as const },
   instructions: { title: "Instruções", component: InstructionsPage, type: "regular" as const },
   statute: { title: "Estatuto", component: StatutePage, type: "regular" as const },
-  requests: { title: "Requerimentos", component: PlaceholderPage, icon: FileText, type: "placeholder" as const },
+  requests: { title: "Requerimentos", component: RequestsPage, type: "regular" as const },
   reports: { title: "Relatórios", component: ReportsPage, type: "regular" as const },
   admin: { title: "Administração", component: PlaceholderPage, icon: Settings, type: "placeholder" as const },
   contact: { title: "Localização e Contato", component: ContactPage, type: "regular" as const },
@@ -100,6 +101,9 @@ const Index = () => {
           )}
           {currentPageConfig.type === "regular" && currentPage === "statute" && (
             <StatutePage />
+          )}
+          {currentPageConfig.type === "regular" && currentPage === "requests" && (
+            <RequestsPage />
           )}
           {currentPageConfig.type === "regular" && currentPage === "reports" && (
             <ReportsPage />

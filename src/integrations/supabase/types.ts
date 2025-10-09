@@ -523,6 +523,54 @@ export type Database = {
         }
         Relationships: []
       }
+      requerimentos: {
+        Row: {
+          created_at: string
+          dados: Json
+          email: string
+          id: string
+          matricula: number
+          nome_solicitante: string
+          observacoes_admin: string | null
+          respondido_em: string | null
+          respondido_por_sigla: string | null
+          status: string
+          telefone: string | null
+          tipo: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dados: Json
+          email: string
+          id?: string
+          matricula: number
+          nome_solicitante: string
+          observacoes_admin?: string | null
+          respondido_em?: string | null
+          respondido_por_sigla?: string | null
+          status?: string
+          telefone?: string | null
+          tipo: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dados?: Json
+          email?: string
+          id?: string
+          matricula?: number
+          nome_solicitante?: string
+          observacoes_admin?: string | null
+          respondido_em?: string | null
+          respondido_por_sigla?: string | null
+          status?: string
+          telefone?: string | null
+          tipo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       senhas: {
         Row: {
           cpf: string

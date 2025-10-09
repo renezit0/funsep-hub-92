@@ -1,5 +1,5 @@
 import React from "react";
-import { LayoutDashboard, Users, UserPlus, Shield, Key, Newspaper, FileText, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, UserPlus, Shield, Key, Newspaper, FileText, LogOut, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AdminSession } from "@/services/adminAuth";
 import { AdminPageType } from "@/pages/AdminDashboard";
@@ -36,9 +36,13 @@ const navigation = [{
   label: 'Notícias',
   icon: Newspaper
 }, {
+  id: 'requerimentos' as AdminPageType,
+  label: 'Requerimentos',
+  icon: FileText
+}, {
   id: 'relatorios' as AdminPageType,
   label: 'Relatórios',
-  icon: FileText
+  icon: BarChart3
 }];
 export function AdminSidebar({
   currentPage,

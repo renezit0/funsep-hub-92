@@ -7,6 +7,7 @@ export interface AdminUser {
   cargo: string;
   secao: string;
   status?: string;
+  matricula?: number;
 }
 
 export interface AdminSession {
@@ -80,7 +81,8 @@ class AdminAuthService {
         sigla: `BEN-${user.matricula}`,
         nome: user.nome || senhaRecord.nome,
         cargo: 'ASSOCIADO',
-        secao: 'ASSOCIADOS'
+        secao: 'ASSOCIADOS',
+        matricula: user.matricula
       });
     } catch (error) {
       return { success: false, error: 'Erro interno do servidor' };
