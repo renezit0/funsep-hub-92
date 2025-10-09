@@ -56,7 +56,7 @@ export function Sidebar({ currentPage, onPageChange, onLoginClick, isOpen, onTog
         <div className="p-6 border-b border-sidebar-border">
           <div className="flex items-center justify-center">
             <img 
-              src="/lovable-uploads/e548bfa7-21ab-4b35-866a-211b0aaa1135.png" 
+              src="/images/e548bfa7-21ab-4b35-866a-211b0aaa1135.png" 
               alt="FUNSEP" 
               className="h-12 w-auto"
             />
