@@ -391,7 +391,7 @@ export type Database = {
         }
         Relationships: []
       }
-      irpfd: {
+      irpftb: {
         Row: {
           ano: number | null
           guiaboleto: string | null
