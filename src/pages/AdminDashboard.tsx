@@ -28,6 +28,16 @@ export default function AdminDashboard() {
       }
       
       const currentSession = adminAuth.getSession();
+      
+      // CRITICAL SECURITY CHECK: Verify user is actually an admin
+      const adminRoles = ['GERENTE', 'DESENVOLVEDOR', 'ANALISTA DE SISTEMAS'];
+      if (!currentSession || !adminRoles.includes(currentSession.user.cargo)) {
+        console.error('Unauthorized access attempt to admin panel');
+        await adminAuth.logout();
+        navigate('/');
+        return;
+      }
+      
       setSession(currentSession);
     };
 
