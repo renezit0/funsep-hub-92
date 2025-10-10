@@ -112,7 +112,7 @@ export function NewsPage() {
               <img
                 src={selectedNoticia.imagem_url}
                 alt={selectedNoticia.titulo}
-                className="w-full h-64 md:h-96 object-cover rounded-lg mt-6"
+                className="w-full h-auto rounded-lg mt-6"
               />
             )}
           </CardContent>
@@ -166,7 +166,7 @@ export function NewsPage() {
                         <img
                           src={noticia.imagem_url}
                           alt={noticia.titulo}
-                          className="w-full h-48 object-cover rounded-lg"
+                          className="w-full h-auto rounded-lg"
                         />
                       </div>
                     )}

@@ -101,7 +101,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
               <img
                 src={selectedNoticia.imagem_url}
                 alt={selectedNoticia.titulo}
-                className="w-full h-64 md:h-96 object-cover rounded-lg mt-6"
+                className="w-full h-auto rounded-lg mt-6"
               />
             )}
           </CardContent>
