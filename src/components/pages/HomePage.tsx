@@ -71,41 +71,39 @@ export function HomePage({ onNavigate }: HomePageProps) {
         </Button>
 
         <Card>
-          <CardContent className="p-0">
+          <CardContent className="p-6 md:p-8">
+            <div className="flex flex-wrap items-center gap-4 mb-6">
+              <Badge className={`${getCategoryColor(selectedNoticia.categoria)} text-white`}>
+                {selectedNoticia.categoria}
+              </Badge>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Calendar className="h-4 w-4" />
+                {format(new Date(selectedNoticia.data_publicacao), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+              </div>
+            </div>
+            
+            <h1 className="text-3xl md:text-4xl font-bold mb-6 text-foreground">
+              {selectedNoticia.titulo}
+            </h1>
+            
+            <div 
+              className="prose prose-lg max-w-none dark:prose-invert
+                prose-headings:text-foreground 
+                prose-p:text-foreground/90 
+                prose-a:text-primary 
+                prose-strong:text-foreground
+                prose-ul:text-foreground/90
+                prose-ol:text-foreground/90 mb-6"
+              dangerouslySetInnerHTML={{ __html: selectedNoticia.conteudo }}
+            />
+            
             {selectedNoticia.imagem_url && (
               <img
                 src={selectedNoticia.imagem_url}
                 alt={selectedNoticia.titulo}
-                className="w-full h-64 md:h-96 object-cover rounded-t-lg"
+                className="w-full h-64 md:h-96 object-cover rounded-lg mt-6"
               />
             )}
-            
-            <div className="p-6 md:p-8">
-              <div className="flex flex-wrap items-center gap-4 mb-6">
-                <Badge className={`${getCategoryColor(selectedNoticia.categoria)} text-white`}>
-                  {selectedNoticia.categoria}
-                </Badge>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Calendar className="h-4 w-4" />
-                  {format(new Date(selectedNoticia.data_publicacao), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
-                </div>
-              </div>
-              
-              <h1 className="text-3xl md:text-4xl font-bold mb-6 text-foreground">
-                {selectedNoticia.titulo}
-              </h1>
-              
-              <div 
-                className="prose prose-lg max-w-none dark:prose-invert
-                  prose-headings:text-foreground 
-                  prose-p:text-foreground/90 
-                  prose-a:text-primary 
-                  prose-strong:text-foreground
-                  prose-ul:text-foreground/90
-                  prose-ol:text-foreground/90"
-                dangerouslySetInnerHTML={{ __html: selectedNoticia.conteudo }}
-              />
-            </div>
           </CardContent>
         </Card>
       </div>
