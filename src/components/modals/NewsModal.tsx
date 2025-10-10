@@ -2,14 +2,15 @@ import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Upload, X, Image as ImageIcon } from "lucide-react";
+import { X, Image as ImageIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 interface NewsModalProps {
   isOpen: boolean;
@@ -24,6 +25,25 @@ const categorias = [
   "Benefícios",
   "Tecnologia",
   "Geral"
+];
+
+const modules = {
+  toolbar: [
+    [{ 'header': [1, 2, 3, false] }],
+    ['bold', 'italic', 'underline', 'strike'],
+    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+    [{ 'align': [] }],
+    ['link'],
+    ['clean']
+  ],
+};
+
+const formats = [
+  'header',
+  'bold', 'italic', 'underline', 'strike',
+  'list', 'bullet',
+  'align',
+  'link'
 ];
 
 export function NewsModal({ isOpen, onClose, onSuccess, editingNews }: NewsModalProps) {
@@ -93,7 +113,6 @@ export function NewsModal({ isOpen, onClose, onSuccess, editingNews }: NewsModal
     try {
       let imagemUrl = editingNews?.imagem_url || null;
 
-      // Upload da nova imagem se selecionada
       if (imageFile) {
         imagemUrl = await uploadImage(imageFile);
         if (!imagemUrl) {
@@ -106,7 +125,6 @@ export function NewsModal({ isOpen, onClose, onSuccess, editingNews }: NewsModal
         }
       }
 
-      // Verificar se há sessão administrativa ativa
       if (!session?.sigla) {
         toast({
           title: "Erro",
@@ -160,7 +178,7 @@ export function NewsModal({ isOpen, onClose, onSuccess, editingNews }: NewsModal
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {editingNews ? "Editar Notícia" : "Nova Notícia"}
@@ -196,25 +214,27 @@ export function NewsModal({ isOpen, onClose, onSuccess, editingNews }: NewsModal
           </div>
 
           <div>
-            <Label htmlFor="resumo">Resumo</Label>
-            <Textarea
+            <Label htmlFor="resumo">Resumo (usado na lista de notícias)</Label>
+            <Input
               id="resumo"
               value={formData.resumo}
               onChange={(e) => setFormData(prev => ({ ...prev, resumo: e.target.value }))}
-              rows={3}
               required
             />
           </div>
 
           <div>
             <Label htmlFor="conteudo">Conteúdo</Label>
-            <Textarea
-              id="conteudo"
-              value={formData.conteudo}
-              onChange={(e) => setFormData(prev => ({ ...prev, conteudo: e.target.value }))}
-              rows={6}
-              required
-            />
+            <div className="bg-background border rounded-md">
+              <ReactQuill
+                theme="snow"
+                value={formData.conteudo}
+                onChange={(value) => setFormData(prev => ({ ...prev, conteudo: value }))}
+                modules={modules}
+                formats={formats}
+                className="min-h-[300px]"
+              />
+            </div>
           </div>
 
           <div>
@@ -225,7 +245,7 @@ export function NewsModal({ isOpen, onClose, onSuccess, editingNews }: NewsModal
                   <img
                     src={imagePreview}
                     alt="Preview"
-                    className="w-32 h-32 object-cover rounded-lg border"
+                    className="w-full max-w-md h-48 object-cover rounded-lg border"
                   />
                   <Button
                     type="button"

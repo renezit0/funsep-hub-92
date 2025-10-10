@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Newspaper, Calendar } from "lucide-react";
+import { Newspaper, Calendar, ArrowLeft } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import 'react-quill/dist/quill.snow.css';
 
 interface Noticia {
   id: string;
@@ -21,6 +22,7 @@ interface Noticia {
 export function NewsPage() {
   const [noticias, setNoticias] = useState<Noticia[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedNoticia, setSelectedNoticia] = useState<Noticia | null>(null);
 
   useEffect(() => {
     loadNoticias();
@@ -66,6 +68,62 @@ export function NewsPage() {
     );
   }
 
+  // Visualização de notícia individual
+  if (selectedNoticia) {
+    return (
+      <div className="space-y-6">
+        <Button 
+          variant="ghost" 
+          onClick={() => setSelectedNoticia(null)}
+          className="gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Voltar para notícias
+        </Button>
+
+        <Card>
+          <CardContent className="p-0">
+            {selectedNoticia.imagem_url && (
+              <img
+                src={selectedNoticia.imagem_url}
+                alt={selectedNoticia.titulo}
+                className="w-full h-64 md:h-96 object-cover rounded-t-lg"
+              />
+            )}
+            
+            <div className="p-6 md:p-8">
+              <div className="flex flex-wrap items-center gap-4 mb-6">
+                <Badge className={`${getCategoryColor(selectedNoticia.categoria)} text-white`}>
+                  {selectedNoticia.categoria}
+                </Badge>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Calendar className="h-4 w-4" />
+                  {format(new Date(selectedNoticia.data_publicacao), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                </div>
+              </div>
+              
+              <h1 className="text-3xl md:text-4xl font-bold mb-6 text-foreground">
+                {selectedNoticia.titulo}
+              </h1>
+              
+              <div 
+                className="prose prose-lg max-w-none dark:prose-invert
+                  prose-headings:text-foreground 
+                  prose-p:text-foreground/90 
+                  prose-a:text-primary 
+                  prose-strong:text-foreground
+                  prose-ul:text-foreground/90
+                  prose-ol:text-foreground/90"
+                dangerouslySetInnerHTML={{ __html: selectedNoticia.conteudo }}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Lista de notícias
   return (
     <div className="space-y-8">
       <Card>
@@ -115,7 +173,11 @@ export function NewsPage() {
                       {noticia.resumo}
                     </p>
                     
-                    <Button variant="link" className="p-0 h-auto text-primary">
+                    <Button 
+                      variant="link" 
+                      className="p-0 h-auto text-primary"
+                      onClick={() => setSelectedNoticia(noticia)}
+                    >
                       Leia mais
                     </Button>
                   </CardContent>

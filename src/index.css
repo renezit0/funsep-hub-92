@@ -180,3 +180,66 @@ All colors MUST be HSL.
     display: none;             /* Chrome, Safari and Opera */
   }
 }
+
+/* React Quill Editor Customization */
+@layer components {
+  .ql-container {
+    @apply border-border;
+    font-family: inherit;
+  }
+  
+  .ql-toolbar {
+    @apply border-border bg-muted/30;
+    border-radius: 0.5rem 0.5rem 0 0;
+  }
+  
+  .ql-editor {
+    @apply min-h-[300px] text-foreground;
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+  
+  .ql-editor.ql-blank::before {
+    @apply text-muted-foreground;
+    font-style: normal;
+  }
+  
+  .ql-snow .ql-stroke {
+    @apply stroke-foreground;
+  }
+  
+  .ql-snow .ql-fill {
+    @apply fill-foreground;
+  }
+  
+  .ql-snow .ql-picker-label {
+    @apply text-foreground;
+  }
+  
+  .ql-toolbar button:hover,
+  .ql-toolbar button:focus {
+    @apply bg-accent;
+  }
+  
+  .ql-toolbar button.ql-active {
+    @apply bg-primary/10;
+  }
+  
+  .ql-snow.ql-toolbar button:hover .ql-stroke,
+  .ql-snow .ql-toolbar button:hover .ql-stroke,
+  .ql-snow.ql-toolbar button:focus .ql-stroke,
+  .ql-snow .ql-toolbar button:focus .ql-stroke,
+  .ql-snow.ql-toolbar button.ql-active .ql-stroke,
+  .ql-snow .ql-toolbar button.ql-active .ql-stroke {
+    @apply stroke-primary;
+  }
+  
+  .ql-snow.ql-toolbar button:hover .ql-fill,
+  .ql-snow .ql-toolbar button:hover .ql-fill,
+  .ql-snow.ql-toolbar button:focus .ql-fill,
+  .ql-snow .ql-toolbar button:focus .ql-fill,
+  .ql-snow.ql-toolbar button.ql-active .ql-fill,
+  .ql-snow .ql-toolbar button.ql-active .ql-fill {
+    @apply fill-primary;
+  }
+}

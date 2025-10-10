@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
-import { Users, Hospital, Heart, ArrowRight } from "lucide-react";
+import { Users, Hospital, Heart, ArrowRight, Calendar, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import 'react-quill/dist/quill.snow.css';
 
 interface HomePageProps {
   onNavigate: (page: string) => void;
@@ -14,12 +16,15 @@ interface Noticia {
   id: string;
   titulo: string;
   resumo: string;
+  conteudo: string;
   categoria: string;
+  imagem_url: string | null;
   data_publicacao: string;
 }
 
 export function HomePage({ onNavigate }: HomePageProps) {
   const [noticias, setNoticias] = useState<Noticia[]>([]);
+  const [selectedNoticia, setSelectedNoticia] = useState<Noticia | null>(null);
 
   useEffect(() => {
     loadNoticias();
@@ -29,7 +34,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
     try {
       const { data, error } = await supabase
         .from('noticias')
-        .select('id, titulo, resumo, categoria, data_publicacao')
+        .select('*')
         .eq('publicado', true)
         .order('data_publicacao', { ascending: false })
         .limit(3);
@@ -43,15 +48,71 @@ export function HomePage({ onNavigate }: HomePageProps) {
 
   const getCategoryColor = (categoria: string) => {
     const colors: Record<string, string> = {
-      'Saúde': 'bg-primary text-primary-foreground',
-      'Informativo': 'bg-blue-500 text-white',
-      'Benefícios': 'bg-green-500 text-white',
-      'Tecnologia': 'bg-purple-500 text-white',
-      'Geral': 'bg-gray-500 text-white'
+      'Saúde': 'bg-primary',
+      'Informativo': 'bg-blue-500',
+      'Benefícios': 'bg-green-500',
+      'Tecnologia': 'bg-purple-500',
+      'Geral': 'bg-gray-500'
     };
-    return colors[categoria] || 'bg-gray-500 text-white';
+    return colors[categoria] || 'bg-gray-500';
   };
 
+  // Visualização de notícia individual
+  if (selectedNoticia) {
+    return (
+      <div className="space-y-6">
+        <Button 
+          variant="ghost" 
+          onClick={() => setSelectedNoticia(null)}
+          className="gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Voltar para início
+        </Button>
+
+        <Card>
+          <CardContent className="p-0">
+            {selectedNoticia.imagem_url && (
+              <img
+                src={selectedNoticia.imagem_url}
+                alt={selectedNoticia.titulo}
+                className="w-full h-64 md:h-96 object-cover rounded-t-lg"
+              />
+            )}
+            
+            <div className="p-6 md:p-8">
+              <div className="flex flex-wrap items-center gap-4 mb-6">
+                <Badge className={`${getCategoryColor(selectedNoticia.categoria)} text-white`}>
+                  {selectedNoticia.categoria}
+                </Badge>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Calendar className="h-4 w-4" />
+                  {format(new Date(selectedNoticia.data_publicacao), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                </div>
+              </div>
+              
+              <h1 className="text-3xl md:text-4xl font-bold mb-6 text-foreground">
+                {selectedNoticia.titulo}
+              </h1>
+              
+              <div 
+                className="prose prose-lg max-w-none dark:prose-invert
+                  prose-headings:text-foreground 
+                  prose-p:text-foreground/90 
+                  prose-a:text-primary 
+                  prose-strong:text-foreground
+                  prose-ul:text-foreground/90
+                  prose-ol:text-foreground/90"
+                dangerouslySetInnerHTML={{ __html: selectedNoticia.conteudo }}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Página inicial normal
   return (
     <div className="space-y-8">
       {/* Welcome Section */}
@@ -109,9 +170,9 @@ export function HomePage({ onNavigate }: HomePageProps) {
               {noticias.map((noticia) => (
                 <div key={noticia.id} className="p-4 border rounded-lg border-border hover:bg-accent/50 transition-colors">
                   <div className="flex gap-3 mb-3 text-xs">
-                    <span className={`px-2 py-1 rounded font-medium ${getCategoryColor(noticia.categoria)}`}>
+                    <Badge className={`${getCategoryColor(noticia.categoria)} text-white`}>
                       {noticia.categoria}
-                    </span>
+                    </Badge>
                     <span className="text-muted-foreground">
                       {format(new Date(noticia.data_publicacao), "dd 'de' MMMM, yyyy", { locale: ptBR })}
                     </span>
@@ -122,7 +183,11 @@ export function HomePage({ onNavigate }: HomePageProps) {
                   <p className="text-sm text-muted-foreground mb-3">
                     {noticia.resumo.length > 120 ? `${noticia.resumo.substring(0, 120)}...` : noticia.resumo}
                   </p>
-                  <Button variant="link" className="p-0 h-auto text-primary">
+                  <Button 
+                    variant="link" 
+                    className="p-0 h-auto text-primary"
+                    onClick={() => setSelectedNoticia(noticia)}
+                  >
                     Leia mais
                   </Button>
                 </div>
