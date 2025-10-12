@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface User {
   sigla: string;
@@ -36,6 +37,7 @@ interface EditUserModalProps {
 }
 
 export function EditUserModal({ user, open, onOpenChange, onUserUpdated }: EditUserModalProps) {
+  const { session } = useAuth();
   const [formData, setFormData] = useState<User>(user || {
     sigla: "",
     nome: "",
@@ -45,6 +47,8 @@ export function EditUserModal({ user, open, onOpenChange, onUserUpdated }: EditU
     status: "ATIVO"
   });
   const [loading, setLoading] = useState(false);
+  
+  const isDeveloper = session?.user?.cargo === 'DESENVOLVEDOR';
 
   React.useEffect(() => {
     if (user) {
@@ -57,15 +61,26 @@ export function EditUserModal({ user, open, onOpenChange, onUserUpdated }: EditU
     setLoading(true);
 
     try {
+      const updateData: any = {
+        nome: formData.nome,
+        cargo: formData.cargo,
+        secao: formData.secao,
+      };
+
+      // Apenas desenvolvedores podem alterar a sigla
+      if (isDeveloper && formData.sigla !== user?.sigla) {
+        updateData.sigla = formData.sigla.toUpperCase();
+      }
+
+      // Só atualizar senha se foi alterada
+      if (formData.senha && formData.senha !== user?.senha) {
+        updateData.senha = formData.senha;
+      }
+
       const { error } = await supabase
         .from('usuarios')
-        .update({
-          nome: formData.nome,
-          cargo: formData.cargo,
-          secao: formData.secao,
-          ...(formData.senha && formData.senha !== user?.senha ? { senha: formData.senha } : {})
-        })
-        .eq('sigla', formData.sigla);
+        .update(updateData)
+        .eq('sigla', user?.sigla || formData.sigla);
 
       if (error) throw error;
 
@@ -98,9 +113,16 @@ export function EditUserModal({ user, open, onOpenChange, onUserUpdated }: EditU
             <Input
               id="sigla"
               value={formData.sigla}
-              disabled
-              className="bg-muted"
+              onChange={(e) => setFormData({ ...formData, sigla: e.target.value.toUpperCase() })}
+              disabled={!isDeveloper}
+              className={!isDeveloper ? "bg-muted" : ""}
+              maxLength={10}
             />
+            {isDeveloper && (
+              <p className="text-xs text-muted-foreground">
+                Apenas desenvolvedores podem alterar a sigla
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
