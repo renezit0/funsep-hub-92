@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,7 +28,7 @@ export function BeneficiariesPage() {
   const [hasSearched, setHasSearched] = useState(false);
   const [selectedBeneficiary, setSelectedBeneficiary] = useState<Beneficiary | null>(null);
 
-  const searchBeneficiaries = async () => {
+  const searchBeneficiaries = useCallback(async () => {
     if (!searchTerm.trim()) {
       setBeneficiaries([]);
       setHasSearched(false);
@@ -73,7 +73,7 @@ export function BeneficiariesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchTerm, statusFilter]);
 
   useEffect(() => {
     const delayedSearch = setTimeout(() => {
@@ -81,7 +81,7 @@ export function BeneficiariesPage() {
     }, 500);
 
     return () => clearTimeout(delayedSearch);
-  }, [searchTerm, statusFilter]);
+  }, [searchBeneficiaries]);
 
   const getStatusBadge = (situacao: number) => {
     switch (situacao) {
