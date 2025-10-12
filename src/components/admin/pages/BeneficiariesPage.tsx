@@ -116,16 +116,6 @@ export function BeneficiariesPage() {
   // Filtros já aplicados na query, não precisamos filtrar novamente
   const filteredBeneficiaries = beneficiaries || [];
 
-  if (loading) {
-    return (
-      <div className="space-y-4 sm:space-y-6">
-        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Associados</h1>
-        <div className="flex items-center justify-center h-32 sm:h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-4 sm:space-y-6">
