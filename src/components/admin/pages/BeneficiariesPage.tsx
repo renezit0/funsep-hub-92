@@ -78,7 +78,7 @@ export function BeneficiariesPage() {
   useEffect(() => {
     const delayedSearch = setTimeout(() => {
       searchBeneficiaries();
-    }, 500);
+    }, 800); // Aumentado para 800ms para dar mais tempo
 
     return () => clearTimeout(delayedSearch);
   }, [searchTerm, statusFilter]);
