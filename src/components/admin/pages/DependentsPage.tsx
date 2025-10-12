@@ -24,7 +24,7 @@ export function DependentsPage() {
   const [dependents, setDependents] = useState<Dependent[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<number | null>(null);
+  const [statusFilter, setStatusFilter] = useState<number | null>(1);
   const [hasSearched, setHasSearched] = useState(false);
 
   const searchDependents = async () => {
