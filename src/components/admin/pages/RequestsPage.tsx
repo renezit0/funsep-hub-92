@@ -29,15 +29,25 @@ interface Requerimento {
 
 export function RequestsPage() {
   const [requerimentos, setRequerimentos] = useState<Requerimento[]>([]);
+  const [filteredRequerimentos, setFilteredRequerimentos] = useState<Requerimento[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] = useState<Requerimento | null>(null);
   const [newStatus, setNewStatus] = useState("");
   const [observacoes, setObservacoes] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("PENDENTE");
   const { toast } = useToast();
 
   useEffect(() => {
     loadRequests();
   }, []);
+
+  useEffect(() => {
+    if (statusFilter === "TODOS") {
+      setFilteredRequerimentos(requerimentos);
+    } else {
+      setFilteredRequerimentos(requerimentos.filter(r => r.status === statusFilter));
+    }
+  }, [requerimentos, statusFilter]);
 
   const loadRequests = async () => {
     setIsLoading(true);
@@ -194,8 +204,28 @@ export function RequestsPage() {
         </p>
       </div>
 
+      <div className="flex items-center gap-4 mb-6">
+        <Label>Filtrar por Status:</Label>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="TODOS">Todos</SelectItem>
+            <SelectItem value="PENDENTE">Pendentes</SelectItem>
+            <SelectItem value="EM_ANALISE">Em Análise</SelectItem>
+            <SelectItem value="APROVADO">Aprovados</SelectItem>
+            <SelectItem value="NEGADO">Negados</SelectItem>
+            <SelectItem value="CANCELADO">Cancelados</SelectItem>
+          </SelectContent>
+        </Select>
+        <span className="text-sm text-muted-foreground">
+          ({filteredRequerimentos.length} {filteredRequerimentos.length === 1 ? 'requerimento' : 'requerimentos'})
+        </span>
+      </div>
+
       <div className="grid gap-4">
-        {requerimentos.length === 0 ? (
+        {filteredRequerimentos.length === 0 ? (
           <Card>
             <CardContent className="p-6">
               <p className="text-muted-foreground text-center">
@@ -204,7 +234,7 @@ export function RequestsPage() {
             </CardContent>
           </Card>
         ) : (
-          requerimentos.map((req) => (
+          filteredRequerimentos.map((req) => (
             <Card key={req.id}>
               <CardHeader>
                 <div className="flex items-start justify-between">
@@ -239,49 +269,120 @@ export function RequestsPage() {
                   )}
                 </div>
                 
-                {req.tipo === "inclusao_associado" && req.dados && (
-                  <div className="bg-muted p-3 rounded-md space-y-2 text-sm">
-                    <p className="font-medium">Dados do Requerimento - Inclusão de Associado:</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {req.dados.dtnasc && <div><span className="font-medium">Data Nasc:</span> {req.dados.dtnasc}</div>}
-                      {req.dados.sexo && <div><span className="font-medium">Sexo:</span> {req.dados.sexo}</div>}
-                      {req.dados.nomemae && <div><span className="font-medium">Nome da Mãe:</span> {req.dados.nomemae}</div>}
-                      {req.dados.identidade && <div><span className="font-medium">RG:</span> {req.dados.identidade}</div>}
-                      {req.dados.endereco && <div className="col-span-2"><span className="font-medium">Endereço:</span> {req.dados.endereco}, {req.dados.numero} - {req.dados.bairro}</div>}
-                      {req.dados.cidade && <div><span className="font-medium">Cidade/UF:</span> {req.dados.cidade}/{req.dados.uf}</div>}
-                      {req.dados.cep && <div><span className="font-medium">CEP:</span> {req.dados.cep}</div>}
-                      {req.dados.cargo && <div><span className="font-medium">Cargo:</span> {req.dados.cargo}</div>}
-                      {req.dados.matrfunc && <div><span className="font-medium">Matrícula TJ:</span> {req.dados.matrfunc}</div>}
-                      {req.dados.pispasep && <div><span className="font-medium">PIS/PASEP:</span> {req.dados.pispasep}</div>}
-                      {req.dados.tipacomoda && <div><span className="font-medium">Acomodação:</span> {req.dados.tipacomoda}</div>}
+                <div className="bg-muted/30 p-3 rounded-md space-y-3 text-sm">
+                  <p className="font-semibold text-base">Detalhes do Requerimento:</p>
+                  
+                  {req.tipo === "inclusao_associado" && req.dados && (
+                    <div className="space-y-2">
+                      <p className="font-medium text-primary">Inclusão de Associado</p>
+                      <div className="grid grid-cols-2 gap-2 pl-2">
+                        {req.dados.cpf && <div><span className="font-medium">CPF:</span> {req.dados.cpf}</div>}
+                        {req.dados.dtnasc && <div><span className="font-medium">Data Nasc:</span> {req.dados.dtnasc}</div>}
+                        {req.dados.sexo && <div><span className="font-medium">Sexo:</span> {req.dados.sexo}</div>}
+                        {req.dados.estcivil && <div><span className="font-medium">Estado Civil:</span> {req.dados.estcivil}</div>}
+                        {req.dados.nomemae && <div className="col-span-2"><span className="font-medium">Nome da Mãe:</span> {req.dados.nomemae}</div>}
+                        {req.dados.identidade && <div><span className="font-medium">RG:</span> {req.dados.identidade}</div>}
+                        {req.dados.orgemi && <div><span className="font-medium">Órgão Emissor:</span> {req.dados.orgemi}</div>}
+                        {req.dados.dtemirg && <div><span className="font-medium">Data Emissão RG:</span> {req.dados.dtemirg}</div>}
+                        {req.dados.endereco && <div className="col-span-2"><span className="font-medium">Endereço:</span> {req.dados.endereco}, {req.dados.numero}{req.dados.complemento ? ` - ${req.dados.complemento}` : ''} - {req.dados.bairro}</div>}
+                        {req.dados.cidade && <div><span className="font-medium">Cidade/UF:</span> {req.dados.cidade}/{req.dados.uf}</div>}
+                        {req.dados.cep && <div><span className="font-medium">CEP:</span> {req.dados.cep}</div>}
+                        {req.dados.telefone_res && <div><span className="font-medium">Tel. Residencial:</span> {req.dados.telefone_res}</div>}
+                        {req.dados.telefone_com && <div><span className="font-medium">Tel. Comercial:</span> {req.dados.telefone_com}</div>}
+                        {req.dados.cargo && <div><span className="font-medium">Cargo:</span> {req.dados.cargo}</div>}
+                        {req.dados.localtrab && <div><span className="font-medium">Local Trabalho:</span> {req.dados.localtrab}</div>}
+                        {req.dados.matrfunc && <div><span className="font-medium">Matrícula TJ:</span> {req.dados.matrfunc}</div>}
+                        {req.dados.pispasep && <div><span className="font-medium">PIS/PASEP:</span> {req.dados.pispasep}</div>}
+                        {req.dados.banco && <div><span className="font-medium">Banco:</span> {req.dados.banco}</div>}
+                        {req.dados.agencia && <div><span className="font-medium">Agência:</span> {req.dados.agencia}</div>}
+                        {req.dados.contacorr && <div><span className="font-medium">Conta:</span> {req.dados.contacorr}</div>}
+                        {req.dados.tipacomoda && <div><span className="font-medium">Acomodação:</span> {req.dados.tipacomoda}</div>}
+                      </div>
+                      {req.dados.dependentes && req.dados.dependentes.length > 0 && (
+                        <div className="mt-3 pt-3 border-t">
+                          <p className="font-medium mb-2">Dependentes ({req.dados.dependentes.length}):</p>
+                          {req.dados.dependentes.map((dep: any, idx: number) => (
+                            <div key={idx} className="ml-4 mb-2 p-2 bg-background/50 rounded">
+                              <p className="font-medium text-sm">{idx + 1}. {dep.nome_dep}</p>
+                              <div className="grid grid-cols-3 gap-1 text-xs mt-1">
+                                {dep.parent_dep && <div>Parentesco: {dep.parent_dep}</div>}
+                                {dep.sexo_dep && <div>Sexo: {dep.sexo_dep}</div>}
+                                {dep.dtnasc_dep && <div>Nasc: {dep.dtnasc_dep}</div>}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {req.tipo === "requerimento_reembolso" && req.dados && (
-                  <div className="bg-muted p-3 rounded-md space-y-2 text-sm">
-                    <p className="font-medium">Dados do Reembolso:</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {req.dados.cartao_unimed && <div><span className="font-medium">Cartão Unimed:</span> {req.dados.cartao_unimed}</div>}
-                      {req.dados.nome_beneficiario && <div><span className="font-medium">Beneficiário:</span> {req.dados.nome_beneficiario}</div>}
-                      {req.dados.motivo && <div><span className="font-medium">Motivo:</span> {req.dados.motivo}</div>}
-                      {req.dados.valor && <div><span className="font-medium">Valor:</span> R$ {req.dados.valor}</div>}
-                      {req.dados.titular_conta && <div><span className="font-medium">Titular Conta:</span> {req.dados.titular_conta}</div>}
-                      {req.dados.banco_reemb && <div><span className="font-medium">Banco:</span> {req.dados.banco_reemb}</div>}
-                      {req.dados.agencia_reemb && <div><span className="font-medium">Agência:</span> {req.dados.agencia_reemb}</div>}
-                      {req.dados.conta_reemb && <div><span className="font-medium">Conta:</span> {req.dados.conta_reemb}</div>}
+                  {req.tipo === "inclusao_dependente" && req.dados && (
+                    <div className="space-y-2">
+                      <p className="font-medium text-primary">Inclusão de Dependente</p>
+                      <div className="grid grid-cols-2 gap-2 pl-2">
+                        {req.dados.nome_dependente && <div className="col-span-2"><span className="font-medium">Nome:</span> {req.dados.nome_dependente}</div>}
+                        {req.dados.cpf_dependente && <div><span className="font-medium">CPF:</span> {req.dados.cpf_dependente}</div>}
+                        {req.dados.dtnasc_dependente && <div><span className="font-medium">Data Nasc:</span> {req.dados.dtnasc_dependente}</div>}
+                        {req.dados.nomemae_dependente && <div className="col-span-2"><span className="font-medium">Nome da Mãe:</span> {req.dados.nomemae_dependente}</div>}
+                        {req.dados.tipacomoda && <div><span className="font-medium">Acomodação:</span> {req.dados.tipacomoda}</div>}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {req.dados?.descricao && (
-                  <div>
-                    <p className="text-sm font-medium mb-1">Descrição:</p>
-                    <p className="text-sm text-muted-foreground">
-                      {req.dados.descricao}
-                    </p>
-                  </div>
-                )}
+                  {req.tipo === "inclusao_recem_nascido" && req.dados && (
+                    <div className="space-y-2">
+                      <p className="font-medium text-primary">Inclusão de Recém-Nascido</p>
+                      <div className="grid grid-cols-2 gap-2 pl-2">
+                        {req.dados.nome_recem_nascido && <div className="col-span-2"><span className="font-medium">Nome:</span> {req.dados.nome_recem_nascido}</div>}
+                        {req.dados.data_nascimento && <div><span className="font-medium">Data Nascimento:</span> {req.dados.data_nascimento}</div>}
+                        {req.dados.tipacomoda && <div><span className="font-medium">Acomodação:</span> {req.dados.tipacomoda}</div>}
+                      </div>
+                    </div>
+                  )}
+
+                  {req.tipo === "exclusao_dependente" && req.dados && (
+                    <div className="space-y-2">
+                      <p className="font-medium text-primary">Exclusão de Dependente</p>
+                      <div className="grid grid-cols-2 gap-2 pl-2">
+                        {req.dados.nome_dependente_excluir && <div className="col-span-2"><span className="font-medium">Dependente:</span> {req.dados.nome_dependente_excluir}</div>}
+                      </div>
+                    </div>
+                  )}
+
+                  {req.tipo === "requerimento_21_anos" && req.dados && (
+                    <div className="space-y-2">
+                      <p className="font-medium text-primary">Permanência 21 Anos</p>
+                      <div className="grid grid-cols-2 gap-2 pl-2">
+                        {req.dados.nome_dependente && <div className="col-span-2"><span className="font-medium">Dependente:</span> {req.dados.nome_dependente}</div>}
+                        {req.dados.dtnasc_dependente && <div><span className="font-medium">Data Nasc:</span> {req.dados.dtnasc_dependente}</div>}
+                      </div>
+                    </div>
+                  )}
+
+                  {req.tipo === "requerimento_reembolso" && req.dados && (
+                    <div className="space-y-2">
+                      <p className="font-medium text-primary">Requerimento de Reembolso</p>
+                      <div className="grid grid-cols-2 gap-2 pl-2">
+                        {req.dados.cartao_unimed && <div><span className="font-medium">Cartão Unimed:</span> {req.dados.cartao_unimed}</div>}
+                        {req.dados.nome_beneficiario && <div><span className="font-medium">Beneficiário:</span> {req.dados.nome_beneficiario}</div>}
+                        {req.dados.motivo && <div className="col-span-2"><span className="font-medium">Motivo:</span> {req.dados.motivo}</div>}
+                        {req.dados.valor && <div><span className="font-medium">Valor:</span> R$ {req.dados.valor}</div>}
+                        {req.dados.titular_conta && <div className="col-span-2"><span className="font-medium">Titular Conta:</span> {req.dados.titular_conta}</div>}
+                        {req.dados.banco_reemb && <div><span className="font-medium">Banco:</span> {req.dados.banco_reemb}</div>}
+                        {req.dados.agencia_reemb && <div><span className="font-medium">Agência:</span> {req.dados.agencia_reemb}</div>}
+                        {req.dados.conta_reemb && <div><span className="font-medium">Conta:</span> {req.dados.conta_reemb}</div>}
+                      </div>
+                    </div>
+                  )}
+
+                  {req.dados?.descricao && (
+                    <div className="space-y-1">
+                      <p className="font-medium text-primary">Descrição:</p>
+                      <p className="text-sm pl-2">{req.dados.descricao}</p>
+                    </div>
+                  )}
+                </div>
+
                 {req.observacoes_admin && (
                   <div className="bg-muted p-3 rounded-md">
                     <p className="text-sm font-medium mb-1">Observações da Administração:</p>

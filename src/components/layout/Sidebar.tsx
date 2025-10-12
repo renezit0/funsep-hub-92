@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Home, Newspaper, Star, Book, Gavel, FileText, BarChart3, Settings, Mail, MapPin, Heart, ExternalLink, User, LogIn, Shield, LogOut } from "lucide-react";
+import { Home, Newspaper, Star, Book, Gavel, FileText, BarChart3, Settings, Mail, MapPin, Heart, ExternalLink, User, LogIn, Shield, LogOut, ClipboardList } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import funsepLogo from "@/assets/funsep-logo.png";
@@ -20,6 +20,7 @@ const navigation = [
   { id: "instructions", label: "Instruções", icon: Book },
   { id: "statute", label: "Estatuto", icon: Gavel },
   { id: "requests", label: "Requerimentos", icon: FileText },
+  { id: "myRequests", label: "Meus Requerimentos", icon: ClipboardList, requiresAuth: true },
   { id: "reports", label: "Relatórios", icon: BarChart3 },
   { id: "admin", label: "Administração", icon: Settings },
   { id: "contact", label: "Localização e Contato", icon: MapPin },
@@ -68,6 +69,11 @@ export function Sidebar({ currentPage, onPageChange, onLoginClick, isOpen, onTog
           {navigation.map((item) => {
             const Icon = item.icon;
             const isActive = currentPage === item.id;
+            
+            // Esconder "Meus Requerimentos" se não estiver logado
+            if (item.requiresAuth && !isAuthenticated) {
+              return null;
+            }
             
             // Handle admin redirect
             if (item.id === "admin") {

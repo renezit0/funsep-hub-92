@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Book, Gavel, FileText, BarChart3, Settings } from "lucide-react";
+import { Book, Gavel, FileText, BarChart3, Settings, ClipboardList } from "lucide-react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { LoginModal } from "@/components/modals/LoginModal";
@@ -15,6 +15,7 @@ import { StatutePage } from "@/components/pages/StatutePage";
 import { PlaceholderPage } from "@/components/pages/PlaceholderPage";
 import { ReportsPage } from "@/components/pages/ReportsPage";
 import { RequestsPage } from "@/components/pages/RequestsPage";
+import { MyRequestsPage } from "@/components/pages/MyRequestsPage";
 
 const pageConfig = {
   home: { title: "Início", component: HomePage, type: "home" as const },
@@ -23,6 +24,7 @@ const pageConfig = {
   instructions: { title: "Instruções", component: InstructionsPage, type: "regular" as const },
   statute: { title: "Estatuto", component: StatutePage, type: "regular" as const },
   requests: { title: "Requerimentos", component: RequestsPage, type: "regular" as const },
+  myRequests: { title: "Meus Requerimentos", component: MyRequestsPage, type: "regular" as const },
   reports: { title: "Relatórios", component: ReportsPage, type: "regular" as const },
   admin: { title: "Administração", component: PlaceholderPage, icon: Settings, type: "placeholder" as const },
   contact: { title: "Localização e Contato", component: ContactPage, type: "regular" as const },
@@ -104,6 +106,9 @@ const Index = () => {
           )}
           {currentPageConfig.type === "regular" && currentPage === "requests" && (
             <RequestsPage />
+          )}
+          {currentPageConfig.type === "regular" && currentPage === "myRequests" && (
+            <MyRequestsPage />
           )}
           {currentPageConfig.type === "regular" && currentPage === "reports" && (
             <ReportsPage />

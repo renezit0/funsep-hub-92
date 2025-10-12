@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserData } from "@/hooks/useUserData";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -41,6 +42,7 @@ const requestTypes = [
 
 export function RequestsPage() {
   const { session } = useAuth();
+  const { userData, isLoading: isLoadingUserData } = useUserData();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedType, setSelectedType] = useState("");
@@ -51,6 +53,42 @@ export function RequestsPage() {
     telefone: "",
     documentos: [],
   });
+
+  // Preencher dados automaticamente quando userData estiver disponível
+  useEffect(() => {
+    if (userData?.cadben && session) {
+      setFormData((prev: any) => ({
+        ...prev,
+        nome: userData.cadben.nome || session.user?.nome || "",
+        matricula: userData.cadben.matricula || session.user?.matricula || "",
+        email: userData.cadben.email || prev.email,
+        telefone: userData.cadben.telefone || userData.cadben.telefone1 || prev.telefone,
+        cpf: userData.cadben.cpf || "",
+        dtnasc: userData.cadben.dtnasc || "",
+        sexo: userData.cadben.sexo || "",
+        nomemae: userData.cadben.nomemae || "",
+        identidade: userData.cadben.identidade || "",
+        orgemi: userData.cadben.orgemi || "",
+        dtemirg: userData.cadben.dtemirg || "",
+        endereco: userData.cadben.endereco || "",
+        numero: userData.cadben.numero || "",
+        complemento: userData.cadben.complemento || "",
+        bairro: userData.cadben.bairro || "",
+        cidade: userData.cadben.cidade || "",
+        uf: userData.cadben.uf || "",
+        cep: userData.cadben.cep || "",
+        cargo: userData.cadben.cargo || "",
+        localtrab: userData.cadben.localtrab || "",
+        matrfunc: userData.cadben.matnoipe || "",
+        pispasep: userData.cadben.pispasep || "",
+        banco: userData.cadben.banco || "",
+        agencia: userData.cadben.agencia || "",
+        contacorr: userData.cadben.contacorr || "",
+        tipacomoda: userData.cadben.tipacomoda || "",
+        dependentes: userData.dependentes || [],
+      }));
+    }
+  }, [userData, session]);
 
   const updateFormData = (field: string, value: any) => {
     setFormData({ ...formData, [field]: value });
