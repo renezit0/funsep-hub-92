@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Search, UserCog, Shield, UserCheck, UserX } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface User {
   sigla: string;
@@ -17,9 +18,13 @@ interface User {
 }
 
 export function UsersPage() {
+  const { session } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  
+  const canManageUsers = session?.user?.cargo && 
+    ['GERENTE', 'DESENVOLVEDOR', 'ANALISTA DE SISTEMAS'].includes(session.user.cargo);
 
   useEffect(() => {
     loadUsers();
@@ -149,25 +154,27 @@ export function UsersPage() {
                     </div>
                   </div>
                   
-                  <div className="ml-4">
-                    <Button
-                      size="sm"
-                      variant={user.status === 'ATIVO' ? 'destructive' : 'default'}
-                      onClick={() => toggleUserStatus(user.sigla, user.status || 'ATIVO')}
-                    >
-                      {user.status === 'ATIVO' ? (
-                        <>
-                          <UserX className="h-4 w-4 mr-1" />
-                          Inativar
-                        </>
-                      ) : (
-                        <>
-                          <UserCheck className="h-4 w-4 mr-1" />
-                          Ativar
-                        </>
-                      )}
-                    </Button>
-                  </div>
+                  {canManageUsers && (
+                    <div className="ml-4">
+                      <Button
+                        size="sm"
+                        variant={user.status === 'ATIVO' ? 'destructive' : 'default'}
+                        onClick={() => toggleUserStatus(user.sigla, user.status || 'ATIVO')}
+                      >
+                        {user.status === 'ATIVO' ? (
+                          <>
+                            <UserX className="h-4 w-4 mr-1" />
+                            Inativar
+                          </>
+                        ) : (
+                          <>
+                            <UserCheck className="h-4 w-4 mr-1" />
+                            Ativar
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
