@@ -527,6 +527,7 @@ export type Database = {
         Row: {
           created_at: string
           dados: Json
+          documentos: Json | null
           email: string
           id: string
           matricula: number
@@ -542,6 +543,7 @@ export type Database = {
         Insert: {
           created_at?: string
           dados: Json
+          documentos?: Json | null
           email: string
           id?: string
           matricula: number
@@ -557,6 +559,7 @@ export type Database = {
         Update: {
           created_at?: string
           dados?: Json
+          documentos?: Json | null
           email?: string
           id?: string
           matricula?: number

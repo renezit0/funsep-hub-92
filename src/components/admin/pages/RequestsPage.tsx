@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, Clock, CheckCircle, XCircle, Eye } from "lucide-react";
+import { FileText, Clock, CheckCircle, XCircle, Eye, Download, ExternalLink } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 
@@ -24,6 +24,7 @@ interface Requerimento {
   updated_at: string;
   respondido_por_sigla: string | null;
   respondido_em: string | null;
+  documentos: any;
 }
 
 export function RequestsPage() {
@@ -131,6 +132,46 @@ export function RequestsPage() {
       termo_opcao: "Termo de Opção",
     };
     return labels[tipo] || tipo;
+  };
+
+  const renderDocumentos = (documentos: Array<{ tipo: string; url: string; nome: string }> | null) => {
+    if (!documentos || documentos.length === 0) {
+      return <p className="text-sm text-muted-foreground">Nenhum documento anexado</p>;
+    }
+
+    const labelMap: Record<string, string> = {
+      rg_cpf: "RG e CPF",
+      comprovante_endereco: "Comprovante de Endereço",
+      contracheque: "Contracheque",
+      certidao_casamento: "Certidão de Casamento/União Estável",
+      nota_fiscal: "Nota Fiscal/Recibo",
+      comprovante_pagamento: "Comprovante de Pagamento",
+      documento_geral: "Documento Anexo",
+    };
+
+    return (
+      <div className="space-y-2">
+        {documentos.map((doc, idx) => (
+          <div key={idx} className="flex items-center justify-between p-2 border rounded-md bg-muted/50">
+            <div className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              <span className="text-sm font-medium">{labelMap[doc.tipo] || doc.tipo}</span>
+              <span className="text-xs text-muted-foreground">({doc.nome})</span>
+            </div>
+            <div className="flex gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => window.open(doc.url, '_blank')}
+                title="Abrir em nova aba"
+              >
+                <ExternalLink className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
   };
 
   if (isLoading) {
@@ -247,6 +288,12 @@ export function RequestsPage() {
                     <p className="text-sm">{req.observacoes_admin}</p>
                   </div>
                 )}
+                {req.documentos && req.documentos.length > 0 && (
+                  <div className="bg-muted p-3 rounded-md">
+                    <p className="text-sm font-medium mb-2">Documentos Anexados:</p>
+                    {renderDocumentos(req.documentos)}
+                  </div>
+                )}
                 <Button
                   onClick={() => {
                     setSelectedRequest(req);
@@ -275,6 +322,14 @@ export function RequestsPage() {
           </DialogHeader>
           {selectedRequest && (
             <div className="space-y-4">
+              {selectedRequest.documentos && selectedRequest.documentos.length > 0 && (
+                <div>
+                  <Label>Documentos Anexados</Label>
+                  <div className="mt-2">
+                    {renderDocumentos(selectedRequest.documentos)}
+                  </div>
+                </div>
+              )}
               <div>
                 <Label>Status</Label>
                 <Select value={newStatus} onValueChange={setNewStatus}>

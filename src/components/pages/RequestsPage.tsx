@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { FileText, Send, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { RequestDocumentUpload } from "@/components/RequestDocumentUpload";
 
 const requestTypes = [
   { value: "exclusao_associado", label: "Exclusão de Associado", requiresLogin: true },
@@ -17,7 +18,7 @@ const requestTypes = [
   { value: "inclusao_associado", label: "Inclusão de Associado", requiresLogin: false },
   { value: "inclusao_dependente", label: "Inclusão de Dependente", requiresLogin: true },
   { value: "inclusao_recem_nascido", label: "Inclusão de Recém-Nascido", requiresLogin: true },
-  { value: "inscricao_pensionista", label: "Inscrição como Pensionista", requiresLogin: false },
+  { value: "inscricao_pensionista", label: "Inscrição como Pensionista", requiresLogin: true },
   { value: "requerimento_21_anos", label: "Requerimento - 21 Anos", requiresLogin: true },
   { value: "requerimento_auxilio_saude", label: "Requerimento para Auxílio Saúde", requiresLogin: true },
   { value: "requerimento_diversos", label: "Requerimento - Diversos", requiresLogin: true },
@@ -37,10 +38,35 @@ export function RequestsPage() {
     matricula: session?.user?.matricula || "",
     email: "",
     telefone: "",
+    documentos: [],
   });
 
   const updateFormData = (field: string, value: any) => {
     setFormData({ ...formData, [field]: value });
+  };
+
+  const handleDocumentUpload = (docType: string, url: string, fileName: string) => {
+    const docs = formData.documentos || [];
+    if (url) {
+      // Adicionar ou atualizar documento
+      const existingIndex = docs.findIndex((d: any) => d.tipo === docType);
+      if (existingIndex >= 0) {
+        docs[existingIndex] = { tipo: docType, url, nome: fileName };
+      } else {
+        docs.push({ tipo: docType, url, nome: fileName });
+      }
+    } else {
+      // Remover documento
+      const filtered = docs.filter((d: any) => d.tipo !== docType);
+      setFormData({ ...formData, documentos: filtered });
+      return;
+    }
+    setFormData({ ...formData, documentos: docs });
+  };
+
+  const getDocument = (docType: string) => {
+    const docs = formData.documentos || [];
+    return docs.find((d: any) => d.tipo === docType);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -76,6 +102,7 @@ export function RequestsPage() {
         email: formData.email,
         telefone: formData.telefone,
         dados: formData,
+        documentos: formData.documentos || [],
         status: "PENDENTE",
       });
 
@@ -93,6 +120,7 @@ export function RequestsPage() {
         matricula: session?.user?.matricula || "",
         email: "",
         telefone: "",
+        documentos: [],
       });
     } catch (error) {
       console.error("Error submitting request:", error);
@@ -287,6 +315,37 @@ export function RequestsPage() {
                 rows={3}
               />
             </div>
+
+            <div className="border-t pt-4 space-y-4">
+              <h3 className="font-semibold">Documentos Obrigatórios</h3>
+              <RequestDocumentUpload
+                label="RG e CPF (cópia autenticada)"
+                required
+                requestType="inclusao_associado"
+                onUpload={(url, name) => handleDocumentUpload("rg_cpf", url, name)}
+                currentFile={getDocument("rg_cpf")}
+              />
+              <RequestDocumentUpload
+                label="Comprovante de Endereço Atualizado"
+                required
+                requestType="inclusao_associado"
+                onUpload={(url, name) => handleDocumentUpload("comprovante_endereco", url, name)}
+                currentFile={getDocument("comprovante_endereco")}
+              />
+              <RequestDocumentUpload
+                label="Contracheque"
+                required
+                requestType="inclusao_associado"
+                onUpload={(url, name) => handleDocumentUpload("contracheque", url, name)}
+                currentFile={getDocument("contracheque")}
+              />
+              <RequestDocumentUpload
+                label="Certidão de Casamento/União Estável (se aplicável)"
+                requestType="inclusao_associado"
+                onUpload={(url, name) => handleDocumentUpload("certidao_casamento", url, name)}
+                currentFile={getDocument("certidao_casamento")}
+              />
+            </div>
           </div>
         );
 
@@ -403,6 +462,24 @@ export function RequestsPage() {
                 </SelectContent>
               </Select>
             </div>
+
+            <div className="border-t pt-4 space-y-4">
+              <h3 className="font-semibold">Documentos Obrigatórios</h3>
+              <RequestDocumentUpload
+                label="Nota Fiscal ou Recibo (com CNPJ ou CPF)"
+                required
+                requestType="requerimento_reembolso"
+                onUpload={(url, name) => handleDocumentUpload("nota_fiscal", url, name)}
+                currentFile={getDocument("nota_fiscal")}
+              />
+              <RequestDocumentUpload
+                label="Comprovante de Pagamento"
+                required
+                requestType="requerimento_reembolso"
+                onUpload={(url, name) => handleDocumentUpload("comprovante_pagamento", url, name)}
+                currentFile={getDocument("comprovante_pagamento")}
+              />
+            </div>
           </div>
         );
 
@@ -417,6 +494,16 @@ export function RequestsPage() {
                 placeholder="Descreva detalhadamente seu requerimento..."
                 rows={6}
                 required
+              />
+            </div>
+
+            <div className="border-t pt-4 space-y-4">
+              <h3 className="font-semibold">Documentos Comprobatórios</h3>
+              <RequestDocumentUpload
+                label="Documento Anexo (se necessário)"
+                requestType={selectedType}
+                onUpload={(url, name) => handleDocumentUpload("documento_geral", url, name)}
+                currentFile={getDocument("documento_geral")}
               />
             </div>
           </div>
