@@ -117,14 +117,13 @@ export function EditUserModal({ user, open, onOpenChange, onUserUpdated }: EditU
           <div className="space-y-2">
             <Label htmlFor="cargo">Cargo</Label>
             <Select
-              value={formData.cargo}
+              value={formData.cargo || undefined}
               onValueChange={(value) => setFormData({ ...formData, cargo: value })}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione um cargo" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Sem cargo</SelectItem>
                 <SelectItem value="GERENTE">Gerente</SelectItem>
                 <SelectItem value="DESENVOLVEDOR">Desenvolvedor</SelectItem>
                 <SelectItem value="ANALISTA DE SISTEMAS">Analista de Sistemas</SelectItem>
