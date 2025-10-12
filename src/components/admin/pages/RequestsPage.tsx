@@ -191,13 +191,56 @@ export function RequestsPage() {
                     <span className="font-medium">Enviado em:</span>{" "}
                     {new Date(req.created_at).toLocaleString("pt-BR")}
                   </div>
+                  {req.dados?.cpf && (
+                    <div>
+                      <span className="font-medium">CPF:</span> {req.dados.cpf}
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <p className="text-sm font-medium mb-1">Descrição:</p>
-                  <p className="text-sm text-muted-foreground">
-                    {req.dados?.descricao || "Sem descrição"}
-                  </p>
-                </div>
+                
+                {req.tipo === "inclusao_associado" && req.dados && (
+                  <div className="bg-muted p-3 rounded-md space-y-2 text-sm">
+                    <p className="font-medium">Dados do Requerimento - Inclusão de Associado:</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {req.dados.dtnasc && <div><span className="font-medium">Data Nasc:</span> {req.dados.dtnasc}</div>}
+                      {req.dados.sexo && <div><span className="font-medium">Sexo:</span> {req.dados.sexo}</div>}
+                      {req.dados.nomemae && <div><span className="font-medium">Nome da Mãe:</span> {req.dados.nomemae}</div>}
+                      {req.dados.identidade && <div><span className="font-medium">RG:</span> {req.dados.identidade}</div>}
+                      {req.dados.endereco && <div className="col-span-2"><span className="font-medium">Endereço:</span> {req.dados.endereco}, {req.dados.numero} - {req.dados.bairro}</div>}
+                      {req.dados.cidade && <div><span className="font-medium">Cidade/UF:</span> {req.dados.cidade}/{req.dados.uf}</div>}
+                      {req.dados.cep && <div><span className="font-medium">CEP:</span> {req.dados.cep}</div>}
+                      {req.dados.cargo && <div><span className="font-medium">Cargo:</span> {req.dados.cargo}</div>}
+                      {req.dados.matrfunc && <div><span className="font-medium">Matrícula TJ:</span> {req.dados.matrfunc}</div>}
+                      {req.dados.pispasep && <div><span className="font-medium">PIS/PASEP:</span> {req.dados.pispasep}</div>}
+                      {req.dados.tipacomoda && <div><span className="font-medium">Acomodação:</span> {req.dados.tipacomoda}</div>}
+                    </div>
+                  </div>
+                )}
+
+                {req.tipo === "requerimento_reembolso" && req.dados && (
+                  <div className="bg-muted p-3 rounded-md space-y-2 text-sm">
+                    <p className="font-medium">Dados do Reembolso:</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {req.dados.cartao_unimed && <div><span className="font-medium">Cartão Unimed:</span> {req.dados.cartao_unimed}</div>}
+                      {req.dados.nome_beneficiario && <div><span className="font-medium">Beneficiário:</span> {req.dados.nome_beneficiario}</div>}
+                      {req.dados.motivo && <div><span className="font-medium">Motivo:</span> {req.dados.motivo}</div>}
+                      {req.dados.valor && <div><span className="font-medium">Valor:</span> R$ {req.dados.valor}</div>}
+                      {req.dados.titular_conta && <div><span className="font-medium">Titular Conta:</span> {req.dados.titular_conta}</div>}
+                      {req.dados.banco_reemb && <div><span className="font-medium">Banco:</span> {req.dados.banco_reemb}</div>}
+                      {req.dados.agencia_reemb && <div><span className="font-medium">Agência:</span> {req.dados.agencia_reemb}</div>}
+                      {req.dados.conta_reemb && <div><span className="font-medium">Conta:</span> {req.dados.conta_reemb}</div>}
+                    </div>
+                  </div>
+                )}
+
+                {req.dados?.descricao && (
+                  <div>
+                    <p className="text-sm font-medium mb-1">Descrição:</p>
+                    <p className="text-sm text-muted-foreground">
+                      {req.dados.descricao}
+                    </p>
+                  </div>
+                )}
                 {req.observacoes_admin && (
                   <div className="bg-muted p-3 rounded-md">
                     <p className="text-sm font-medium mb-1">Observações da Administração:</p>
