@@ -3,12 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, UserCog, Shield, Pencil, UserPlus } from "lucide-react";
+import { Search, UserCog, Shield, Pencil, UserPlus, Filter } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { EditUserModal } from "@/components/modals/EditUserModal";
 import { AddUserModal } from "@/components/modals/AddUserModal";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 interface User {
   sigla: string;
@@ -27,6 +29,7 @@ export function UsersPage() {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [showInactive, setShowInactive] = useState(false);
   
   const canManageUsers = session?.user?.cargo && 
     ['GERENTE', 'DESENVOLVEDOR', 'ANALISTA DE SISTEMAS'].includes(session.user.cargo);
@@ -57,8 +60,8 @@ export function UsersPage() {
   };
 
   const filteredUsers = users.filter(user => {
-    // Filtrar apenas usuários ativos
-    if (user.status !== 'ATIVO') return false;
+    // Filtrar por status (mostrar inativos apenas se o toggle estiver ativo)
+    if (!showInactive && user.status !== 'ATIVO') return false;
     
     return searchTerm === "" || 
       user.nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -90,7 +93,7 @@ export function UsersPage() {
         </p>
       </div>
 
-      <div className="flex gap-4 items-center">
+      <div className="flex gap-4 items-center flex-wrap">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -99,6 +102,17 @@ export function UsersPage() {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
           />
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <Switch
+            id="show-inactive"
+            checked={showInactive}
+            onCheckedChange={setShowInactive}
+          />
+          <Label htmlFor="show-inactive" className="cursor-pointer">
+            Mostrar inativos
+          </Label>
         </div>
         
         {canManageUsers && (
