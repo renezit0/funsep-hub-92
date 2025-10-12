@@ -58,7 +58,12 @@ export function BeneficiariesPage() {
 
       // Aplicar filtro de status se selecionado
       if (statusFilter !== null) {
-        query = query.eq('situacao', statusFilter);
+        if (statusFilter === 1) {
+          // Ativos e Reativados
+          query = query.in('situacao', [1, 2]);
+        } else {
+          query = query.eq('situacao', statusFilter);
+        }
       }
 
       query = query.order('nome').limit(100);
