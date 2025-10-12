@@ -3,10 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, UserCog, Shield, UserCheck, UserX } from "lucide-react";
+import { Search, UserCog, Shield, UserCheck, UserX, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { EditUserModal } from "@/components/modals/EditUserModal";
 
 interface User {
   sigla: string;
@@ -22,6 +23,8 @@ export function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
   const canManageUsers = session?.user?.cargo && 
     ['GERENTE', 'DESENVOLVEDOR', 'ANALISTA DE SISTEMAS'].includes(session.user.cargo);
@@ -69,6 +72,11 @@ export function UsersPage() {
       console.error('Erro ao alterar status do usuário:', error);
       toast.error('Erro ao alterar status do usuário');
     }
+  };
+
+  const handleEditUser = (user: User) => {
+    setEditingUser(user);
+    setIsEditModalOpen(true);
   };
 
   const filteredUsers = users.filter(user => {
@@ -155,7 +163,15 @@ export function UsersPage() {
                   </div>
                   
                   {canManageUsers && (
-                    <div className="ml-4">
+                    <div className="ml-4 flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleEditUser(user)}
+                      >
+                        <Pencil className="h-4 w-4 mr-1" />
+                        Editar
+                      </Button>
                       <Button
                         size="sm"
                         variant={user.status === 'ATIVO' ? 'destructive' : 'default'}
@@ -187,6 +203,13 @@ export function UsersPage() {
           </div>
         </CardContent>
       </Card>
+
+      <EditUserModal
+        user={editingUser}
+        open={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        onUserUpdated={loadUsers}
+      />
     </div>
   );
 }
