@@ -3,11 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, UserCog, Shield, UserCheck, UserX, Pencil } from "lucide-react";
+import { Search, UserCog, Shield, UserCheck, UserX, Pencil, UserPlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { EditUserModal } from "@/components/modals/EditUserModal";
+import { AddUserModal } from "@/components/modals/AddUserModal";
 
 interface User {
   sigla: string;
@@ -25,6 +26,7 @@ export function UsersPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   
   const canManageUsers = session?.user?.cargo && 
     ['GERENTE', 'DESENVOLVEDOR', 'ANALISTA DE SISTEMAS'].includes(session.user.cargo);
@@ -120,6 +122,13 @@ export function UsersPage() {
             className="pl-10"
           />
         </div>
+        
+        {canManageUsers && (
+          <Button onClick={() => setIsAddModalOpen(true)}>
+            <UserPlus className="h-4 w-4 mr-2" />
+            Adicionar Usuário
+          </Button>
+        )}
       </div>
 
       <Card>
@@ -209,6 +218,12 @@ export function UsersPage() {
         open={isEditModalOpen}
         onOpenChange={setIsEditModalOpen}
         onUserUpdated={loadUsers}
+      />
+
+      <AddUserModal
+        open={isAddModalOpen}
+        onOpenChange={setIsAddModalOpen}
+        onUserAdded={loadUsers}
       />
     </div>
   );
