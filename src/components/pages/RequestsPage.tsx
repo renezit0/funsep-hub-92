@@ -13,6 +13,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { RequestDocumentUpload } from "@/components/RequestDocumentUpload";
 import { ExclusaoAssociadoForm } from "@/components/requests/ExclusaoAssociadoForm";
 import { ExclusaoDependenteForm } from "@/components/requests/ExclusaoDependenteForm";
+import { InclusaoAssociadoForm } from "@/components/requests/InclusaoAssociadoForm";
 import { InclusaoDependenteForm } from "@/components/requests/InclusaoDependenteForm";
 import { InclusaoRecemNascidoForm } from "@/components/requests/InclusaoRecemNascidoForm";
 import { InscricaoPensionistaForm } from "@/components/requests/InscricaoPensionistaForm";
@@ -160,47 +161,7 @@ export function RequestsPage() {
         return <ExclusaoDependenteForm {...props} />;
       
       case "inclusao_associado":
-        return (
-          <div className="space-y-4">
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                Taxa de inscrição: R$ 30,00 por pessoa. Prazos de carência: Consultas (30 dias), Exames diagnósticos (3 meses), Internamentos/cirurgias (6 meses), Parto (10 meses).
-              </AlertDescription>
-            </Alert>
-...
-            <div className="border-t pt-4 space-y-4">
-              <h3 className="font-semibold">Documentos Obrigatórios</h3>
-              <RequestDocumentUpload
-                label="RG e CPF (cópia autenticada)"
-                required
-                requestType="inclusao_associado"
-                onUpload={(url, name) => handleDocumentUpload("rg_cpf", url, name)}
-                currentFile={getDocument("rg_cpf")}
-              />
-              <RequestDocumentUpload
-                label="Comprovante de Endereço Atualizado"
-                required
-                requestType="inclusao_associado"
-                onUpload={(url, name) => handleDocumentUpload("comprovante_endereco", url, name)}
-                currentFile={getDocument("comprovante_endereco")}
-              />
-              <RequestDocumentUpload
-                label="Contracheque"
-                required
-                requestType="inclusao_associado"
-                onUpload={(url, name) => handleDocumentUpload("contracheque", url, name)}
-                currentFile={getDocument("contracheque")}
-              />
-              <RequestDocumentUpload
-                label="Certidão de Casamento/União Estável (se aplicável)"
-                requestType="inclusao_associado"
-                onUpload={(url, name) => handleDocumentUpload("certidao_casamento", url, name)}
-                currentFile={getDocument("certidao_casamento")}
-              />
-            </div>
-          </div>
-        );
+        return <InclusaoAssociadoForm {...props} />;
       
       case "inclusao_dependente":
         return <InclusaoDependenteForm {...props} />;
