@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, UserCog, Shield, UserCheck, UserX, Pencil, UserPlus } from "lucide-react";
+import { Search, UserCog, Shield, Pencil, UserPlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -51,37 +51,15 @@ export function UsersPage() {
     }
   };
 
-  const toggleUserStatus = async (sigla: string, currentStatus: string) => {
-    try {
-      const newStatus = currentStatus === 'ATIVO' ? 'INATIVO' : 'ATIVO';
-      
-      const { error } = await supabase
-        .from('usuarios')
-        .update({ status: newStatus })
-        .eq('sigla', sigla);
-
-      if (error) throw error;
-
-      // Atualizar a lista local
-      setUsers(users.map(user => 
-        user.sigla === sigla 
-          ? { ...user, status: newStatus }
-          : user
-      ));
-
-      toast.success(`Usuário ${newStatus.toLowerCase()} com sucesso!`);
-    } catch (error) {
-      console.error('Erro ao alterar status do usuário:', error);
-      toast.error('Erro ao alterar status do usuário');
-    }
-  };
-
   const handleEditUser = (user: User) => {
     setEditingUser(user);
     setIsEditModalOpen(true);
   };
 
   const filteredUsers = users.filter(user => {
+    // Filtrar apenas usuários ativos
+    if (user.status !== 'ATIVO') return false;
+    
     return searchTerm === "" || 
       user.nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.sigla?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -172,7 +150,7 @@ export function UsersPage() {
                   </div>
                   
                   {canManageUsers && (
-                    <div className="ml-4 flex gap-2">
+                    <div className="ml-4">
                       <Button
                         size="sm"
                         variant="outline"
@@ -180,23 +158,6 @@ export function UsersPage() {
                       >
                         <Pencil className="h-4 w-4 mr-1" />
                         Editar
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant={user.status === 'ATIVO' ? 'destructive' : 'default'}
-                        onClick={() => toggleUserStatus(user.sigla, user.status || 'ATIVO')}
-                      >
-                        {user.status === 'ATIVO' ? (
-                          <>
-                            <UserX className="h-4 w-4 mr-1" />
-                            Inativar
-                          </>
-                        ) : (
-                          <>
-                            <UserCheck className="h-4 w-4 mr-1" />
-                            Ativar
-                          </>
-                        )}
                       </Button>
                     </div>
                   )}

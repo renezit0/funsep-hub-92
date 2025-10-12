@@ -49,6 +49,8 @@ export function EditUserModal({ user, open, onOpenChange, onUserUpdated }: EditU
   const [loading, setLoading] = useState(false);
   
   const isDeveloper = session?.user?.cargo === 'DESENVOLVEDOR';
+  const canManageUsers = session?.user?.cargo && 
+    ['GERENTE', 'DESENVOLVEDOR', 'ANALISTA DE SISTEMAS'].includes(session.user.cargo);
 
   React.useEffect(() => {
     if (user) {
@@ -65,6 +67,7 @@ export function EditUserModal({ user, open, onOpenChange, onUserUpdated }: EditU
         nome: formData.nome,
         cargo: formData.cargo,
         secao: formData.secao,
+        status: formData.status,
       };
 
       // Apenas desenvolvedores podem alterar a sigla
@@ -176,6 +179,24 @@ export function EditUserModal({ user, open, onOpenChange, onUserUpdated }: EditU
               maxLength={50}
             />
           </div>
+
+          {canManageUsers && (
+            <div className="space-y-2">
+              <Label htmlFor="status">Status do Usuário</Label>
+              <Select
+                value={formData.status}
+                onValueChange={(value) => setFormData({ ...formData, status: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ATIVO">Ativo</SelectItem>
+                  <SelectItem value="INATIVO">Inativo</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="flex gap-2 justify-end">
             <Button
