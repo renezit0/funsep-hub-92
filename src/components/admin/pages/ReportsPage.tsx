@@ -51,6 +51,7 @@ export function ReportsPage() {
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [reportType, setReportType] = useState<'a_pagar' | 'pagos' | 'ir'>('a_pagar');
   const [selectedBeneficiary, setSelectedBeneficiary] = useState<Beneficiary | null>(null);
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [dateRange, setDateRange] = useState({
     dataInicio: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
     dataFim: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().split('T')[0]
@@ -494,9 +495,10 @@ export function ReportsPage() {
                 <Label htmlFor="ano">Ano:</Label>
                 <select
                   id="ano"
-                  value={new Date(dateRange.dataInicio).getFullYear()}
+                  value={selectedYear}
                   onChange={(e) => {
-                    const ano = e.target.value;
+                    const ano = parseInt(e.target.value);
+                    setSelectedYear(ano);
                     setDateRange({
                       dataInicio: `${ano}-01-01`,
                       dataFim: `${ano}-12-31`
