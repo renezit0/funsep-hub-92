@@ -239,21 +239,28 @@ async function generateIRReport(supabase: any, beneficiary: any, matricula: numb
       .select('*')
       .eq('matricula', matricula)
       .eq('ano', anoExercicio) // Buscar pelo ano do exercício
-      .or('nrodep.eq.0,nrodep.eq."0",nrodep.is.null') // Titular: 0, "0" ou null
       
-      console.log('IRPFD Titular - Dados encontrados:', irTitularIRPFD)
+      console.log('IRPFD TODOS OS DADOS - Dados encontrados:', irTitularIRPFD)
+      console.log('IRPFD - Quantidade de registros:', irTitularIRPFD?.length)
       
       if (!irTitularIRPFDError && irTitularIRPFD && irTitularIRPFD.length > 0) {
+        // Filtrar apenas o titular (nrodep = "0" ou vazio)
+        const dadosTitular = irTitularIRPFD.filter((item: any) => 
+          item.nrodep === '0' || item.nrodep === 0 || !item.nrodep || item.nrodep === ''
+        )
+        
+        console.log('IRPFD - Dados do titular filtrados:', dadosTitular)
+        
         // Usar dados do IRPFD
-        totalTitularMensalidade = irTitularIRPFD.reduce((acc: number, item: any) => {
+        totalTitularMensalidade = dadosTitular.reduce((acc: number, item: any) => {
           const vlmen = Number(item.vlmen) || Number(item.ment) || 0
-          console.log('IRPFD - Mensalidade item:', vlmen)
+          console.log('IRPFD - Mensalidade item:', vlmen, 'nrodep:', item.nrodep)
           return acc + vlmen
         }, 0)
         
-        totalTitularGuia = irTitularIRPFD.reduce((acc: number, item: any) => {
+        totalTitularGuia = dadosTitular.reduce((acc: number, item: any) => {
           const vlguia = Number(item.vlguia) || 0
-          console.log('IRPFD - Guia item:', vlguia)
+          console.log('IRPFD - Guia item:', vlguia, 'nrodep:', item.nrodep)
           return acc + vlguia
         }, 0)
         
@@ -272,20 +279,26 @@ async function generateIRReport(supabase: any, beneficiary: any, matricula: numb
           .select('*')
           .eq('matricula', matricula)
           .eq('ano', anoExercicio) // Buscar pelo ano do exercício
-          .or('nrodep.eq.0,nrodep.eq."0",nrodep.is.null') // Titular: 0, "0" ou null
         
-        console.log('IRPFT Titular - Dados encontrados:', irTitular)
+        console.log('IRPFT TODOS OS DADOS - Dados encontrados:', irTitular)
         
         if (!irTitularError && irTitular && irTitular.length > 0) {
-          totalTitularMensalidade = irTitular.reduce((acc: number, item: any) => {
+          // Filtrar apenas o titular
+          const dadosTitular = irTitular.filter((item: any) => 
+            item.nrodep === '0' || item.nrodep === 0 || !item.nrodep || item.nrodep === ''
+          )
+          
+          console.log('IRPFT - Dados do titular filtrados:', dadosTitular)
+          
+          totalTitularMensalidade = dadosTitular.reduce((acc: number, item: any) => {
             const vlmen = Number(item.vlmen) || Number(item.ment) || 0
-            console.log('IRPFT - Mensalidade item:', vlmen)
+            console.log('IRPFT - Mensalidade item:', vlmen, 'nrodep:', item.nrodep)
             return acc + vlmen
           }, 0)
           
-          totalTitularGuia = irTitular.reduce((acc: number, item: any) => {
+          totalTitularGuia = dadosTitular.reduce((acc: number, item: any) => {
             const vlguia = Number(item.vlguia) || Number(item.guiat) || 0
-            console.log('IRPFT - Guia item:', vlguia)
+            console.log('IRPFT - Guia item:', vlguia, 'nrodep:', item.nrodep)
             return acc + vlguia
           }, 0)
           
@@ -323,14 +336,17 @@ async function generateIRReport(supabase: any, beneficiary: any, matricula: numb
         .select('*')
         .eq('matricula', matricula)
         .eq('ano', anoExercicio) // Buscar pelo ano do exercício
-        .not('nrodep', 'in', '(0,"0")') // Excluir o titular
-        .not('nrodep', 'is', null) // Excluir nulos
+      
+      console.log('IRPFD Dependentes - Todos os dados:', irDependentesData)
       
       if (irDependentesError) {
         console.error('Erro ao buscar IR dependentes:', irDependentesError)
       } else {
-        irDependentes = irDependentesData || []
-        console.log('IR Dependentes encontrado:', irDependentes)
+        // Filtrar apenas dependentes (excluir titular)
+        irDependentes = (irDependentesData || []).filter((item: any) => 
+          item.nrodep && item.nrodep !== '0' && item.nrodep !== 0 && item.nrodep !== ''
+        )
+        console.log('IR Dependentes filtrado:', irDependentes)
       }
     } catch (err) {
       console.error('Erro na consulta IRPFD dependentes:', err)
