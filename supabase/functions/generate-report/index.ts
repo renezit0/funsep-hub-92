@@ -1097,7 +1097,8 @@ function formatCurrencyText(value: number): string {
   }
   
   if (integerPart === 0) {
-    return `zero reais e ${decimalPart.toString().padStart(2, '0')} centavos`
+    const centavosTexto = decimalPart === 0 ? 'zero' : numeroParaTexto(decimalPart)
+    return `zero reais e ${centavosTexto} centavos`
   }
   
   let resultado = ''
@@ -1138,7 +1139,10 @@ function formatCurrencyText(value: number): string {
   }
   
   resultado += integerPart === 1 ? ' real' : ' reais'
-  resultado += ` e ${decimalPart.toString().padStart(2, '0')} centavos`
+  
+  // Centavos por extenso
+  const centavosTexto = decimalPart === 0 ? 'zero' : numeroParaTexto(decimalPart)
+  resultado += ` e ${centavosTexto} centavos`
   
   return resultado
 }
