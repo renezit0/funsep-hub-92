@@ -239,6 +239,7 @@ async function generateIRReport(supabase: any, beneficiary: any, matricula: numb
       .select('*')
       .eq('matricula', matricula)
       .eq('ano', anoExercicio) // Buscar pelo ano do exercício
+      .eq('nrodep', '0') // Apenas o titular
       
       console.log('IRPFD Titular - Dados encontrados:', irTitularIRPFD)
       
@@ -271,6 +272,7 @@ async function generateIRReport(supabase: any, beneficiary: any, matricula: numb
           .select('*')
           .eq('matricula', matricula)
           .eq('ano', anoExercicio) // Buscar pelo ano do exercício
+          .eq('nrodep', '0') // Apenas o titular
         
         console.log('IRPFT Titular - Dados encontrados:', irTitular)
         
@@ -321,6 +323,7 @@ async function generateIRReport(supabase: any, beneficiary: any, matricula: numb
         .select('*')
         .eq('matricula', matricula)
         .eq('ano', anoExercicio) // Buscar pelo ano do exercício
+        .neq('nrodep', '0') // Excluir o titular
       
       if (irDependentesError) {
         console.error('Erro ao buscar IR dependentes:', irDependentesError)
