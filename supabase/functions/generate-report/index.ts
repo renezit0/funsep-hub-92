@@ -728,19 +728,19 @@ function generateReportHTML(
             width: 100%; 
             border-collapse: collapse; 
             margin: 6px 0;
-            font-size: 10px;
+            font-size: 11px;
             table-layout: fixed;
             clear: both;
         }
         
         th, td { 
             border: 1px solid #ccc;
-            padding: 5px 8px;
+            padding: 6px 8px;
             text-align: center; 
-            vertical-align: top;
+            vertical-align: middle;
             word-wrap: break-word;
             overflow: hidden;
-            line-height: 1.2;
+            line-height: 1.4;
         }
         
         th { 
@@ -749,14 +749,14 @@ function generateReportHTML(
             text-align: center;
             color: #2c5aa0;
             text-transform: uppercase;
-            font-size: 9px;
-            line-height: 1.2;
-            vertical-align: top;
-            padding: 6px 8px;
+            font-size: 10px;
+            line-height: 1.3;
+            vertical-align: middle;
+            padding: 7px 8px;
         }
         
         .section-title { 
-            font-size: 9px;
+            font-size: 11px;
             font-weight: bold; 
             margin: 12px 0 6px 0;
             color: #2c5aa0;
@@ -777,24 +777,24 @@ function generateReportHTML(
             background: #f0f5fa;
             font-weight: bold;
             color: #1565c0;
-            font-size: 8px;
+            font-size: 10px;
         }
         
         .total-geral { 
             background: #2c5aa0;
             color: white;
             font-weight: bold; 
-            font-size: 9px;
+            font-size: 11px;
         }
         
         .footer { 
             margin-top: 8px;
             text-align: center; 
-            font-size: 8px;
+            font-size: 9px;
             color: #6c757d;
             border-top: 1px solid #dee2e6;
             padding-top: 4px;
-            line-height: 1.2;
+            line-height: 1.3;
         }
         
         .currency {
@@ -810,7 +810,7 @@ function generateReportHTML(
             background: #f8f9fa;
             border-radius: 3px;
             margin-bottom: 4px;
-            font-size: 6px;
+            font-size: 9px;
         }
         
         tr:nth-child(even) {
@@ -827,15 +827,15 @@ function generateReportHTML(
         .col-titular-valor { width: 22%; text-align: right; }
         
         .total-geral-valor { 
-            font-size: 11px !important; 
+            font-size: 12px !important; 
             font-weight: bold;
         }
 
         .highlight {
-            font-size: 8px;
-            line-height: 1.3;
+            font-size: 10px;
+            line-height: 1.4;
             margin: 4px 0;
-            padding: 4px 6px;
+            padding: 5px 7px;
             background: #f8f9fa;
             border-left: 2px solid #2c5aa0;
         }
@@ -850,8 +850,8 @@ function generateReportHTML(
         
         .resumo-compacto th,
         .resumo-compacto td {
-            padding: 3px 4px;
-            font-size: 8px;
+            padding: 4px 5px;
+            font-size: 10px;
         }
 
         @media print { 
