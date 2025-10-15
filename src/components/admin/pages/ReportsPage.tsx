@@ -148,6 +148,13 @@ export function ReportsPage() {
   const openReportModal = (beneficiary: Beneficiary, type: 'a_pagar' | 'pagos' | 'ir') => {
     setSelectedBeneficiary(beneficiary);
     setReportType(type);
+    if (type === 'ir') {
+      // Sincronizar dateRange com selectedYear quando abrir modal de IR
+      setDateRange({
+        dataInicio: `${selectedYear}-01-01`,
+        dataFim: `${selectedYear}-12-31`
+      });
+    }
     setReportModalOpen(true);
   };
 
