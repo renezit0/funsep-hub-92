@@ -11,9 +11,10 @@ interface HeaderProps {
   title: string;
   onMenuToggle: () => void;
   onLoginClick: () => void;
+  isAuthenticated?: boolean;
 }
 
-export function Header({ title, onMenuToggle, onLoginClick }: HeaderProps) {
+export function Header({ title, onMenuToggle, onLoginClick, isAuthenticated = false }: HeaderProps) {
   return (
     <header className="h-header bg-background border-b border-border px-6 flex items-center justify-between sticky top-0 z-30">
       <div className="flex items-center gap-4">
@@ -32,29 +33,31 @@ export function Header({ title, onMenuToggle, onLoginClick }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-3">
-        {/* Notifications */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-10 w-10 p-0 relative text-foreground hover:bg-accent"
-            >
-              <Bell className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 h-3 w-3 bg-destructive rounded-full text-[10px] text-destructive-foreground flex items-center justify-center">
-                0
-              </span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80">
-            <div className="p-4 border-b">
-              <h3 className="font-semibold">Notificações</h3>
-            </div>
-            <div className="p-4 text-sm text-muted-foreground text-center">
-              Nenhuma notificação no momento
-            </div>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {/* Notifications - Only show when authenticated */}
+        {isAuthenticated && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-10 w-10 p-0 relative text-foreground hover:bg-accent"
+              >
+                <Bell className="h-5 w-5" />
+                <span className="absolute -top-1 -right-1 h-3 w-3 bg-destructive rounded-full text-[10px] text-destructive-foreground flex items-center justify-center">
+                  0
+                </span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-80">
+              <div className="p-4 border-b">
+                <h3 className="font-semibold">Notificações</h3>
+              </div>
+              <div className="p-4 text-sm text-muted-foreground text-center">
+                Nenhuma notificação no momento
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
 
         {/* User Avatar */}
         <Button

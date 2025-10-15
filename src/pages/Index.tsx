@@ -71,6 +71,7 @@ const Index = () => {
           title={currentPageConfig.title}
           onMenuToggle={toggleSidebar}
           onLoginClick={openLoginModal}
+          isAuthenticated={isAuthenticated}
         />
         
         <main className="p-6 lg:p-8">
