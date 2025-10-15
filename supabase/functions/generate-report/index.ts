@@ -73,9 +73,9 @@ Deno.serve(async (req) => {
 
     // Verificar tipo de relatório e executar lógica apropriada
     if (reportType === 'ir') {
-      const anoExercicio = parseInt(dataInicio.split('-')[0]) // Ano selecionado na interface
-      const anoCalendario = anoExercicio + 1 // Ano calendário (sempre ano+1)
-      return await generateIRReport(supabase, beneficiary, matricula, anoExercicio, anoCalendario)
+      const anoCalendario = parseInt(dataInicio.split('-')[0]) // Ano selecionado na interface
+      const anoExercicio = anoCalendario + 1 // Ano do exercício (sempre ano+1)
+      return await generateIRReport(supabase, beneficiary, matricula, anoCalendario, anoExercicio)
     }
 
     // 2. Buscar procedimentos (para relatórios a_pagar e pagos)
@@ -223,9 +223,9 @@ Deno.serve(async (req) => {
   }
 })
 
-async function generateIRReport(supabase: any, beneficiary: any, matricula: number, anoExercicio: number, anoCalendario: number) {
+async function generateIRReport(supabase: any, beneficiary: any, matricula: number, anoCalendario: number, anoExercicio: number) {
   try {
-    console.log('Gerando relatório IR para:', { matricula, anoExercicio, anoCalendario })
+    console.log('Gerando relatório IR para:', { matricula, anoCalendario, anoExercicio })
     
     // Estratégia: testar uma tabela por vez e usar apenas UMA fonte de dados
     let totalTitularMensalidade = 0
@@ -238,7 +238,7 @@ async function generateIRReport(supabase: any, beneficiary: any, matricula: numb
         .from('irpfd')
       .select('*')
       .eq('matricula', matricula)
-      .eq('ano', anoExercicio) // Buscar pelo ano do exercício
+      .eq('ano', anoCalendario) // Buscar pelo ano calendário
       
       console.log('IRPFD TODOS OS DADOS - Dados encontrados:', irTitularIRPFD)
       console.log('IRPFD - Quantidade de registros:', irTitularIRPFD?.length)
@@ -278,7 +278,7 @@ async function generateIRReport(supabase: any, beneficiary: any, matricula: numb
           .from('irpft')
           .select('*')
           .eq('matricula', matricula)
-          .eq('ano', anoExercicio) // Buscar pelo ano do exercício
+          .eq('ano', anoCalendario) // Buscar pelo ano calendário
         
         console.log('IRPFT TODOS OS DADOS - Dados encontrados:', irTitular)
         
@@ -335,7 +335,7 @@ async function generateIRReport(supabase: any, beneficiary: any, matricula: numb
         .from('irpfd')
         .select('*')
         .eq('matricula', matricula)
-        .eq('ano', anoExercicio) // Buscar pelo ano do exercício
+        .eq('ano', anoCalendario) // Buscar pelo ano calendário
       
       console.log('IRPFD Dependentes - Todos os dados:', irDependentesData)
       
@@ -363,13 +363,13 @@ async function generateIRReport(supabase: any, beneficiary: any, matricula: numb
       { mensalidade: totalTitularMensalidade, guia: totalTitularGuia },
       dependentes,
       irDependentes,
-      anoExercicio,
-      anoCalendario
+      anoCalendario,
+      anoExercicio
     )
     
     return new Response(JSON.stringify({ 
       html: htmlContent,
-      filename: `IR_${beneficiary.nome.replace(/[^A-Z0-9]/gi, '_')}_${matricula}_${anoExercicio}.pdf`
+      filename: `IR_${beneficiary.nome.replace(/[^A-Z0-9]/gi, '_')}_${matricula}_${anoCalendario}.pdf`
     }), {
       headers: {
         ...corsHeaders,
@@ -391,8 +391,8 @@ function generateIRReportHTML(
   totalTitular: { mensalidade: number, guia: number },
   dependentes: any[],
   irDependentes: any[],
-  anoExercicio: number,
-  anoCalendario: number
+  anoCalendario: number,
+  anoExercicio: number
 ): string {
   
   console.log('Gerando HTML IR com dados:', { 
