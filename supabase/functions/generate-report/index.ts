@@ -388,20 +388,23 @@ function generateIRReportHTML(
     dependentesMap.set(dep.nrodep.toString(), dep)
   })
   
-  // Processar dados de IR dos dependentes
-  const dependentesComIR = irDependentes.map(ir => {
-    const dependente = dependentesMap.get(ir.nrodep?.toString() || '')
-    const vlmen = Number(ir.vlmen) || Number(ir.ment) || Number(ir.vlmensalidade) || 0
-    const vlguia = Number(ir.vlguia) || Number(ir.vlparticipacao) || 0
-    
-    return {
-      ...ir,
-      nome: dependente?.nome || `Dependente ${ir.nrodep}`,
-      cpf: dependente?.cpf || '',
-      vlmen: vlmen,
-      vlguia: vlguia
-    }
-  }).filter(dep => dep.vlmen > 0 || dep.vlguia > 0) // Filtrar apenas dependentes com valores
+  // Processar dados de IR dos dependentes (EXCLUIR nrodep = "0" que é o titular)
+  const dependentesComIR = irDependentes
+    .filter(ir => ir.nrodep !== "0" && ir.nrodep !== 0) // Filtrar titular
+    .map(ir => {
+      const dependente = dependentesMap.get(ir.nrodep?.toString() || '')
+      const vlmen = Number(ir.vlmen) || Number(ir.ment) || Number(ir.vlmensalidade) || 0
+      const vlguia = Number(ir.vlguia) || Number(ir.vlparticipacao) || 0
+      
+      return {
+        ...ir,
+        nome: dependente?.nome || `Dependente ${ir.nrodep}`,
+        cpf: dependente?.cpf || '',
+        vlmen: vlmen,
+        vlguia: vlguia
+      }
+    })
+    .filter(dep => dep.vlmen > 0 || dep.vlguia > 0) // Filtrar apenas dependentes com valores
   
   // Calcular totais
   const totalTitularCompleto = totalTitular.mensalidade + totalTitular.guia
