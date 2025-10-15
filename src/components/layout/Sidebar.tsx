@@ -75,20 +75,36 @@ export function Sidebar({ currentPage, onPageChange, onLoginClick, isOpen, onTog
               return null;
             }
             
-            // Handle admin redirect
-            if (item.id === "admin") {
-              if (isAdmin) {
-                window.location.href = '/admin';
-                return;
-              } else {
-                return null; // Hide if not admin
-              }
+            // Hide admin link if not admin
+            if (item.id === "admin" && !isAdmin) {
+              return null;
             }
             
             // Hide other admin-only items if not admin or beneficiary
             const isBeneficiary = session?.user.cargo === 'ASSOCIADO';
             if ((item.id === "reports") && !isAdmin && !isBeneficiary) {
               return null;
+            }
+            
+            // Special handling for admin link - open in new tab
+            if (item.id === "admin") {
+              return (
+                <a
+                  key={item.id}
+                  href="/admin"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block"
+                >
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start gap-3 h-12 font-medium text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                  >
+                    <Icon className="h-5 w-5" />
+                    {item.label}
+                  </Button>
+                </a>
+              );
             }
             
             return (
