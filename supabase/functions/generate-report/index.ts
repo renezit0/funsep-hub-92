@@ -1055,27 +1055,90 @@ function formatCPF(cpf: any): string {
 }
 
 function formatCurrencyText(value: number): string {
-  // Função simplificada para converter número em texto
   const integerPart = Math.floor(value)
   const decimalPart = Math.round((value - integerPart) * 100)
+  
+  const unidades = ['', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove']
+  const dez = ['dez', 'onze', 'doze', 'treze', 'quatorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove']
+  const dezenas = ['', '', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta', 'setenta', 'oitenta', 'noventa']
+  const centenas = ['', 'cento', 'duzentos', 'trezentos', 'quatrocentos', 'quinhentos', 'seiscentos', 'setecentos', 'oitocentos', 'novecentos']
+  
+  function numeroParaTexto(num: number): string {
+    if (num === 0) return 'zero'
+    if (num === 100) return 'cem'
+    
+    let texto = ''
+    
+    // Centenas
+    const c = Math.floor(num / 100)
+    if (c > 0) {
+      texto += centenas[c]
+      num = num % 100
+      if (num > 0) texto += ' e '
+    }
+    
+    // Dezenas e unidades
+    if (num >= 10 && num < 20) {
+      texto += dez[num - 10]
+    } else {
+      const d = Math.floor(num / 10)
+      const u = num % 10
+      
+      if (d > 0) {
+        texto += dezenas[d]
+        if (u > 0) texto += ' e '
+      }
+      if (u > 0) {
+        texto += unidades[u]
+      }
+    }
+    
+    return texto
+  }
   
   if (integerPart === 0) {
     return `zero reais e ${decimalPart.toString().padStart(2, '0')} centavos`
   }
   
-  const thousands = Math.floor(integerPart / 1000)
-  const hundreds = integerPart % 1000
+  let resultado = ''
   
-  let text = ''
-  if (thousands > 0) {
-    text += `${thousands} mil`
-    if (hundreds > 0) {
-      text += `, ${hundreds}`
+  // Milhões
+  const milhoes = Math.floor(integerPart / 1000000)
+  if (milhoes > 0) {
+    resultado += numeroParaTexto(milhoes)
+    resultado += milhoes === 1 ? ' milhão' : ' milhões'
+    const resto = integerPart % 1000000
+    if (resto > 0) {
+      if (resto < 100) {
+        resultado += ' e '
+      } else {
+        resultado += ', '
+      }
     }
-  } else {
-    text = hundreds.toString()
   }
   
-  text += ` reais e ${decimalPart.toString().padStart(2, '0')} centavos`
-  return text
+  // Milhares
+  const milhares = Math.floor((integerPart % 1000000) / 1000)
+  if (milhares > 0) {
+    resultado += numeroParaTexto(milhares) + ' mil'
+    const centenas_resto = integerPart % 1000
+    if (centenas_resto > 0) {
+      if (centenas_resto < 100) {
+        resultado += ' e '
+      } else {
+        resultado += ', '
+      }
+    }
+  }
+  
+  // Centenas
+  const centenas_final = integerPart % 1000
+  if (centenas_final > 0 || (milhares === 0 && milhoes === 0)) {
+    resultado += numeroParaTexto(centenas_final)
+  }
+  
+  resultado += integerPart === 1 ? ' real' : ' reais'
+  resultado += ` e ${decimalPart.toString().padStart(2, '0')} centavos`
+  
+  return resultado
 }
