@@ -1,5 +1,5 @@
 import React from "react";
-import { Bell, RefreshCw, LogOut, User } from "lucide-react";
+import { Bell, RefreshCw, LogOut, User, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AdminSession } from "@/services/adminAuth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -27,6 +27,15 @@ export function AdminHeader({ session, onLogout }: AdminHeaderProps) {
         </div>
 
         <div className="flex items-center gap-1 sm:gap-2 lg:gap-4">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => window.location.href = '/'}
+            title="Voltar ao Início"
+          >
+            <Home className="h-5 w-5" />
+          </Button>
+
           <Button variant="ghost" size="icon" className="hidden sm:flex">
             <RefreshCw className="h-5 w-5" />
           </Button>

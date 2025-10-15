@@ -86,24 +86,20 @@ export function Sidebar({ currentPage, onPageChange, onLoginClick, isOpen, onTog
               return null;
             }
             
-            // Special handling for admin link - open in new tab
+            // Special handling for admin link - redirect same tab
             if (item.id === "admin") {
               return (
-                <a
+                <Button
                   key={item.id}
-                  href="/admin"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block"
+                  variant="ghost"
+                  className="w-full justify-start gap-3 h-12 font-medium text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                  onClick={() => {
+                    window.location.href = '/admin';
+                  }}
                 >
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start gap-3 h-12 font-medium text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                  >
-                    <Icon className="h-5 w-5" />
-                    {item.label}
-                  </Button>
-                </a>
+                  <Icon className="h-5 w-5" />
+                  {item.label}
+                </Button>
               );
             }
             
