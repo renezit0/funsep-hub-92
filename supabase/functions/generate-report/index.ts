@@ -547,7 +547,7 @@ function generateIRReportHTML(
 <body>
     <div class="header">
         <div class="logo">
-            <img src="/lovable-uploads/e548bfa7-21ab-4b35-866a-211b0aaa1135.png" alt="Logo FUNSEP">
+            <img src="/images/e548bfa7-21ab-4b35-866a-211b0aaa1135.png" alt="Logo FUNSEP">
         </div>
         <div class="title">DECLARAÇÃO</div>
     </div>
@@ -891,7 +891,7 @@ function generateReportHTML(
 <body>
     <div class="header">
         <div class="logo">
-            <img src="/lovable-uploads/e548bfa7-21ab-4b35-866a-211b0aaa1135.png" alt="Logo FUNSEP">
+            <img src="/images/e548bfa7-21ab-4b35-866a-211b0aaa1135.png" alt="Logo FUNSEP">
             <div class="cnpj">CNPJ: 20.601.112/0001-91</div>
         </div>
         <div class="title">RELATÓRIO DE PROCEDIMENTOS A PAGAR</div>
