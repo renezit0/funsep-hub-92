@@ -288,15 +288,19 @@ export function RequestsPage() {
   return (
     <div className="space-y-6">
       <div className="max-w-4xl mx-auto space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
-            <FileText className="h-8 w-8" />
-            Requerimentos
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            Envie seus requerimentos para a administração do FUNSEP
-          </p>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-3 text-xl">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <FileText className="h-6 w-6 text-primary" />
+              </div>
+              Requerimentos
+            </CardTitle>
+            <CardDescription>
+              Envie seus requerimentos para a administração do FUNSEP
+            </CardDescription>
+          </CardHeader>
+        </Card>
 
         <Card>
           <CardHeader>
