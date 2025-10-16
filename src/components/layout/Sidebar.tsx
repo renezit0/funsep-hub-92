@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Home, Newspaper, Star, Book, Gavel, FileText, BarChart3, Settings, Mail, MapPin, Heart, ExternalLink, User, LogIn, Shield, LogOut, ClipboardList } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import funsepLogo from "@/assets/funsep-logo.png";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -65,8 +66,9 @@ export function Sidebar({ currentPage, onPageChange, onLoginClick, isOpen, onTog
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto px-4 py-6 space-y-2 min-h-0 scrollbar-hide">
-          {navigation.map((item) => {
+        <ScrollArea className="flex-1 px-4">
+          <nav className="py-6 space-y-2">
+            {navigation.map((item) => {
             const Icon = item.icon;
             const isActive = currentPage === item.id;
             
@@ -124,7 +126,8 @@ export function Sidebar({ currentPage, onPageChange, onLoginClick, isOpen, onTog
               </Button>
             );
           })}
-        </nav>
+          </nav>
+        </ScrollArea>
 
         {/* User Profile */}
         <div className="p-4 border-t border-sidebar-border space-y-2 flex-shrink-0">
