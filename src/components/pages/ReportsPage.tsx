@@ -4,38 +4,32 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 export function ReportsPage() {
   const { session } = useAuth();
   const [loading, setLoading] = useState(false);
   const [reportModalOpen, setReportModalOpen] = useState(false);
-  const [reportType, setReportType] = useState<'a_pagar' | 'pagos' | 'ir'>('a_pagar');
+  const [reportType, setReportType] = useState<"a_pagar" | "pagos" | "ir">("a_pagar");
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear() - 1);
   const [dateRange, setDateRange] = useState({
-    dataInicio: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
-    dataFim: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().split('T')[0]
+    dataInicio: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split("T")[0],
+    dataFim: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().split("T")[0],
   });
   const { toast } = useToast();
 
-  const openReportModal = (type: 'a_pagar' | 'pagos' | 'ir') => {
+  const openReportModal = (type: "a_pagar" | "pagos" | "ir") => {
     setReportType(type);
-    if (type === 'ir') {
+    if (type === "ir") {
       // Sincronizar dateRange com selectedYear quando abrir modal de IR
       setDateRange({
         dataInicio: `${selectedYear}-01-01`,
-        dataFim: `${selectedYear}-12-31`
+        dataFim: `${selectedYear}-12-31`,
       });
     }
     setReportModalOpen(true);
@@ -51,7 +45,7 @@ export function ReportsPage() {
       return;
     }
 
-    const matricula = parseInt(session.user.sigla.replace('BEN-', ''));
+    const matricula = parseInt(session.user.sigla.replace("BEN-", ""));
     if (isNaN(matricula)) {
       toast({
         title: "Erro",
@@ -64,7 +58,7 @@ export function ReportsPage() {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('generate-report', {
+      const { data, error } = await supabase.functions.invoke("generate-report", {
         body: {
           matricula: matricula,
           dataInicio: dateRange.dataInicio,
@@ -74,37 +68,37 @@ export function ReportsPage() {
       });
 
       if (error) {
-        console.error('Erro ao chamar função de relatório:', error);
+        console.error("Erro ao chamar função de relatório:", error);
         throw error;
       }
 
       const { html, filename } = data;
 
-      const tempDiv = document.createElement('div');
+      const tempDiv = document.createElement("div");
       tempDiv.innerHTML = html;
-      tempDiv.style.position = 'absolute';
-      tempDiv.style.left = '-9999px';
-      tempDiv.style.top = '-9999px';
-      tempDiv.style.width = '794px';
-      tempDiv.style.maxWidth = '794px';
-      tempDiv.style.backgroundColor = '#ffffff';
-      tempDiv.style.fontFamily = 'Arial, sans-serif';
-      tempDiv.style.fontSize = '12px';
-      tempDiv.style.lineHeight = '1.4';
-      tempDiv.style.padding = '0';
-      tempDiv.style.margin = '0';
-      tempDiv.style.boxSizing = 'border-box';
-      tempDiv.style.overflow = 'visible';
-      tempDiv.style.zIndex = '-1';
+      tempDiv.style.position = "absolute";
+      tempDiv.style.left = "-9999px";
+      tempDiv.style.top = "-9999px";
+      tempDiv.style.width = "794px";
+      tempDiv.style.maxWidth = "794px";
+      tempDiv.style.backgroundColor = "#ffffff";
+      tempDiv.style.fontFamily = "Arial, sans-serif";
+      tempDiv.style.fontSize = "12px";
+      tempDiv.style.lineHeight = "1.4";
+      tempDiv.style.padding = "0";
+      tempDiv.style.margin = "0";
+      tempDiv.style.boxSizing = "border-box";
+      tempDiv.style.overflow = "visible";
+      tempDiv.style.zIndex = "-1";
       document.body.appendChild(tempDiv);
 
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       const canvas = await html2canvas(tempDiv, {
         scale: 2.5,
         useCORS: true,
         allowTaint: true,
-        backgroundColor: '#ffffff',
+        backgroundColor: "#ffffff",
         logging: false,
         width: 794,
         height: Math.max(1123, tempDiv.scrollHeight),
@@ -115,18 +109,18 @@ export function ReportsPage() {
         x: 0,
         y: 0,
         onclone: (clonedDoc) => {
-          const clonedElement = clonedDoc.querySelector('body > div') as HTMLElement;
+          const clonedElement = clonedDoc.querySelector("body > div") as HTMLElement;
           if (clonedElement) {
-            clonedElement.style.width = '794px';
-            clonedElement.style.maxWidth = '794px';
+            clonedElement.style.width = "794px";
+            clonedElement.style.maxWidth = "794px";
           }
-        }
+        },
       });
 
       document.body.removeChild(tempDiv);
 
-      const imgData = canvas.toDataURL('image/png', 1.0);
-      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgData = canvas.toDataURL("image/png", 1.0);
+      const pdf = new jsPDF("p", "mm", "a4");
 
       const marginLeft = 15;
       const marginTop = 15;
@@ -144,13 +138,13 @@ export function ReportsPage() {
       let heightLeft = imgHeight;
       let position = marginTop;
 
-      pdf.addImage(imgData, 'PNG', marginLeft, position, imgWidth, imgHeight);
+      pdf.addImage(imgData, "PNG", marginLeft, position, imgWidth, imgHeight);
       heightLeft -= contentHeight;
 
       while (heightLeft >= 0) {
         position = marginTop - (imgHeight - heightLeft);
         pdf.addPage();
-        pdf.addImage(imgData, 'PNG', marginLeft, position, imgWidth, imgHeight);
+        pdf.addImage(imgData, "PNG", marginLeft, position, imgWidth, imgHeight);
         heightLeft -= contentHeight;
       }
 
@@ -163,9 +157,9 @@ export function ReportsPage() {
 
       setReportModalOpen(false);
     } catch (error: any) {
-      console.error('Erro completo ao gerar relatório:', error);
+      console.error("Erro completo ao gerar relatório:", error);
 
-      if (error.message?.includes('não encontrado')) {
+      if (error.message?.includes("não encontrado")) {
         toast({
           title: "Sem dados",
           description: "Nenhum procedimento encontrado para o período selecionado",
@@ -174,7 +168,7 @@ export function ReportsPage() {
       } else {
         toast({
           title: "Erro",
-          description: `Erro ao gerar relatório: ${error.message || 'Erro desconhecido'}`, 
+          description: `Erro ao gerar relatório: ${error.message || "Erro desconhecido"}`,
           variant: "destructive",
         });
       }
@@ -190,9 +184,7 @@ export function ReportsPage() {
           <ChartBar className="h-8 w-8" />
           Meus Relatórios
         </h1>
-        <p className="text-muted-foreground">
-          Acesse seus relatórios de procedimentos e imposto de renda.
-        </p>
+        <p className="text-muted-foreground">Acesse seus relatórios de coparticipação e imposto de renda.</p>
       </div>
 
       <Card className="border-l-4 border-l-primary">
@@ -202,7 +194,7 @@ export function ReportsPage() {
             <div>
               <p className="font-semibold">Relatórios Disponíveis</p>
               <p className="text-sm text-muted-foreground">
-                Gere seus relatórios de procedimentos a pagar, pagos e imposto de renda.
+                Gere seus relatórios de coparticipação a pagar, pagas e imposto de renda.
               </p>
             </div>
           </div>
@@ -215,23 +207,17 @@ export function ReportsPage() {
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Button
-            onClick={() => openReportModal('a_pagar')}
+            onClick={() => openReportModal("a_pagar")}
             className="bg-green-600 hover:bg-green-700 text-white gap-2"
           >
             <FileText className="h-4 w-4" />
-            Relatório a Pagar
+            Relatório Cop. a Pagar
           </Button>
-          <Button
-            onClick={() => openReportModal('pagos')}
-            className="bg-blue-600 hover:bg-blue-700 text-white gap-2"
-          >
+          <Button onClick={() => openReportModal("pagos")} className="bg-blue-600 hover:bg-blue-700 text-white gap-2">
             <Download className="h-4 w-4" />
-            Relatório de Pagos
+            Relatório Cop. Pagas
           </Button>
-          <Button
-            onClick={() => openReportModal('ir')}
-            className="bg-purple-600 hover:bg-purple-700 text-white gap-2"
-          >
+          <Button onClick={() => openReportModal("ir")} className="bg-purple-600 hover:bg-purple-700 text-white gap-2">
             <FileText className="h-4 w-4" />
             Relatório de IR
           </Button>
@@ -243,14 +229,13 @@ export function ReportsPage() {
           <DialogHeader>
             <DialogTitle>Selecionar Período</DialogTitle>
             <DialogDescription>
-              {reportType === 'ir' 
-                ? 'Selecione o ano para gerar o relatório de Imposto de Renda.'
-                : `Selecione o período para gerar o relatório de ${reportType === 'a_pagar' ? 'procedimentos a pagar' : 'procedimentos pagos'}.`
-              }
+              {reportType === "ir"
+                ? "Selecione o ano para gerar o relatório de Imposto de Renda."
+                : `Selecione o período para gerar o relatório de ${reportType === "a_pagar" ? "procedimentos a pagar" : "procedimentos pagos"}.`}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            {reportType === 'ir' ? (
+            {reportType === "ir" ? (
               <div className="space-y-2">
                 <Label htmlFor="ano">Ano:</Label>
                 <select
@@ -261,13 +246,15 @@ export function ReportsPage() {
                     setSelectedYear(ano);
                     setDateRange({
                       dataInicio: `${ano}-01-01`,
-                      dataFim: `${ano}-12-31`
+                      dataFim: `${ano}-12-31`,
                     });
                   }}
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - 1 - i).map(year => (
-                    <option key={year} value={year}>{year + 1} (ano calendário {year})</option>
+                  {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - 1 - i).map((year) => (
+                    <option key={year} value={year}>
+                      {year + 1} (ano calendário {year})
+                    </option>
                   ))}
                 </select>
               </div>
@@ -294,7 +281,13 @@ export function ReportsPage() {
               </>
             )}
             <Button onClick={generateReport} className="w-full gap-2" disabled={loading}>
-              {loading ? "Gerando..." : <><Download className="h-4 w-4" /> Gerar Relatório</>}
+              {loading ? (
+                "Gerando..."
+              ) : (
+                <>
+                  <Download className="h-4 w-4" /> Gerar Relatório
+                </>
+              )}
             </Button>
           </div>
         </DialogContent>
