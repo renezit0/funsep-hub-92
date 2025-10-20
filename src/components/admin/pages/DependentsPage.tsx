@@ -12,6 +12,7 @@ interface Dependent {
   nome: string;
   parent: number;
   parentesco_nome?: string;
+  titular_nome?: string;
   situacao: number;
   dtnasc: string;
   sexo: string;
@@ -36,25 +37,24 @@ export function DependentsPage() {
 
     setLoading(true);
     setHasSearched(true);
-    
+
     try {
-      let query = supabase
-        .from('caddep')
-        .select(`
+      let query = supabase.from("caddep").select(`
           matricula, nrodep, nome, parent, situacao, dtnasc, sexo, cpf, nomemae, email,
-          tabgrpar!fk_caddep_parent_tabgrpar(nome)
+          tabgrpar!fk_caddep_parent_tabgrpar(nome),
+          cadben!fk_caddep_matricula_cadben(nome)
         `);
 
       // Aplicar filtros de busca
       if (searchTerm.trim()) {
         const isNumeric = /^\d+$/.test(searchTerm.trim());
-        
+
         if (isNumeric) {
           // Se for numérico, buscar por matrícula
-          query = query.eq('matricula', parseInt(searchTerm));
+          query = query.eq("matricula", parseInt(searchTerm));
         } else {
           // Se não for numérico, buscar por nome
-          query = query.ilike('nome', `%${searchTerm}%`);
+          query = query.ilike("nome", `%${searchTerm}%`);
         }
       }
 
@@ -62,27 +62,28 @@ export function DependentsPage() {
       if (statusFilter !== null) {
         if (statusFilter === 1) {
           // Ativos e Reativados
-          query = query.in('situacao', [1, 2]);
+          query = query.in("situacao", [1, 2]);
         } else {
-          query = query.eq('situacao', statusFilter);
+          query = query.eq("situacao", statusFilter);
         }
       }
 
-      query = query.order('matricula, nrodep').limit(100);
-      
+      query = query.order("matricula, nrodep").limit(100);
+
       const { data, error } = await query;
 
       if (error) throw error;
-      
-      // Processar dados para incluir nome do parentesco
-      const processedData = (data || []).map(item => ({
+
+      // Processar dados para incluir nome do parentesco e titular
+      const processedData = (data || []).map((item) => ({
         ...item,
-        parentesco_nome: item.tabgrpar?.nome || 'Não informado'
+        parentesco_nome: item.tabgrpar?.nome || "Não informado",
+        titular_nome: item.cadben?.nome || "Não informado",
       }));
-      
+
       setDependents(processedData);
     } catch (error) {
-      console.error('Erro ao buscar dependentes:', error);
+      console.error("Erro ao buscar dependentes:", error);
       setDependents([]);
     } finally {
       setLoading(false);
@@ -111,32 +112,31 @@ export function DependentsPage() {
   };
 
   const getParentTypeBadge = (parentesco_nome?: string) => {
-    if (!parentesco_nome || parentesco_nome === 'Não informado') {
+    if (!parentesco_nome || parentesco_nome === "Não informado") {
       return <Badge variant="outline">Não informado</Badge>;
     }
     return <Badge variant="outline">{parentesco_nome}</Badge>;
   };
 
   const formatCPF = (cpf: string) => {
-    if (!cpf) return '-';
-    const cpfStr = cpf.toString().padStart(11, '0');
-    return cpfStr.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    if (!cpf) return "-";
+    const cpfStr = cpf.toString().padStart(11, "0");
+    return cpfStr.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
   };
 
   const formatDate = (dateStr: string) => {
-    if (!dateStr) return '-';
+    if (!dateStr) return "-";
     try {
       const date = new Date(dateStr);
       if (isNaN(date.getTime())) return dateStr;
-      return date.toLocaleDateString('pt-BR');
+      return date.toLocaleDateString("pt-BR");
     } catch {
-      return dateStr || '-';
+      return dateStr || "-";
     }
   };
 
   // Filtros já aplicados na query, não precisamos filtrar novamente
   const filteredDependents = dependents || [];
-
 
   return (
     <div className="space-y-6">
@@ -145,9 +145,7 @@ export function DependentsPage() {
           <UserPlus className="h-8 w-8" />
           Dependentes
         </h1>
-        <p className="text-muted-foreground">
-          Gerenciamento de dependentes dos associados FUNSEP
-        </p>
+        <p className="text-muted-foreground">Gerenciamento de dependentes dos associados FUNSEP</p>
       </div>
 
       <div className="flex gap-4 items-center">
@@ -160,7 +158,7 @@ export function DependentsPage() {
             className="pl-10"
           />
         </div>
-        
+
         <div className="flex gap-2">
           <Button
             variant={statusFilter === null ? "default" : "outline"}
@@ -169,18 +167,10 @@ export function DependentsPage() {
           >
             Todos
           </Button>
-          <Button
-            variant={statusFilter === 1 ? "default" : "outline"}
-            size="sm"
-            onClick={() => setStatusFilter(1)}
-          >
+          <Button variant={statusFilter === 1 ? "default" : "outline"} size="sm" onClick={() => setStatusFilter(1)}>
             Ativos
           </Button>
-          <Button
-            variant={statusFilter === 3 ? "default" : "outline"}
-            size="sm"
-            onClick={() => setStatusFilter(3)}
-          >
+          <Button variant={statusFilter === 3 ? "default" : "outline"} size="sm" onClick={() => setStatusFilter(3)}>
             Inativos
           </Button>
         </div>
@@ -189,11 +179,9 @@ export function DependentsPage() {
       <Card>
         <CardHeader>
           <CardTitle>
-            {hasSearched ? (
-              `${filteredDependents.length} dependentes encontrados`
-            ) : (
-              "Digite no campo de busca para encontrar dependentes"
-            )}
+            {hasSearched
+              ? `${filteredDependents.length} dependentes encontrados`
+              : "Digite no campo de busca para encontrar dependentes"}
             {filteredDependents.length === 100 && (
               <span className="text-sm text-muted-foreground block">
                 (máximo 100 resultados exibidos - refine sua busca se necessário)
@@ -214,50 +202,54 @@ export function DependentsPage() {
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
                 <p className="text-muted-foreground mt-2">Buscando...</p>
               </div>
-            ) : Array.isArray(filteredDependents) && filteredDependents.map((dependent) => (
-              <div
-                key={`${dependent.matricula}-${dependent.nrodep}`}
-                className="border border-border rounded-lg p-4 hover:bg-accent/50 transition-colors"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-semibold">{dependent.nome || 'Nome não informado'}</h3>
-                      {getStatusBadge(dependent.situacao)}
-                      {getParentTypeBadge(dependent.parentesco_nome)}
+            ) : (
+              Array.isArray(filteredDependents) &&
+              filteredDependents.map((dependent) => (
+                <div
+                  key={`${dependent.matricula}-${dependent.nrodep}`}
+                  className="border border-border rounded-lg p-4 hover:bg-accent/50 transition-colors"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="font-semibold">{dependent.nome || "Nome não informado"}</h3>
+                        {getStatusBadge(dependent.situacao)}
+                        {getParentTypeBadge(dependent.parentesco_nome)}
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-muted-foreground">
+                        <div>
+                          <strong>Titular:</strong> {dependent.titular_nome || "Não informado"} (Mat.{" "}
+                          {dependent.matricula || "-"})
+                        </div>
+                        <div>
+                          <strong>Nº Dependente:</strong> {dependent.nrodep || "-"}
+                        </div>
+                        <div>
+                          <strong>CPF:</strong> {dependent.cpf ? formatCPF(dependent.cpf) : "-"}
+                        </div>
+                        <div>
+                          <strong>Nascimento:</strong> {formatDate(dependent.dtnasc)}
+                        </div>
+                        <div>
+                          <strong>Sexo:</strong> {dependent.sexo || "-"}
+                        </div>
+                        <div>
+                          <strong>Mãe:</strong> {dependent.nomemae || "-"}
+                        </div>
+                      </div>
+
+                      {dependent.email && (
+                        <div className="text-sm">
+                          <strong>Email:</strong> {dependent.email}
+                        </div>
+                      )}
                     </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-muted-foreground">
-                      <div>
-                        <strong>Titular:</strong> {dependent.matricula || '-'}
-                      </div>
-                      <div>
-                        <strong>Nº Dependente:</strong> {dependent.nrodep || '-'}
-                      </div>
-                      <div>
-                        <strong>CPF:</strong> {dependent.cpf ? formatCPF(dependent.cpf) : '-'}
-                      </div>
-                      <div>
-                        <strong>Nascimento:</strong> {formatDate(dependent.dtnasc)}
-                      </div>
-                      <div>
-                        <strong>Sexo:</strong> {dependent.sexo || '-'}
-                      </div>
-                      <div>
-                        <strong>Mãe:</strong> {dependent.nomemae || '-'}
-                      </div>
-                    </div>
-                    
-                    {dependent.email && (
-                      <div className="text-sm">
-                        <strong>Email:</strong> {dependent.email}
-                      </div>
-                    )}
                   </div>
                 </div>
-              </div>
-            ))}
-            
+              ))
+            )}
+
             {hasSearched && (!Array.isArray(filteredDependents) || filteredDependents.length === 0) && (
               <div className="text-center py-8 text-muted-foreground">
                 <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
