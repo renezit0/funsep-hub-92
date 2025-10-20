@@ -12,6 +12,7 @@ interface Dependent {
   nome: string;
   parent: number;
   parentesco_nome?: string;
+  titular_nome?: string;
   situacao: number;
   dtnasc: string;
   sexo: string;
@@ -72,10 +73,25 @@ export function DependentsPage() {
 
       if (error) throw error;
 
-      // Processar dados para incluir nome do parentesco
+      // Buscar nomes dos titulares
+      const matriculas = [...new Set((data || []).map((item) => item.matricula))];
+
+      let titularesMap = new Map();
+      if (matriculas.length > 0) {
+        const { data: titulares } = await supabase.from("cadben").select("matricula, nome").in("matricula", matriculas);
+
+        if (titulares) {
+          titulares.forEach((titular) => {
+            titularesMap.set(titular.matricula, titular.nome);
+          });
+        }
+      }
+
+      // Processar dados para incluir nome do parentesco e titular
       const processedData = (data || []).map((item) => ({
         ...item,
         parentesco_nome: item.tabgrpar?.nome || "Não informado",
+        titular_nome: titularesMap.get(item.matricula) || "Não informado",
       }));
 
       setDependents(processedData);
@@ -216,7 +232,8 @@ export function DependentsPage() {
 
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-muted-foreground">
                         <div>
-                          <strong>Titular:</strong> {dependent.matricula || "-"}
+                          <strong>Titular:</strong> {dependent.titular_nome || "Não informado"} (Mat.{" "}
+                          {dependent.matricula || "-"})
                         </div>
                         <div>
                           <strong>Nº Dependente:</strong> {dependent.nrodep || "-"}
