@@ -12,7 +12,6 @@ interface Dependent {
   nome: string;
   parent: number;
   parentesco_nome?: string;
-  titular_nome?: string;
   situacao: number;
   dtnasc: string;
   sexo: string;
@@ -41,8 +40,7 @@ export function DependentsPage() {
     try {
       let query = supabase.from("caddep").select(`
           matricula, nrodep, nome, parent, situacao, dtnasc, sexo, cpf, nomemae, email,
-          tabgrpar!fk_caddep_parent_tabgrpar(nome),
-          cadben!fk_caddep_matricula_cadben(nome)
+          tabgrpar!fk_caddep_parent_tabgrpar(nome)
         `);
 
       // Aplicar filtros de busca
@@ -74,11 +72,10 @@ export function DependentsPage() {
 
       if (error) throw error;
 
-      // Processar dados para incluir nome do parentesco e titular
+      // Processar dados para incluir nome do parentesco
       const processedData = (data || []).map((item) => ({
         ...item,
         parentesco_nome: item.tabgrpar?.nome || "Não informado",
-        titular_nome: item.cadben?.nome || "Não informado",
       }));
 
       setDependents(processedData);
@@ -219,8 +216,7 @@ export function DependentsPage() {
 
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-muted-foreground">
                         <div>
-                          <strong>Titular:</strong> {dependent.titular_nome || "Não informado"} (Mat.{" "}
-                          {dependent.matricula || "-"})
+                          <strong>Titular:</strong> {dependent.matricula || "-"}
                         </div>
                         <div>
                           <strong>Nº Dependente:</strong> {dependent.nrodep || "-"}
