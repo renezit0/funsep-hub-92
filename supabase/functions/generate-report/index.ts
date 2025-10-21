@@ -79,12 +79,15 @@ Deno.serve(async (req) => {
     }
 
     // 2. Buscar procedimentos (para relatórios a_pagar e pagos)
+    // Se dataFim estiver vazio, usar a data atual
+    const dataFimFinal = dataFim && dataFim.trim() !== '' ? dataFim : new Date().toISOString().split('T')[0]
+    
     const { data: procedimentos, error: procedimentosError } = await supabase
       .from('mgumrrapg')
       .select('matricula, dep, dtatend, datavenc, valorpago, valorpart, evento')
       .eq('matricula', matricula)
       .gte('datavenc', dataInicio)
-      .lte('datavenc', dataFim)
+      .lte('datavenc', dataFimFinal)
       .order('dtatend')
 
     if (procedimentosError) {
@@ -94,6 +97,8 @@ Deno.serve(async (req) => {
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
+
+    console.log('Procedimentos encontrados:', procedimentos?.length || 0, 'para o período:', dataInicio, 'a', dataFimFinal)
 
     if (!procedimentos || procedimentos.length === 0) {
       return new Response(
