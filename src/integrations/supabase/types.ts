@@ -421,6 +421,66 @@ export type Database = {
         }
         Relationships: []
       }
+      mgumrr: {
+        Row: {
+          datareceb: string | null
+          datavenc: string | null
+          dep: string | null
+          dtatend: string | null
+          evento: string | null
+          forreceb: number | null
+          guia: number | null
+          matricula: number | null
+          parcela: number | null
+          prsv: number | null
+          tipo: string | null
+          tipreceb: number | null
+          titulo: number | null
+          valorpago: number | null
+          valorpart: number | null
+          valorreceb: string | null
+          valortit: number | null
+        }
+        Insert: {
+          datareceb?: string | null
+          datavenc?: string | null
+          dep?: string | null
+          dtatend?: string | null
+          evento?: string | null
+          forreceb?: number | null
+          guia?: number | null
+          matricula?: number | null
+          parcela?: number | null
+          prsv?: number | null
+          tipo?: string | null
+          tipreceb?: number | null
+          titulo?: number | null
+          valorpago?: number | null
+          valorpart?: number | null
+          valorreceb?: string | null
+          valortit?: number | null
+        }
+        Update: {
+          datareceb?: string | null
+          datavenc?: string | null
+          dep?: string | null
+          dtatend?: string | null
+          evento?: string | null
+          forreceb?: number | null
+          guia?: number | null
+          matricula?: number | null
+          parcela?: number | null
+          prsv?: number | null
+          tipo?: string | null
+          tipreceb?: number | null
+          titulo?: number | null
+          valorpago?: number | null
+          valorpart?: number | null
+          valorreceb?: string | null
+          valortit?: number | null
+        }
+        Relationships: []
+      }
       mgumrrapg: {
         Row: {
           datareceb: string | null
