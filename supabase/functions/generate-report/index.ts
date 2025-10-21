@@ -86,8 +86,8 @@ Deno.serve(async (req) => {
       .from('mgumrrapg')
       .select('matricula, dep, dtatend, datavenc, valorpago, valorpart, evento')
       .eq('matricula', matricula)
-      .gte('datavenc', dataInicio)
-      .lte('datavenc', dataFimFinal)
+      .gte('dtatend', dataInicio)
+      .lte('dtatend', dataFimFinal)
       .order('dtatend')
 
     if (procedimentosError) {
