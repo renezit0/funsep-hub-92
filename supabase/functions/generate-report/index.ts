@@ -79,8 +79,10 @@ Deno.serve(async (req) => {
     }
 
     // 2. Buscar procedimentos (para relatórios a_pagar e pagos)
-    // Se dataFim estiver vazio, usar a data atual
-    const dataFimFinal = dataFim && dataFim.trim() !== '' ? dataFim : new Date().toISOString().split('T')[0]
+    // Se dataFim estiver vazio, usar o último dia do mês atual
+    const hoje = new Date()
+    const ultimoDiaMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).toISOString().split('T')[0]
+    const dataFimFinal = dataFim && dataFim.trim() !== '' ? dataFim : ultimoDiaMes
     
     const { data: procedimentos, error: procedimentosError } = await supabase
       .from('mgumrrapg')
