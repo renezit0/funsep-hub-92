@@ -344,34 +344,34 @@ export function ReportsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <ChartBar className="h-8 w-8" />
+          <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
+            <ChartBar className="h-6 w-6 sm:h-8 sm:w-8" />
             Relatórios por Associado
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">
             Busque associados e gere relatórios individuais de procedimentos.
           </p>
         </div>
         <Button 
           onClick={() => setValidateTokenModalOpen(true)}
           variant="outline"
-          className="gap-2"
+          className="gap-2 w-full sm:w-auto"
         >
           <Shield className="h-4 w-4" />
-          Validar Tokens
+          <span className="sm:inline">Validar Tokens</span>
         </Button>
       </div>
 
       <Card className="border-l-4 border-l-primary">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-3">
-            <Info className="h-5 w-5 text-primary" />
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex items-start gap-2 sm:gap-3">
+            <Info className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold">Relatórios Administrativos</p>
-              <p className="text-sm text-muted-foreground">
+              <p className="font-semibold text-sm sm:text-base">Relatórios Administrativos</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 Gere relatórios detalhados por associado, incluindo procedimentos a pagar, pagos e IR.
               </p>
             </div>
@@ -381,11 +381,11 @@ export function ReportsPage() {
 
       {/* Busca de Associados */}
       <Card>
-        <CardHeader>
-          <CardTitle>Buscar Associados</CardTitle>
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="text-lg sm:text-xl">Buscar Associados</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <CardContent className="space-y-4 p-4 sm:p-6 pt-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <div className="space-y-2">
               <Label htmlFor="nome">Nome</Label>
               <Input
@@ -434,12 +434,12 @@ export function ReportsPage() {
               </select>
             </div>
           </div>
-          <div className="flex gap-2">
-            <Button onClick={searchBeneficiaries} disabled={loading} className="gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button onClick={searchBeneficiaries} disabled={loading} className="gap-2 w-full sm:w-auto">
               <Search className="h-4 w-4" />
               {loading ? "Buscando..." : "Buscar"}
             </Button>
-            <Button variant="outline" onClick={clearFilters} className="gap-2">
+            <Button variant="outline" onClick={clearFilters} className="gap-2 w-full sm:w-auto">
               <X className="h-4 w-4" />
               Limpar
             </Button>
@@ -449,103 +449,168 @@ export function ReportsPage() {
 
       {/* Resultados */}
       <Card>
-        <CardHeader>
-          <CardTitle>Associados Encontrados ({beneficiaries.length})</CardTitle>
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="text-lg sm:text-xl">Associados Encontrados ({beneficiaries.length})</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0 sm:p-6 sm:pt-0">
           {loading ? (
             <div className="flex items-center justify-center py-8">
               <div className="text-center">
                 <ChartBar className="h-12 w-12 mx-auto mb-4 opacity-30 animate-pulse" />
-                <p className="text-muted-foreground">Carregando associados...</p>
+                <p className="text-sm text-muted-foreground">Carregando associados...</p>
               </div>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Matrícula</TableHead>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>CPF</TableHead>
-                  <TableHead>Empresa</TableHead>
-                  <TableHead>Relatório A Pagar</TableHead>
-                  <TableHead>Relatório Pagos</TableHead>
-                  <TableHead>Auxílio Saúde</TableHead>
-                  <TableHead>Imposto de Renda</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <>
+              {/* Desktop Table */}
+              <div className="hidden lg:block overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Matrícula</TableHead>
+                      <TableHead>Nome</TableHead>
+                      <TableHead>CPF</TableHead>
+                      <TableHead>Empresa</TableHead>
+                      <TableHead>A Pagar</TableHead>
+                      <TableHead>Pagos</TableHead>
+                      <TableHead>Auxílio</TableHead>
+                      <TableHead>IR</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {beneficiaries.length > 0 ? (
+                      beneficiaries.map((beneficiary) => (
+                        <TableRow key={beneficiary.matricula}>
+                          <TableCell className="font-medium">{beneficiary.matricula}</TableCell>
+                          <TableCell>{beneficiary.nome}</TableCell>
+                          <TableCell className="font-mono text-xs">{formatCPF(beneficiary.cpf)}</TableCell>
+                          <TableCell>
+                            <span className="text-sm text-muted-foreground">
+                              {getCompanyName(beneficiary.empresa)}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <Button 
+                              size="sm" 
+                              variant="default"
+                              onClick={() => openReportModal(beneficiary, 'a_pagar')}
+                              className="bg-green-600 hover:bg-green-700 gap-1"
+                            >
+                              <FileText className="h-3 w-3" />
+                              <span className="hidden xl:inline">A Pagar</span>
+                            </Button>
+                          </TableCell>
+                          <TableCell>
+                            <Button 
+                              size="sm" 
+                              variant="secondary"
+                              onClick={() => openReportModal(beneficiary, 'pagos')}
+                              className="bg-blue-600 hover:bg-blue-700 text-white gap-1"
+                            >
+                              <Download className="h-3 w-3" />
+                              <span className="hidden xl:inline">Pagos</span>
+                            </Button>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-xs">Breve</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => openReportModal(beneficiary, 'ir')}
+                              className="bg-purple-600 hover:bg-purple-700 text-white border-purple-600 gap-1"
+                            >
+                              <FileText className="h-3 w-3" />
+                              <span className="hidden xl:inline">IR</span>
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                          <ChartBar className="h-12 w-12 mx-auto mb-4 opacity-30" />
+                          Nenhum associado encontrado.
+                          <br />
+                          <small>Verifique os filtros de pesquisa ou tente novamente.</small>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Mobile Cards */}
+              <div className="lg:hidden space-y-3 p-4">
                 {beneficiaries.length > 0 ? (
                   beneficiaries.map((beneficiary) => (
-                    <TableRow key={beneficiary.matricula}>
-                      <TableCell className="font-medium">{beneficiary.matricula}</TableCell>
-                      <TableCell>{beneficiary.nome}</TableCell>
-                      <TableCell>{formatCPF(beneficiary.cpf)}</TableCell>
-                      <TableCell>
-                        <span className="text-sm text-muted-foreground">
-                          {getCompanyName(beneficiary.empresa)}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <Button 
-                          size="sm" 
-                          variant="default"
-                          onClick={() => openReportModal(beneficiary, 'a_pagar')}
-                          className="bg-green-600 hover:bg-green-700"
-                        >
-                          <FileText className="h-4 w-4" />
-                          A Pagar
-                        </Button>
-                      </TableCell>
-                      <TableCell>
-                        <Button 
-                          size="sm" 
-                          variant="secondary"
-                          onClick={() => openReportModal(beneficiary, 'pagos')}
-                          className="bg-blue-600 hover:bg-blue-700 text-white"
-                        >
-                          <Download className="h-4 w-4" />
-                          Pagos
-                        </Button>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">Em breve</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => openReportModal(beneficiary, 'ir')}
-                          className="bg-purple-600 hover:bg-purple-700 text-white border-purple-600"
-                        >
-                          <FileText className="h-4 w-4" />
-                          IR
-                        </Button>
-                      </TableCell>
-                    </TableRow>
+                    <Card key={beneficiary.matricula} className="overflow-hidden">
+                      <CardContent className="p-4 space-y-3">
+                        <div className="space-y-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0 flex-1">
+                              <p className="font-semibold text-sm truncate">{beneficiary.nome}</p>
+                              <p className="text-xs text-muted-foreground">Mat: {beneficiary.matricula}</p>
+                            </div>
+                          </div>
+                          <p className="text-xs font-mono text-muted-foreground">{formatCPF(beneficiary.cpf)}</p>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {getCompanyName(beneficiary.empresa)}
+                          </p>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-2">
+                          <Button 
+                            size="sm"
+                            onClick={() => openReportModal(beneficiary, 'a_pagar')}
+                            className="bg-green-600 hover:bg-green-700 text-white w-full gap-1 text-xs h-8"
+                          >
+                            <FileText className="h-3 w-3" />
+                            A Pagar
+                          </Button>
+                          <Button 
+                            size="sm"
+                            onClick={() => openReportModal(beneficiary, 'pagos')}
+                            className="bg-blue-600 hover:bg-blue-700 text-white w-full gap-1 text-xs h-8"
+                          >
+                            <Download className="h-3 w-3" />
+                            Pagos
+                          </Button>
+                          <Button 
+                            size="sm"
+                            onClick={() => openReportModal(beneficiary, 'ir')}
+                            className="bg-purple-600 hover:bg-purple-700 text-white w-full gap-1 text-xs h-8"
+                          >
+                            <FileText className="h-3 w-3" />
+                            IR
+                          </Button>
+                          <div className="flex items-center justify-center">
+                            <Badge variant="outline" className="text-xs">Auxílio em breve</Badge>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
                   ))
                 ) : (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                      <ChartBar className="h-12 w-12 mx-auto mb-4 opacity-30" />
-                      Nenhum associado encontrado.
-                      <br />
-                      <small>Verifique os filtros de pesquisa ou tente novamente.</small>
-                    </TableCell>
-                  </TableRow>
+                  <div className="text-center py-8 text-muted-foreground">
+                    <ChartBar className="h-12 w-12 mx-auto mb-4 opacity-30" />
+                    <p className="text-sm">Nenhum associado encontrado.</p>
+                    <p className="text-xs mt-1">Verifique os filtros de pesquisa ou tente novamente.</p>
+                  </div>
                 )}
-              </TableBody>
-            </Table>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
 
       {/* Modal de Período para Relatórios */}
       <Dialog open={reportModalOpen} onOpenChange={setReportModalOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Selecionar Período</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-lg">Selecionar Período</DialogTitle>
+            <DialogDescription className="text-sm">
               {reportType === 'ir' 
                 ? 'Selecione o ano para gerar o relatório de Imposto de Renda.'
                 : `Selecione o período para gerar o relatório de ${reportType === 'a_pagar' ? 'procedimentos a pagar' : 'procedimentos pagos'}.`
@@ -624,28 +689,29 @@ export function ReportsPage() {
 
       {/* Modal de Token Gerado */}
       <Dialog open={tokenModalOpen} onOpenChange={setTokenModalOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Hash className="h-5 w-5" />
+            <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <Hash className="h-4 w-4 sm:h-5 sm:w-5" />
               Token do Relatório Gerado
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-xs sm:text-sm">
               Use este token para visualizar o relatório posteriormente ou compartilhar com o beneficiário.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <div className="space-y-2">
-              <Label>Token:</Label>
+              <Label className="text-sm">Token:</Label>
               <div className="flex gap-2">
                 <Input
                   value={generatedToken || ''}
                   readOnly
-                  className="font-mono text-sm"
+                  className="font-mono text-xs sm:text-sm"
                 />
                 <Button
                   size="icon"
                   variant="outline"
+                  className="flex-shrink-0"
                   onClick={() => {
                     if (generatedToken) {
                       navigator.clipboard.writeText(generatedToken);
@@ -662,10 +728,10 @@ export function ReportsPage() {
             </div>
             
             <Card className="border-l-4 border-l-primary">
-              <CardContent className="p-4">
+              <CardContent className="p-3 sm:p-4">
                 <div className="flex items-start gap-2">
-                  <Info className="h-4 w-4 text-primary mt-0.5" />
-                  <div className="text-sm">
+                  <Info className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                  <div className="text-xs sm:text-sm">
                     <p className="font-medium">Como usar o token:</p>
                     <ul className="text-muted-foreground mt-1 space-y-1">
                       <li>• Acesse a página de relatórios</li>
@@ -686,26 +752,26 @@ export function ReportsPage() {
 
       {/* Modal de Validar Token */}
       <Dialog open={validateTokenModalOpen} onOpenChange={setValidateTokenModalOpen}>
-        <DialogContent className="sm:max-w-2xl">
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Shield className="h-5 w-5" />
+            <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <Shield className="h-4 w-4 sm:h-5 sm:w-5" />
               Validar Token de Relatório
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-xs sm:text-sm">
               Digite o token para visualizar e validar um relatório gerado anteriormente.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="validateToken">Token:</Label>
-              <div className="flex gap-2">
+              <Label htmlFor="validateToken" className="text-sm">Token:</Label>
+              <div className="flex flex-col sm:flex-row gap-2">
                 <Input
                   id="validateToken"
                   value={tokenToValidate}
                   onChange={(e) => setTokenToValidate(e.target.value)}
                   placeholder="Digite o token do relatório"
-                  className="font-mono"
+                  className="font-mono text-xs sm:text-sm flex-1"
                 />
                 <Button
                   onClick={() => {
@@ -721,18 +787,19 @@ export function ReportsPage() {
                       });
                     }
                   }}
+                  className="w-full sm:w-auto gap-2"
                 >
-                  <FileText className="h-4 w-4 mr-2" />
+                  <FileText className="h-4 w-4" />
                   Visualizar
                 </Button>
               </div>
             </div>
             
             <Card className="border-l-4 border-l-primary">
-              <CardContent className="p-4">
+              <CardContent className="p-3 sm:p-4">
                 <div className="flex items-start gap-2">
-                  <Info className="h-4 w-4 text-primary mt-0.5" />
-                  <div className="text-sm">
+                  <Info className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                  <div className="text-xs sm:text-sm">
                     <p className="font-medium">Informações sobre tokens:</p>
                     <ul className="text-muted-foreground mt-1 space-y-1">
                       <li>• Cada relatório gerado possui um token único</li>
