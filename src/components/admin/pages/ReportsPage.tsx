@@ -184,21 +184,23 @@ export function ReportsPage() {
     setLoading(true);
 
     try {
-      // Buscar dados do admin logado
-      const adminSession = localStorage.getItem('adminSession');
+      // Buscar dados do admin logado (usando mesma chave do adminAuth)
+      const adminSessionStr = localStorage.getItem('admin_session');
       let geradoPorSigla = null;
       let geradoPorMatricula = null;
 
-      if (adminSession) {
-        const sessionData = JSON.parse(adminSession);
-        geradoPorSigla = sessionData.sigla;
-        
-        // Buscar matrícula do admin (se tiver)
-        const { data: adminData } = await supabase
-          .from('usuarios')
-          .select('sigla')
-          .eq('sigla', geradoPorSigla)
-          .single();
+      if (adminSessionStr) {
+        try {
+          const sessionData = JSON.parse(adminSessionStr);
+          geradoPorSigla = sessionData.sigla;
+          
+          // Se for beneficiário (BEN-XXXX), extrair matrícula
+          if (geradoPorSigla && geradoPorSigla.startsWith('BEN-')) {
+            geradoPorMatricula = parseInt(geradoPorSigla.replace('BEN-', ''));
+          }
+        } catch (e) {
+          console.error('Erro ao parsear sessão:', e);
+        }
       }
 
       console.log('Chamando função edge com dados:', {

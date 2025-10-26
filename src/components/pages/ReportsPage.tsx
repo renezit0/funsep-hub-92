@@ -48,6 +48,8 @@ export function ReportsPage() {
           dataInicio: reportType === 'ir' ? `${selectedYear}-01-01` : dateRange.dataInicio,
           dataFim: reportType === 'ir' ? `${selectedYear}-12-31` : dateRange.dataFim,
           reportType: reportType,
+          geradoPorMatricula: session.user.matricula,
+          geradoPorSigla: session.sigla,
         },
       });
 
