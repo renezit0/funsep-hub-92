@@ -462,89 +462,87 @@ export function ReportsPage() {
             </div>
           ) : (
             <>
-              {/* Desktop/Tablet Table with horizontal scroll */}
-              <div className="hidden lg:block">
-                <div className="overflow-x-auto -mx-6 px-6">
-                  <Table className="min-w-[1000px]">
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-[100px]">Matrícula</TableHead>
-                        <TableHead className="min-w-[200px]">Nome</TableHead>
-                        <TableHead className="w-[140px]">CPF</TableHead>
-                        <TableHead className="min-w-[150px]">Empresa</TableHead>
-                        <TableHead className="w-[110px]">A Pagar</TableHead>
-                        <TableHead className="w-[110px]">Pagos</TableHead>
-                        <TableHead className="w-[90px]">Auxílio</TableHead>
-                        <TableHead className="w-[90px]">IR</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {beneficiaries.length > 0 ? (
-                        beneficiaries.map((beneficiary) => (
-                          <TableRow key={beneficiary.matricula}>
-                            <TableCell className="font-medium">{beneficiary.matricula}</TableCell>
-                            <TableCell className="font-medium">{beneficiary.nome}</TableCell>
-                            <TableCell className="font-mono text-xs">{formatCPF(beneficiary.cpf)}</TableCell>
-                            <TableCell>
-                              <span className="text-sm text-muted-foreground">
-                                {getCompanyName(beneficiary.empresa)}
-                              </span>
-                            </TableCell>
-                            <TableCell>
-                              <Button 
-                                size="sm" 
-                                variant="default"
-                                onClick={() => openReportModal(beneficiary, 'a_pagar')}
-                                className="bg-green-600 hover:bg-green-700 gap-1 whitespace-nowrap"
-                              >
-                                <FileText className="h-3 w-3" />
-                                <span className="hidden xl:inline">A Pagar</span>
-                              </Button>
-                            </TableCell>
-                            <TableCell>
-                              <Button 
-                                size="sm" 
-                                variant="secondary"
-                                onClick={() => openReportModal(beneficiary, 'pagos')}
-                                className="bg-blue-600 hover:bg-blue-700 text-white gap-1 whitespace-nowrap"
-                              >
-                                <Download className="h-3 w-3" />
-                                <span className="hidden xl:inline">Pagos</span>
-                              </Button>
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant="outline" className="text-xs whitespace-nowrap">Breve</Badge>
-                            </TableCell>
-                            <TableCell>
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => openReportModal(beneficiary, 'ir')}
-                                className="bg-purple-600 hover:bg-purple-700 text-white border-purple-600 gap-1 whitespace-nowrap"
-                              >
-                                <FileText className="h-3 w-3" />
-                                <span className="hidden xl:inline">IR</span>
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                            <ChartBar className="h-12 w-12 mx-auto mb-4 opacity-30" />
-                            Nenhum associado encontrado.
-                            <br />
-                            <small>Verifique os filtros de pesquisa ou tente novamente.</small>
+              {/* Desktop Table - apenas em telas muito grandes */}
+              <div className="hidden xl:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Matrícula</TableHead>
+                      <TableHead>Nome</TableHead>
+                      <TableHead>CPF</TableHead>
+                      <TableHead>Empresa</TableHead>
+                      <TableHead>A Pagar</TableHead>
+                      <TableHead>Pagos</TableHead>
+                      <TableHead>Auxílio</TableHead>
+                      <TableHead>IR</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {beneficiaries.length > 0 ? (
+                      beneficiaries.map((beneficiary) => (
+                        <TableRow key={beneficiary.matricula}>
+                          <TableCell className="font-medium">{beneficiary.matricula}</TableCell>
+                          <TableCell className="font-medium">{beneficiary.nome}</TableCell>
+                          <TableCell className="font-mono text-xs">{formatCPF(beneficiary.cpf)}</TableCell>
+                          <TableCell>
+                            <span className="text-sm text-muted-foreground">
+                              {getCompanyName(beneficiary.empresa)}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <Button 
+                              size="sm" 
+                              variant="default"
+                              onClick={() => openReportModal(beneficiary, 'a_pagar')}
+                              className="bg-green-600 hover:bg-green-700 gap-1"
+                            >
+                              <FileText className="h-3 w-3" />
+                              A Pagar
+                            </Button>
+                          </TableCell>
+                          <TableCell>
+                            <Button 
+                              size="sm" 
+                              variant="secondary"
+                              onClick={() => openReportModal(beneficiary, 'pagos')}
+                              className="bg-blue-600 hover:bg-blue-700 text-white gap-1"
+                            >
+                              <Download className="h-3 w-3" />
+                              Pagos
+                            </Button>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-xs">Breve</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => openReportModal(beneficiary, 'ir')}
+                              className="bg-purple-600 hover:bg-purple-700 text-white border-purple-600 gap-1"
+                            >
+                              <FileText className="h-3 w-3" />
+                              IR
+                            </Button>
                           </TableCell>
                         </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                          <ChartBar className="h-12 w-12 mx-auto mb-4 opacity-30" />
+                          Nenhum associado encontrado.
+                          <br />
+                          <small>Verifique os filtros de pesquisa ou tente novamente.</small>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
               </div>
 
-              {/* Mobile Cards */}
-              <div className="lg:hidden space-y-3 p-4">
+              {/* Cards para Mobile e Tablet */}
+              <div className="xl:hidden space-y-3 p-4">
                 {beneficiaries.length > 0 ? (
                   beneficiaries.map((beneficiary) => (
                     <Card key={beneficiary.matricula} className="overflow-hidden">
