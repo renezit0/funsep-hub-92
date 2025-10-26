@@ -253,7 +253,7 @@ Deno.serve(async (req) => {
     console.log('Relatório gerado com sucesso')
 
     return new Response(JSON.stringify({ 
-      html: htmlContent,
+      html: htmlWithToken,
       filename,
       token
     }), {
@@ -451,7 +451,7 @@ async function generateIRReport(supabase: any, beneficiary: any, matricula: numb
     }
     
     return new Response(JSON.stringify({ 
-      html: htmlContent,
+      html: htmlWithToken,
       filename,
       token
     }), {
