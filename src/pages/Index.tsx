@@ -56,7 +56,9 @@ const Index = () => {
     setLoginModalOpen(false);
   };
 
-  const currentPageConfig = pageConfig[currentPage as keyof typeof pageConfig];
+  // Extract base page name without query params
+  const basePageName = currentPage.split('?')[0];
+  const currentPageConfig = pageConfig[basePageName as keyof typeof pageConfig] || pageConfig.home;
 
   return (
     <div className="min-h-screen bg-bg-secondary">
