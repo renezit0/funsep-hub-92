@@ -864,7 +864,14 @@ export type Database = {
         Args: { text_content: string }
         Returns: string
       }
+      current_user_is_admin: { Args: never; Returns: boolean }
+      is_active_session: { Args: { _sigla: string }; Returns: boolean }
+      is_admin_session: { Args: { _sigla: string }; Returns: boolean }
       is_admin_user: { Args: { _sigla: string }; Returns: boolean }
+      matricula_has_active_session: {
+        Args: { _matricula: number }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
