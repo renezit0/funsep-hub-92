@@ -10,6 +10,8 @@ interface ReportData {
   dataInicio: string
   dataFim: string
   reportType: 'a_pagar' | 'pagos' | 'ir'
+  geradoPorMatricula?: number
+  geradoPorSigla?: string
 }
 
 interface Beneficiary {
@@ -52,9 +54,9 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    const { matricula, dataInicio, dataFim, reportType }: ReportData = await req.json()
+    const { matricula, dataInicio, dataFim, reportType, geradoPorMatricula, geradoPorSigla }: ReportData = await req.json()
 
-    console.log('Iniciando geração de relatório:', { matricula, dataInicio, dataFim, reportType })
+    console.log('Iniciando geração de relatório:', { matricula, dataInicio, dataFim, reportType, geradoPorMatricula, geradoPorSigla })
 
     // 1. Buscar beneficiário
     const { data: beneficiary, error: beneficiaryError } = await supabase
@@ -75,7 +77,7 @@ Deno.serve(async (req) => {
     if (reportType === 'ir') {
       const anoCalendario = parseInt(dataInicio.split('-')[0]) // Ano selecionado na interface
       const anoExercicio = anoCalendario + 1 // Ano do exercício (sempre ano+1)
-      return await generateIRReport(supabase, beneficiary, matricula, anoCalendario, anoExercicio)
+      return await generateIRReport(supabase, beneficiary, matricula, anoCalendario, anoExercicio, geradoPorMatricula, geradoPorSigla)
     }
 
     // 2. Buscar procedimentos (para relatórios a_pagar e pagos)
@@ -84,8 +86,11 @@ Deno.serve(async (req) => {
     const ultimoDiaMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).toISOString().split('T')[0]
     const dataFimFinal = dataFim && dataFim.trim() !== '' ? dataFim : ultimoDiaMes
     
+    // Escolher tabela correta baseado no tipo de relatório
+    const tabelaProcedimentos = reportType === 'pagos' ? 'mgumrr' : 'mgumrrapg'
+    
     const { data: procedimentos, error: procedimentosError } = await supabase
-      .from('mgumrrapg')
+      .from(tabelaProcedimentos)
       .select('matricula, dep, dtatend, datavenc, valorpago, valorpart, evento')
       .eq('matricula', matricula)
       .gte('datavenc', dataInicio)
@@ -206,14 +211,42 @@ Deno.serve(async (req) => {
       dependentes, 
       { titular: totaisTitular, dependentes: totaisDependentes, geral: totaisGeral },
       dataInicio, 
-      dataFim
+      dataFimFinal,
+      reportType
     )
+
+    const filename = `${beneficiary.nome.replace(/[^A-Z0-9]/gi, '_')}_${matricula}_${new Date().getFullYear()}.pdf`
+
+    // 10. Gerar token único e salvar no banco
+    const token = crypto.randomUUID()
+    
+    const { error: tokenError } = await supabase
+      .from('relatorio_tokens')
+      .insert({
+        token,
+        matricula,
+        tipo_relatorio: reportType,
+        data_inicio: dataInicio,
+        data_fim: dataFimFinal,
+        gerado_por_matricula: geradoPorMatricula,
+        gerado_por_sigla: geradoPorSigla,
+        html_content: htmlContent,
+        filename
+      })
+
+    if (tokenError) {
+      console.error('Erro ao salvar token:', tokenError)
+      // Não falhar a geração do relatório, apenas logar o erro
+    } else {
+      console.log('Token gerado e salvo com sucesso:', token)
+    }
 
     console.log('Relatório gerado com sucesso')
 
     return new Response(JSON.stringify({ 
       html: htmlContent,
-      filename: `${beneficiary.nome.replace(/[^A-Z0-9]/gi, '_')}_${matricula}_${new Date().getFullYear()}.pdf`
+      filename,
+      token
     }), {
       headers: {
         ...corsHeaders,
@@ -230,7 +263,7 @@ Deno.serve(async (req) => {
   }
 })
 
-async function generateIRReport(supabase: any, beneficiary: any, matricula: number, anoCalendario: number, anoExercicio: number) {
+async function generateIRReport(supabase: any, beneficiary: any, matricula: number, anoCalendario: number, anoExercicio: number, geradoPorMatricula?: number, geradoPorSigla?: string) {
   try {
     console.log('Gerando relatório IR para:', { matricula, anoCalendario, anoExercicio })
     
@@ -374,9 +407,35 @@ async function generateIRReport(supabase: any, beneficiary: any, matricula: numb
       anoExercicio
     )
     
+    const filename = `IR_${beneficiary.nome.replace(/[^A-Z0-9]/gi, '_')}_${matricula}_${anoCalendario}.pdf`
+
+    // Gerar token único e salvar no banco
+    const token = crypto.randomUUID()
+    
+    const { error: tokenError } = await supabase
+      .from('relatorio_tokens')
+      .insert({
+        token,
+        matricula,
+        tipo_relatorio: 'ir',
+        data_inicio: `${anoCalendario}-01-01`,
+        data_fim: `${anoCalendario}-12-31`,
+        gerado_por_matricula: geradoPorMatricula,
+        gerado_por_sigla: geradoPorSigla,
+        html_content: htmlContent,
+        filename
+      })
+
+    if (tokenError) {
+      console.error('Erro ao salvar token IR:', tokenError)
+    } else {
+      console.log('Token IR gerado e salvo com sucesso:', token)
+    }
+    
     return new Response(JSON.stringify({ 
       html: htmlContent,
-      filename: `IR_${beneficiary.nome.replace(/[^A-Z0-9]/gi, '_')}_${matricula}_${anoCalendario}.pdf`
+      filename,
+      token
     }), {
       headers: {
         ...corsHeaders,
@@ -623,8 +682,12 @@ function generateReportHTML(
   dependentes: Procedure[],
   totais: any,
   dataInicio: string, 
-  dataFim: string
+  dataFim: string,
+  reportType: 'a_pagar' | 'pagos' | 'ir'
 ): string {
+  const tituloRelatorio = reportType === 'pagos' 
+    ? 'RELATÓRIO DE PROCEDIMENTOS PAGOS' 
+    : 'RELATÓRIO DE PROCEDIMENTOS A PAGAR'
   // Agrupar procedimentos por dependente
   const procedimentosPorDependente: { [key: string]: Procedure[] } = {};
   dependentes.forEach(proc => {
@@ -901,7 +964,7 @@ function generateReportHTML(
             <img src="/images/e548bfa7-21ab-4b35-866a-211b0aaa1135.png" alt="Logo FUNSEP">
             <div class="cnpj">CNPJ: 77.750.354/0001-88</div>
         </div>
-        <div class="title">RELATÓRIO DE PROCEDIMENTOS A PAGAR</div>
+        <div class="title">${tituloRelatorio}</div>
         <div class="subtitle">Período: ${formatDate(dataInicio)} a ${formatDate(dataFim)}</div>
     </div>
 

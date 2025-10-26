@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ChartBar, Download, FileText, Info, Search, X } from "lucide-react";
+import { ChartBar, Download, FileText, Info, Search, X, Hash, Copy, Check } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -62,6 +62,8 @@ export function ReportsPage() {
     matricula: '',
     empresa: ''
   });
+  const [generatedToken, setGeneratedToken] = useState<string | null>(null);
+  const [tokenModalOpen, setTokenModalOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -173,11 +175,30 @@ export function ReportsPage() {
     setLoading(true);
 
     try {
+      // Buscar dados do admin logado
+      const adminSession = localStorage.getItem('adminSession');
+      let geradoPorSigla = null;
+      let geradoPorMatricula = null;
+
+      if (adminSession) {
+        const sessionData = JSON.parse(adminSession);
+        geradoPorSigla = sessionData.sigla;
+        
+        // Buscar matrícula do admin (se tiver)
+        const { data: adminData } = await supabase
+          .from('usuarios')
+          .select('sigla')
+          .eq('sigla', geradoPorSigla)
+          .single();
+      }
+
       console.log('Chamando função edge com dados:', {
         matricula: selectedBeneficiary.matricula,
         dataInicio: dateRange.dataInicio,
         dataFim: dateRange.dataFim,
         reportType: reportType,
+        geradoPorSigla,
+        geradoPorMatricula
       });
 
       const { data, error } = await supabase.functions.invoke('generate-report', {
@@ -186,6 +207,8 @@ export function ReportsPage() {
           dataInicio: dateRange.dataInicio,
           dataFim: dateRange.dataFim,
           reportType: reportType,
+          geradoPorSigla,
+          geradoPorMatricula
         },
       });
 
@@ -196,7 +219,12 @@ export function ReportsPage() {
 
       console.log('Resposta da função edge:', data);
 
-      const { html, filename } = data;
+      const { html, filename, token } = data;
+      
+      // Salvar o token gerado
+      if (token) {
+        setGeneratedToken(token);
+      }
 
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = html;
@@ -280,6 +308,11 @@ export function ReportsPage() {
       });
 
       setReportModalOpen(false);
+      
+      // Abrir modal com o token se disponível
+      if (token) {
+        setTokenModalOpen(true);
+      }
     } catch (error: any) {
       console.error('Erro completo ao gerar relatório:', error);
 
@@ -561,6 +594,68 @@ export function ReportsPage() {
 
             <Button onClick={generateReport} className="w-full gap-2" disabled={loading}>
               {loading ? "Gerando..." : <><Download className="h-4 w-4" /> Gerar Relatório</>}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Token Gerado */}
+      <Dialog open={tokenModalOpen} onOpenChange={setTokenModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Hash className="h-5 w-5" />
+              Token do Relatório Gerado
+            </DialogTitle>
+            <DialogDescription>
+              Use este token para visualizar o relatório posteriormente ou compartilhar com o beneficiário.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Token:</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={generatedToken || ''}
+                  readOnly
+                  className="font-mono text-sm"
+                />
+                <Button
+                  size="icon"
+                  variant="outline"
+                  onClick={() => {
+                    if (generatedToken) {
+                      navigator.clipboard.writeText(generatedToken);
+                      toast({
+                        title: "Copiado!",
+                        description: "Token copiado para a área de transferência",
+                      });
+                    }
+                  }}
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            
+            <Card className="border-l-4 border-l-primary">
+              <CardContent className="p-4">
+                <div className="flex items-start gap-2">
+                  <Info className="h-4 w-4 text-primary mt-0.5" />
+                  <div className="text-sm">
+                    <p className="font-medium">Como usar o token:</p>
+                    <ul className="text-muted-foreground mt-1 space-y-1">
+                      <li>• Acesse a página de relatórios</li>
+                      <li>• Digite o token para visualizar o relatório novamente</li>
+                      <li>• O sistema registra cada visualização</li>
+                    </ul>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Button onClick={() => setTokenModalOpen(false)} className="w-full">
+              Entendido
             </Button>
           </div>
         </DialogContent>

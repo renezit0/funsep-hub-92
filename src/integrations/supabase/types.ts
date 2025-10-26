@@ -438,7 +438,7 @@ export type Database = {
           titulo: number | null
           valorpago: number | null
           valorpart: number | null
-          valorreceb: string | null
+          valorreceb: number | null
           valortit: number | null
         }
         Insert: {
@@ -457,7 +457,7 @@ export type Database = {
           titulo?: number | null
           valorpago?: number | null
           valorpart?: number | null
-          valorreceb?: string | null
+          valorreceb?: number | null
           valortit?: number | null
         }
         Update: {
@@ -476,7 +476,7 @@ export type Database = {
           titulo?: number | null
           valorpago?: number | null
           valorpart?: number | null
-          valorreceb?: string | null
+          valorreceb?: number | null
           valortit?: number | null
         }
         Relationships: []
@@ -498,7 +498,7 @@ export type Database = {
           titulo: number | null
           valorpago: number | null
           valorpart: number | null
-          valorreceb: string | null
+          valorreceb: number | null
           valortit: number | null
         }
         Insert: {
@@ -517,7 +517,7 @@ export type Database = {
           titulo?: number | null
           valorpago?: number | null
           valorpart?: number | null
-          valorreceb?: string | null
+          valorreceb?: number | null
           valortit?: number | null
         }
         Update: {
@@ -536,7 +536,7 @@ export type Database = {
           titulo?: number | null
           valorpago?: number | null
           valorpart?: number | null
-          valorreceb?: string | null
+          valorreceb?: number | null
           valortit?: number | null
         }
         Relationships: []
@@ -580,6 +580,57 @@ export type Database = {
           resumo?: string
           titulo?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      relatorio_tokens: {
+        Row: {
+          created_at: string
+          data_fim: string
+          data_inicio: string
+          filename: string
+          gerado_em: string
+          gerado_por_matricula: number | null
+          gerado_por_sigla: string | null
+          html_content: string
+          id: string
+          matricula: number
+          tipo_relatorio: string
+          token: string
+          ultima_visualizacao: string | null
+          visualizacoes: number
+        }
+        Insert: {
+          created_at?: string
+          data_fim: string
+          data_inicio: string
+          filename: string
+          gerado_em?: string
+          gerado_por_matricula?: number | null
+          gerado_por_sigla?: string | null
+          html_content: string
+          id?: string
+          matricula: number
+          tipo_relatorio: string
+          token: string
+          ultima_visualizacao?: string | null
+          visualizacoes?: number
+        }
+        Update: {
+          created_at?: string
+          data_fim?: string
+          data_inicio?: string
+          filename?: string
+          gerado_em?: string
+          gerado_por_matricula?: number | null
+          gerado_por_sigla?: string | null
+          html_content?: string
+          id?: string
+          matricula?: number
+          tipo_relatorio?: string
+          token?: string
+          ultima_visualizacao?: string | null
+          visualizacoes?: number
         }
         Relationships: []
       }
@@ -773,10 +824,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      is_admin_user: {
-        Args: { _sigla: string }
-        Returns: boolean
-      }
+      is_admin_user: { Args: { _sigla: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
