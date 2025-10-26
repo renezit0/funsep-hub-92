@@ -89,12 +89,22 @@ export function SobreFunsepPage({ slug: propSlug }: SobreFunsepPageProps = {}) {
         </CardHeader>
         <CardContent>
           <div 
-            className="prose prose-sm md:prose-base max-w-none dark:prose-invert
-                       prose-headings:text-foreground prose-p:text-foreground 
-                       prose-strong:text-foreground prose-li:text-foreground
-                       prose-table:border prose-th:border prose-th:border-border 
-                       prose-td:border prose-td:border-border prose-th:bg-muted
-                       prose-th:p-2 prose-td:p-2"
+            className="prose prose-base lg:prose-lg max-w-none dark:prose-invert
+                       prose-headings:font-bold prose-headings:text-foreground 
+                       prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl
+                       prose-h1:mb-6 prose-h2:mb-4 prose-h3:mb-3
+                       prose-h1:mt-8 prose-h2:mt-6 prose-h3:mt-4
+                       prose-p:text-foreground prose-p:mb-4 prose-p:leading-relaxed
+                       prose-strong:text-foreground prose-strong:font-bold
+                       prose-li:text-foreground prose-li:mb-2 prose-li:leading-relaxed
+                       prose-ul:my-4 prose-ul:space-y-2
+                       prose-ol:my-4 prose-ol:space-y-2
+                       prose-table:my-8 prose-table:mx-auto prose-table:border-collapse
+                       prose-th:border prose-th:border-border prose-th:bg-muted 
+                       prose-th:p-3 prose-th:text-left prose-th:font-semibold
+                       prose-td:border prose-td:border-border prose-td:p-3
+                       prose-a:text-primary prose-a:underline
+                       [&_table]:mx-auto [&_table]:w-auto [&_table]:max-w-full"
             dangerouslySetInnerHTML={{ 
               __html: secao.conteudo
             }}
