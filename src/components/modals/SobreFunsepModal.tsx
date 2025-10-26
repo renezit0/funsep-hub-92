@@ -88,7 +88,7 @@ export function SobreFunsepModal({
     setLoading(false);
   };
 
-  // Configuração do editor Quill (igual ao de notícias)
+  // Configuração do editor Quill (sem tabelas por enquanto - requer pacote adicional)
   const modules = {
     toolbar: [
       [{ header: [1, 2, 3, false] }],
@@ -99,9 +99,7 @@ export function SobreFunsepModal({
       ["link"],
       [{ color: [] }, { background: [] }],
       ["clean"],
-      [{ table: true }],
     ],
-    table: true,
   };
 
   const formats = [
@@ -117,7 +115,6 @@ export function SobreFunsepModal({
     "link",
     "color",
     "background",
-    "table",
   ];
 
   return (
@@ -152,7 +149,7 @@ export function SobreFunsepModal({
               />
             </div>
             <p className="text-xs text-muted-foreground mt-12">
-              Use a barra de ferramentas para formatar o texto, adicionar tabelas, links, etc.
+              Use a barra de ferramentas para formatar o texto, adicionar links, etc. Para tabelas, use o formato markdown: | Coluna 1 | Coluna 2 |
             </p>
           </div>
 
