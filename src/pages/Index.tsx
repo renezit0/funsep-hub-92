@@ -89,7 +89,9 @@ const Index = () => {
             <HomePage onNavigate={handlePageChange} />
           )}
           {currentPageConfig.type === "regular" && currentPage.startsWith("sobre-funsep") && (
-            <SobreFunsepPage />
+            <SobreFunsepPage 
+              slug={currentPage.includes('?') ? currentPage.split('?secao=')[1] : 'quem-somos'} 
+            />
           )}
           {currentPageConfig.type === "regular" && currentPage === "news" && (
             <NewsPage />

@@ -14,37 +14,47 @@ interface SobreFunsepSecao {
   ordem: number;
 }
 
-export function SobreFunsepPage() {
+interface SobreFunsepPageProps {
+  slug?: string;
+}
+
+export function SobreFunsepPage({ slug: propSlug }: SobreFunsepPageProps = {}) {
   const [searchParams] = useSearchParams();
-  const slug = searchParams.get("secao") || "quem-somos";
+  const slug = propSlug || searchParams.get("secao") || "quem-somos";
   const [secao, setSecao] = useState<SobreFunsepSecao | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log("Loading secao with slug:", slug);
+    
+    const loadSecao = async () => {
+      setLoading(true);
+      setError(null);
+      
+      const { data, error: err } = await supabase
+        .from("sobre_funsep")
+        .select("*")
+        .eq("slug", slug)
+        .eq("publicado", true)
+        .maybeSingle();
+
+      if (err) {
+        setError("Erro ao carregar conteúdo");
+        console.error("Erro ao carregar seção:", err, "slug:", slug);
+      } else if (!data) {
+        setError("Conteúdo não encontrado");
+        console.error("Nenhum dado encontrado para o slug:", slug);
+      } else {
+        console.log("Seção carregada:", data);
+        setSecao(data);
+      }
+      
+      setLoading(false);
+    };
+    
     loadSecao();
   }, [slug]);
-
-  const loadSecao = async () => {
-    setLoading(true);
-    setError(null);
-    
-    const { data, error: err } = await supabase
-      .from("sobre_funsep")
-      .select("*")
-      .eq("slug", slug)
-      .eq("publicado", true)
-      .single();
-
-    if (err) {
-      setError("Erro ao carregar conteúdo");
-      console.error("Erro ao carregar seção:", err);
-    } else {
-      setSecao(data);
-    }
-    
-    setLoading(false);
-  };
 
   if (loading) {
     return (
@@ -70,6 +80,28 @@ export function SobreFunsepPage() {
     );
   }
 
+  // Format content with proper line breaks and styling
+  const formatContent = (content: string) => {
+    return content
+      .split('\n\n')
+      .map(paragraph => {
+        // Check if it's a list item or heading
+        if (paragraph.startsWith('✦') || paragraph.startsWith('-')) {
+          return `<li class="ml-4 mb-2">${paragraph.replace(/^[✦-]\s*/, '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</li>`;
+        }
+        if (paragraph.startsWith('**') && paragraph.endsWith('**')) {
+          return `<h3 class="text-xl font-bold mt-6 mb-3">${paragraph.replace(/\*\*/g, '')}</h3>`;
+        }
+        if (paragraph.includes('|')) {
+          // Simple table detection
+          return `<div class="overflow-x-auto my-4"><pre class="bg-muted p-4 rounded">${paragraph}</pre></div>`;
+        }
+        // Regular paragraph
+        return `<p class="mb-4 leading-relaxed">${paragraph.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</p>`;
+      })
+      .join('');
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <Card>
@@ -78,13 +110,9 @@ export function SobreFunsepPage() {
         </CardHeader>
         <CardContent>
           <div 
-            className="prose prose-sm md:prose-base max-w-none"
+            className="text-foreground space-y-2"
             dangerouslySetInnerHTML={{ 
-              __html: secao.conteudo
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\n\n/g, '</p><p>')
-                .replace(/\n/g, '<br/>')
-                .replace(/^(.*)$/, '<p>$1</p>')
+              __html: formatContent(secao.conteudo)
             }}
           />
         </CardContent>
