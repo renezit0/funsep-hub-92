@@ -80,7 +80,85 @@ export function SobreFunsepPage({ slug: propSlug }: SobreFunsepPageProps = {}) {
     );
   }
 
-  // Render HTML content directly (now it comes from Quill as proper HTML)
+  // Convert simple markdown-like text to HTML
+  const formatContent = (content: string) => {
+    let html = content;
+    
+    // Convert **bold** to <strong>
+    html = html.replace(/\*\*([^\*]+)\*\*/g, '<strong>$1</strong>');
+    
+    // Convert markdown tables to HTML tables
+    const lines = html.split('\n');
+    let inTable = false;
+    let processedLines: string[] = [];
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      
+      // Check if line is a table row
+      if (line.startsWith('|') && line.endsWith('|')) {
+        if (!inTable) {
+          processedLines.push('<div class="my-6 overflow-x-auto flex justify-center"><table class="border-collapse border border-border">');
+          inTable = true;
+        }
+        
+        // Skip separator lines
+        if (line.match(/^\|[\s\-:]+\|/)) {
+          continue;
+        }
+        
+        // Process table row
+        const cells = line.split('|').slice(1, -1).map(cell => cell.trim());
+        const isHeader = i === 0 || (lines[i-1] && lines[i-1].match(/^\|[\s\-:]+\|/)) || line.includes('Faixa') || line.includes('Enfermaria');
+        
+        processedLines.push('<tr>');
+        cells.forEach(cell => {
+          if (isHeader) {
+            processedLines.push(`<th class="border border-border px-4 py-2 bg-muted font-semibold text-left">${cell}</th>`);
+          } else {
+            processedLines.push(`<td class="border border-border px-4 py-2">${cell}</td>`);
+          }
+        });
+        processedLines.push('</tr>');
+      } else {
+        if (inTable) {
+          processedLines.push('</table></div>');
+          inTable = false;
+        }
+        
+        // Convert list items (support both - and ✦)
+        if (line.startsWith('- ') || line.startsWith('✦ ')) {
+          if (processedLines[processedLines.length - 1] !== '<ul class="my-4 space-y-2 list-disc list-inside">') {
+            processedLines.push('<ul class="my-4 space-y-2 list-disc list-inside">');
+          }
+          const itemText = line.startsWith('- ') ? line.substring(2) : line.substring(2);
+          processedLines.push(`<li>${itemText}</li>`);
+        } else if (processedLines[processedLines.length - 1]?.startsWith('<ul')) {
+          processedLines.push('</ul>');
+          if (line) {
+            processedLines.push(`<p class="mb-4 leading-relaxed">${line}</p>`);
+          }
+        } else if (line) {
+          processedLines.push(`<p class="mb-4 leading-relaxed">${line}</p>`);
+        } else {
+          // Empty line - add spacing
+          processedLines.push('<div class="h-2"></div>');
+        }
+      }
+    }
+    
+    if (inTable) {
+      processedLines.push('</table></div>');
+    }
+    
+    if (processedLines[processedLines.length - 1]?.startsWith('<ul')) {
+      processedLines.push('</ul>');
+    }
+    
+    return processedLines.join('');
+  };
+
+  // Render content
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <Card>
@@ -89,24 +167,9 @@ export function SobreFunsepPage({ slug: propSlug }: SobreFunsepPageProps = {}) {
         </CardHeader>
         <CardContent>
           <div 
-            className="prose prose-base lg:prose-lg max-w-none dark:prose-invert
-                       prose-headings:font-bold prose-headings:text-foreground 
-                       prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl
-                       prose-h1:mb-6 prose-h2:mb-4 prose-h3:mb-3
-                       prose-h1:mt-8 prose-h2:mt-6 prose-h3:mt-4
-                       prose-p:text-foreground prose-p:mb-4 prose-p:leading-relaxed
-                       prose-strong:text-foreground prose-strong:font-bold
-                       prose-li:text-foreground prose-li:mb-2 prose-li:leading-relaxed
-                       prose-ul:my-4 prose-ul:space-y-2
-                       prose-ol:my-4 prose-ol:space-y-2
-                       prose-table:my-8 prose-table:mx-auto prose-table:border-collapse
-                       prose-th:border prose-th:border-border prose-th:bg-muted 
-                       prose-th:p-3 prose-th:text-left prose-th:font-semibold
-                       prose-td:border prose-td:border-border prose-td:p-3
-                       prose-a:text-primary prose-a:underline
-                       [&_table]:mx-auto [&_table]:w-auto [&_table]:max-w-full"
+            className="prose prose-base lg:prose-lg max-w-none dark:prose-invert text-foreground"
             dangerouslySetInnerHTML={{ 
-              __html: secao.conteudo
+              __html: formatContent(secao.conteudo)
             }}
           />
         </CardContent>
