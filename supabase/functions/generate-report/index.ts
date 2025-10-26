@@ -49,6 +49,7 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Criar cliente Supabase com service role para consultas
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -57,6 +58,81 @@ Deno.serve(async (req) => {
     const { matricula, dataInicio, dataFim, reportType, geradoPorMatricula, geradoPorSigla }: ReportData = await req.json()
 
     console.log('Iniciando geração de relatório:', { matricula, dataInicio, dataFim, reportType, geradoPorMatricula, geradoPorSigla })
+
+    // VALIDAÇÃO DE SEGURANÇA: Verificar permissões
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      console.error('Tentativa de acesso sem autenticação')
+      return new Response(
+        JSON.stringify({ error: 'Autenticação necessária' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Verificar se é admin
+    let isAdmin = false
+    if (geradoPorSigla) {
+      const { data: adminSession } = await supabase
+        .from('admin_sessions')
+        .select('sigla, is_active, expires_at')
+        .eq('sigla', geradoPorSigla)
+        .eq('is_active', true)
+        .gt('expires_at', new Date().toISOString())
+        .maybeSingle()
+
+      if (adminSession) {
+        const { data: usuario } = await supabase
+          .from('usuarios')
+          .select('cargo')
+          .eq('sigla', geradoPorSigla)
+          .maybeSingle()
+
+        if (usuario && ['GERENTE', 'DESENVOLVEDOR', 'ANALISTA DE SISTEMAS'].includes(usuario.cargo)) {
+          isAdmin = true
+          console.log('Usuário admin validado:', geradoPorSigla)
+        }
+      }
+    }
+
+    // Se não é admin, verificar se está acessando própria matrícula
+    if (!isAdmin) {
+      if (!geradoPorMatricula) {
+        console.error('Tentativa de acesso sem identificação de beneficiário')
+        return new Response(
+          JSON.stringify({ error: 'Acesso negado' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      // Verificar se está tentando acessar própria matrícula
+      if (geradoPorMatricula !== matricula) {
+        console.error('Tentativa de acesso a matrícula não autorizada:', { 
+          geradoPorMatricula, 
+          matriculaSolicitada: matricula 
+        })
+        return new Response(
+          JSON.stringify({ error: 'Você só pode gerar relatórios da sua própria matrícula' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      // Validar que a matrícula pertence ao usuário autenticado
+      const { data: senhaRecord } = await supabase
+        .from('senhas')
+        .select('matricula')
+        .eq('matricula', geradoPorMatricula)
+        .maybeSingle()
+
+      if (!senhaRecord) {
+        console.error('Matrícula não encontrada na autenticação:', geradoPorMatricula)
+        return new Response(
+          JSON.stringify({ error: 'Acesso negado' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      console.log('Beneficiário validado:', geradoPorMatricula)
+    }
 
     // 1. Buscar beneficiário
     const { data: beneficiary, error: beneficiaryError } = await supabase
