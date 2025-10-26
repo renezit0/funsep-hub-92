@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { X, LogIn, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { adminAuth } from "@/services/adminAuth";
 interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -23,11 +25,13 @@ export function LoginModal({
   const [remember, setRemember] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const {
-    login
+    login,
+    session
   } = useAuth();
   const {
     toast
   } = useToast();
+  const navigate = useNavigate();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -35,14 +39,28 @@ export function LoginModal({
       const cleanCpf = cpf.replace(/\D/g, "");
       const result = await login(cleanCpf, password);
       if (result.success) {
+        // Limpar form
+        setCpf("");
+        setPassword("");
+        
         toast({
           title: "Login realizado com sucesso",
           description: "Bem-vindo ao sistema!"
         });
-        onSuccess?.();
+        
         onClose();
-        setCpf("");
-        setPassword("");
+        onSuccess?.();
+        
+        // Redirecionar admins para /admin
+        // Pegar sessão diretamente do adminAuth
+        setTimeout(() => {
+          const currentSession = adminAuth.getSession();
+          const adminRoles = ['GERENTE', 'DESENVOLVEDOR', 'ANALISTA DE SISTEMAS'];
+          
+          if (currentSession?.user?.cargo && adminRoles.includes(currentSession.user.cargo)) {
+            navigate('/admin');
+          }
+        }, 200);
       } else {
         toast({
           variant: "destructive",
