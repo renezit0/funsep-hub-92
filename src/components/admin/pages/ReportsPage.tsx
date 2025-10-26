@@ -139,6 +139,13 @@ export function ReportsPage() {
     searchBeneficiaries();
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      searchBeneficiaries();
+    }
+  };
+
   const formatCPF = (cpf: number): string => {
     const cpfStr = cpf.toString().padStart(11, '0');
     return cpfStr.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
@@ -386,6 +393,7 @@ export function ReportsPage() {
                 placeholder="Digite o nome..."
                 value={filters.nome}
                 onChange={(e) => setFilters({ ...filters, nome: e.target.value })}
+                onKeyDown={handleKeyPress}
               />
             </div>
             <div className="space-y-2">
@@ -395,6 +403,7 @@ export function ReportsPage() {
                 placeholder="000.000.000-00"
                 value={filters.cpf}
                 onChange={(e) => setFilters({ ...filters, cpf: e.target.value })}
+                onKeyDown={handleKeyPress}
               />
             </div>
             <div className="space-y-2">
@@ -404,6 +413,7 @@ export function ReportsPage() {
                 placeholder="Ex: 12345"
                 value={filters.matricula}
                 onChange={(e) => setFilters({ ...filters, matricula: e.target.value })}
+                onKeyDown={handleKeyPress}
               />
             </div>
             <div className="space-y-2">
@@ -412,6 +422,7 @@ export function ReportsPage() {
                 id="empresa"
                 value={filters.empresa}
                 onChange={(e) => setFilters({ ...filters, empresa: e.target.value })}
+                onKeyDown={handleKeyPress}
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <option value="">Todas as empresas</option>
