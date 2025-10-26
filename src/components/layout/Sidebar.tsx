@@ -1,10 +1,18 @@
-import { useState } from "react";
-import { Home, Newspaper, Star, Book, Gavel, FileText, BarChart3, Settings, Mail, MapPin, Heart, ExternalLink, User, LogIn, Shield, LogOut, ClipboardList } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Home, Newspaper, Star, Book, Gavel, FileText, BarChart3, Settings, Mail, MapPin, Heart, ExternalLink, User, LogIn, Shield, LogOut, ClipboardList, Info, ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import funsepLogo from "@/assets/funsep-logo.png";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+
+interface SobreFunsepSecao {
+  id: string;
+  titulo: string;
+  slug: string;
+  ordem: number;
+}
 
 interface SidebarProps {
   currentPage: string;
@@ -16,6 +24,7 @@ interface SidebarProps {
 
 const navigation = [
   { id: "home", label: "Início", icon: Home },
+  { id: "sobre-funsep", label: "Sobre o FUNSEP", icon: Info, hasSubmenu: true },
   { id: "news", label: "Notícias", icon: Newspaper },
   { id: "benefits", label: "Vantagens", icon: Star },
   { id: "instructions", label: "Instruções", icon: Book },
@@ -31,6 +40,24 @@ const navigation = [
 
 export function Sidebar({ currentPage, onPageChange, onLoginClick, isOpen, onToggle }: SidebarProps) {
   const { isAuthenticated, session, logout } = useAuth();
+  const [sobreFunsepExpanded, setSobreFunsepExpanded] = useState(false);
+  const [sobreFunsepSecoes, setSobreFunsepSecoes] = useState<SobreFunsepSecao[]>([]);
+
+  useEffect(() => {
+    loadSobreFunsepSecoes();
+  }, []);
+
+  const loadSobreFunsepSecoes = async () => {
+    const { data } = await supabase
+      .from("sobre_funsep")
+      .select("id, titulo, slug, ordem")
+      .eq("publicado", true)
+      .order("ordem", { ascending: true });
+    
+    if (data) {
+      setSobreFunsepSecoes(data);
+    }
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -102,6 +129,45 @@ export function Sidebar({ currentPage, onPageChange, onLoginClick, isOpen, onTog
                   <Icon className="h-5 w-5" />
                   {item.label}
                 </Button>
+              );
+            }
+            
+            // Special handling for Sobre o FUNSEP - expandable menu
+            if (item.id === "sobre-funsep") {
+              return (
+                <div key={item.id} className="space-y-1">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start gap-3 h-12 font-medium text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                    onClick={() => setSobreFunsepExpanded(!sobreFunsepExpanded)}
+                  >
+                    <Icon className="h-5 w-5" />
+                    {item.label}
+                    {sobreFunsepExpanded ? (
+                      <ChevronDown className="h-4 w-4 ml-auto" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4 ml-auto" />
+                    )}
+                  </Button>
+                  
+                  {sobreFunsepExpanded && (
+                    <div className="ml-8 space-y-1">
+                      {sobreFunsepSecoes.map((secao) => (
+                        <Button
+                          key={secao.id}
+                          variant="ghost"
+                          className="w-full justify-start h-10 text-sm text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                          onClick={() => {
+                            onPageChange(`sobre-funsep?secao=${secao.slug}`);
+                            if (window.innerWidth < 1024) onToggle();
+                          }}
+                        >
+                          {secao.titulo}
+                        </Button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               );
             }
             

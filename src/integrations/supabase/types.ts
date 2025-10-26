@@ -726,6 +726,42 @@ export type Database = {
           },
         ]
       }
+      sobre_funsep: {
+        Row: {
+          atualizado_por_sigla: string | null
+          conteudo: string
+          created_at: string
+          id: string
+          ordem: number
+          publicado: boolean
+          slug: string
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          atualizado_por_sigla?: string | null
+          conteudo: string
+          created_at?: string
+          id?: string
+          ordem: number
+          publicado?: boolean
+          slug: string
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          atualizado_por_sigla?: string | null
+          conteudo?: string
+          created_at?: string
+          id?: string
+          ordem?: number
+          publicado?: boolean
+          slug?: string
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       tabbeneficios: {
         Row: {
           classe: string | null

@@ -36,6 +36,10 @@ const navigation = [{
   label: 'Notícias',
   icon: Newspaper
 }, {
+  id: 'sobre-funsep' as AdminPageType,
+  label: 'Sobre o FUNSEP',
+  icon: FileText
+}, {
   id: 'requerimentos' as AdminPageType,
   label: 'Requerimentos',
   icon: FileText

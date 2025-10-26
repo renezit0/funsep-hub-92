@@ -16,9 +16,11 @@ import { PlaceholderPage } from "@/components/pages/PlaceholderPage";
 import { ReportsPage } from "@/components/pages/ReportsPage";
 import { RequestsPage } from "@/components/pages/RequestsPage";
 import { MyRequestsPage } from "@/components/pages/MyRequestsPage";
+import { SobreFunsepPage } from "@/components/pages/SobreFunsepPage";
 
 const pageConfig = {
   home: { title: "Início", component: HomePage, type: "home" as const },
+  "sobre-funsep": { title: "Sobre o FUNSEP", component: SobreFunsepPage, type: "regular" as const },
   news: { title: "Notícias", component: NewsPage, type: "regular" as const },
   benefits: { title: "Vantagens", component: BenefitsPage, type: "regular" as const },
   instructions: { title: "Instruções", component: InstructionsPage, type: "regular" as const },
@@ -83,6 +85,9 @@ const Index = () => {
           )}
           {currentPageConfig.type === "home" && (
             <HomePage onNavigate={handlePageChange} />
+          )}
+          {currentPageConfig.type === "regular" && currentPage.startsWith("sobre-funsep") && (
+            <SobreFunsepPage />
           )}
           {currentPageConfig.type === "regular" && currentPage === "news" && (
             <NewsPage />
