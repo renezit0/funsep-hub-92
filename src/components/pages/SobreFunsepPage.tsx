@@ -80,28 +80,7 @@ export function SobreFunsepPage({ slug: propSlug }: SobreFunsepPageProps = {}) {
     );
   }
 
-  // Format content with proper line breaks and styling
-  const formatContent = (content: string) => {
-    return content
-      .split('\n\n')
-      .map(paragraph => {
-        // Check if it's a list item or heading
-        if (paragraph.startsWith('✦') || paragraph.startsWith('-')) {
-          return `<li class="ml-4 mb-2">${paragraph.replace(/^[✦-]\s*/, '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</li>`;
-        }
-        if (paragraph.startsWith('**') && paragraph.endsWith('**')) {
-          return `<h3 class="text-xl font-bold mt-6 mb-3">${paragraph.replace(/\*\*/g, '')}</h3>`;
-        }
-        if (paragraph.includes('|')) {
-          // Simple table detection
-          return `<div class="overflow-x-auto my-4"><pre class="bg-muted p-4 rounded">${paragraph}</pre></div>`;
-        }
-        // Regular paragraph
-        return `<p class="mb-4 leading-relaxed">${paragraph.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</p>`;
-      })
-      .join('');
-  };
-
+  // Render HTML content directly (now it comes from Quill as proper HTML)
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <Card>
@@ -110,9 +89,14 @@ export function SobreFunsepPage({ slug: propSlug }: SobreFunsepPageProps = {}) {
         </CardHeader>
         <CardContent>
           <div 
-            className="text-foreground space-y-2"
+            className="prose prose-sm md:prose-base max-w-none dark:prose-invert
+                       prose-headings:text-foreground prose-p:text-foreground 
+                       prose-strong:text-foreground prose-li:text-foreground
+                       prose-table:border prose-th:border prose-th:border-border 
+                       prose-td:border prose-td:border-border prose-th:bg-muted
+                       prose-th:p-2 prose-td:p-2"
             dangerouslySetInnerHTML={{ 
-              __html: formatContent(secao.conteudo)
+              __html: secao.conteudo
             }}
           />
         </CardContent>

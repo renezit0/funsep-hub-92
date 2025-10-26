@@ -3,10 +3,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 interface SobreFunsepSecao {
   id: string;
@@ -54,11 +55,24 @@ export function SobreFunsepModal({
       return;
     }
 
+    // Validate input
+    if (!titulo.trim()) {
+      toast.error("O título é obrigatório");
+      setLoading(false);
+      return;
+    }
+
+    if (!conteudo.trim() || conteudo === '<p><br></p>') {
+      toast.error("O conteúdo é obrigatório");
+      setLoading(false);
+      return;
+    }
+
     const { error } = await supabase
       .from("sobre_funsep")
       .update({
-        titulo,
-        conteudo,
+        titulo: titulo.trim(),
+        conteudo: conteudo.trim(),
         updated_at: new Date().toISOString(),
       })
       .eq("id", editingSecao.id);
@@ -73,6 +87,38 @@ export function SobreFunsepModal({
 
     setLoading(false);
   };
+
+  // Configuração do editor Quill (igual ao de notícias)
+  const modules = {
+    toolbar: [
+      [{ header: [1, 2, 3, false] }],
+      ["bold", "italic", "underline", "strike"],
+      [{ list: "ordered" }, { list: "bullet" }],
+      [{ indent: "-1" }, { indent: "+1" }],
+      [{ align: [] }],
+      ["link"],
+      [{ color: [] }, { background: [] }],
+      ["clean"],
+      [{ table: true }],
+    ],
+    table: true,
+  };
+
+  const formats = [
+    "header",
+    "bold",
+    "italic",
+    "underline",
+    "strike",
+    "list",
+    "bullet",
+    "indent",
+    "align",
+    "link",
+    "color",
+    "background",
+    "table",
+  ];
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -94,16 +140,19 @@ export function SobreFunsepModal({
 
           <div className="space-y-2">
             <Label htmlFor="conteudo">Conteúdo</Label>
-            <Textarea
-              id="conteudo"
-              value={conteudo}
-              onChange={(e) => setConteudo(e.target.value)}
-              rows={15}
-              required
-              className="font-mono text-sm"
-            />
-            <p className="text-xs text-muted-foreground">
-              Dica: Use **texto** para negrito, quebras de linha duplas para parágrafos
+            <div className="min-h-[400px]">
+              <ReactQuill
+                theme="snow"
+                value={conteudo}
+                onChange={setConteudo}
+                modules={modules}
+                formats={formats}
+                className="bg-background"
+                style={{ height: "350px" }}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground mt-12">
+              Use a barra de ferramentas para formatar o texto, adicionar tabelas, links, etc.
             </p>
           </div>
 
