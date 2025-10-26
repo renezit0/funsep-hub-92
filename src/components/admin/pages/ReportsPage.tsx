@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ChartBar, Download, FileText, Info, Search, X, Hash, Copy, Check } from "lucide-react";
+import { ChartBar, Download, FileText, Info, Search, X, Hash, Copy, Check, Shield } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -64,6 +64,8 @@ export function ReportsPage() {
   });
   const [generatedToken, setGeneratedToken] = useState<string | null>(null);
   const [tokenModalOpen, setTokenModalOpen] = useState(false);
+  const [validateTokenModalOpen, setValidateTokenModalOpen] = useState(false);
+  const [tokenToValidate, setTokenToValidate] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -336,14 +338,24 @@ export function ReportsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold flex items-center gap-2">
-          <ChartBar className="h-8 w-8" />
-          Relatórios por Associado
-        </h1>
-        <p className="text-muted-foreground">
-          Busque associados e gere relatórios individuais de procedimentos.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <ChartBar className="h-8 w-8" />
+            Relatórios por Associado
+          </h1>
+          <p className="text-muted-foreground">
+            Busque associados e gere relatórios individuais de procedimentos.
+          </p>
+        </div>
+        <Button 
+          onClick={() => setValidateTokenModalOpen(true)}
+          variant="outline"
+          className="gap-2"
+        >
+          <Shield className="h-4 w-4" />
+          Validar Tokens
+        </Button>
       </div>
 
       <Card className="border-l-4 border-l-primary">
@@ -657,6 +669,70 @@ export function ReportsPage() {
             <Button onClick={() => setTokenModalOpen(false)} className="w-full">
               Entendido
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Validar Token */}
+      <Dialog open={validateTokenModalOpen} onOpenChange={setValidateTokenModalOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              Validar Token de Relatório
+            </DialogTitle>
+            <DialogDescription>
+              Digite o token para visualizar e validar um relatório gerado anteriormente.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="validateToken">Token:</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="validateToken"
+                  value={tokenToValidate}
+                  onChange={(e) => setTokenToValidate(e.target.value)}
+                  placeholder="Digite o token do relatório"
+                  className="font-mono"
+                />
+                <Button
+                  onClick={() => {
+                    if (tokenToValidate.trim()) {
+                      window.open(`/relatorio/${tokenToValidate}`, '_blank');
+                      setValidateTokenModalOpen(false);
+                      setTokenToValidate("");
+                    } else {
+                      toast({
+                        title: "Atenção",
+                        description: "Por favor, digite um token válido",
+                        variant: "destructive",
+                      });
+                    }
+                  }}
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  Visualizar
+                </Button>
+              </div>
+            </div>
+            
+            <Card className="border-l-4 border-l-primary">
+              <CardContent className="p-4">
+                <div className="flex items-start gap-2">
+                  <Info className="h-4 w-4 text-primary mt-0.5" />
+                  <div className="text-sm">
+                    <p className="font-medium">Informações sobre tokens:</p>
+                    <ul className="text-muted-foreground mt-1 space-y-1">
+                      <li>• Cada relatório gerado possui um token único</li>
+                      <li>• O token permite visualizar o relatório sem precisar gerá-lo novamente</li>
+                      <li>• Todas as visualizações são registradas no sistema</li>
+                      <li>• O token pode ser compartilhado com o beneficiário</li>
+                    </ul>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </DialogContent>
       </Dialog>

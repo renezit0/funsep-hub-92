@@ -1,7 +1,6 @@
 import React from "react";
-import { Bell, RefreshCw, LogOut, User, Home, Shield } from "lucide-react";
+import { Bell, RefreshCw, LogOut, User, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
 import { AdminSession } from "@/services/adminAuth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -13,8 +12,6 @@ interface AdminHeaderProps {
 }
 
 export function AdminHeader({ session, onLogout }: AdminHeaderProps) {
-  const navigate = useNavigate();
-
   return (
     <header className="bg-card border-b border-border px-4 sm:px-6 py-3 sm:py-4">
       <div className="flex items-center justify-between">
@@ -30,16 +27,6 @@ export function AdminHeader({ session, onLogout }: AdminHeaderProps) {
         </div>
 
         <div className="flex items-center gap-1 sm:gap-2 lg:gap-4">
-          <Button 
-            variant="outline"
-            onClick={() => navigate('/relatorio/validar')}
-            title="Validar Tokens de Relatórios"
-            className="hidden md:flex"
-          >
-            <Shield className="h-4 w-4 mr-2" />
-            Validar Tokens
-          </Button>
-
           <Button 
             variant="ghost" 
             size="icon"
