@@ -220,6 +220,15 @@ Deno.serve(async (req) => {
     // 10. Gerar token único e salvar no banco
     const token = crypto.randomUUID()
     
+    // Adicionar token ao HTML antes de salvar
+    const htmlWithToken = htmlContent.replace(
+      '</body>',
+      `<div style="margin-top: 30px; padding: 15px; background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 5px;">
+        <p style="margin: 0; font-size: 12px; color: #666;"><strong>Token de Validação:</strong></p>
+        <p style="margin: 5px 0 0 0; font-family: monospace; font-size: 11px; color: #333; word-break: break-all;">${token}</p>
+      </div></body>`
+    )
+    
     const { error: tokenError } = await supabase
       .from('relatorio_tokens')
       .insert({
@@ -230,7 +239,7 @@ Deno.serve(async (req) => {
         data_fim: dataFimFinal,
         gerado_por_matricula: geradoPorMatricula,
         gerado_por_sigla: geradoPorSigla,
-        html_content: htmlContent,
+        html_content: htmlWithToken,
         filename
       })
 
@@ -412,6 +421,15 @@ async function generateIRReport(supabase: any, beneficiary: any, matricula: numb
     // Gerar token único e salvar no banco
     const token = crypto.randomUUID()
     
+    // Adicionar token ao HTML antes de salvar
+    const htmlWithToken = htmlContent.replace(
+      '</body>',
+      `<div style="margin-top: 30px; padding: 15px; background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 5px;">
+        <p style="margin: 0; font-size: 12px; color: #666;"><strong>Token de Validação:</strong></p>
+        <p style="margin: 5px 0 0 0; font-family: monospace; font-size: 11px; color: #333; word-break: break-all;">${token}</p>
+      </div></body>`
+    )
+    
     const { error: tokenError } = await supabase
       .from('relatorio_tokens')
       .insert({
@@ -422,7 +440,7 @@ async function generateIRReport(supabase: any, beneficiary: any, matricula: numb
         data_fim: `${anoCalendario}-12-31`,
         gerado_por_matricula: geradoPorMatricula,
         gerado_por_sigla: geradoPorSigla,
-        html_content: htmlContent,
+        html_content: htmlWithToken,
         filename
       })
 

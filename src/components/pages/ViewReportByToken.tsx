@@ -42,7 +42,10 @@ export function ViewReportByToken() {
   };
 
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('pt-BR');
+    // Parse YYYY-MM-DD format correctly
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    return date.toLocaleDateString('pt-BR');
   };
 
   const formatDateTime = (dateStr: string) => {
