@@ -860,7 +860,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      convert_text_to_html: { Args: { text_content: string }; Returns: string }
+      convert_text_to_html_v2: {
+        Args: { text_content: string }
+        Returns: string
+      }
       is_admin_user: { Args: { _sigla: string }; Returns: boolean }
     }
     Enums: {
