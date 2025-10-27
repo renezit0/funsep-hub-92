@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getAdminClient } from "@/integrations/supabase/admin-client";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -30,7 +30,6 @@ export function SobreFunsepManagementPage() {
   }, []);
 
   const loadSecoes = async () => {
-    const supabase = getAdminClient();
     setLoading(true);
     const { data, error } = await supabase
       .from("sobre_funsep")
@@ -52,7 +51,6 @@ export function SobreFunsepManagementPage() {
   };
 
   const togglePublish = async (secao: SobreFunsepSecao) => {
-    const supabase = getAdminClient();
     const { error } = await supabase
       .from("sobre_funsep")
       .update({ 

@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Search, Key, Plus, Edit2, Trash2, UserCheck } from "lucide-react";
-import { getAdminClient } from "@/integrations/supabase/admin-client";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -56,7 +56,6 @@ export function PasswordsPage() {
   }, []);
 
   const loadData = async () => {
-    const supabase = getAdminClient();
     try {
       setLoading(true);
       
@@ -114,7 +113,6 @@ export function PasswordsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const supabase = getAdminClient();
     try {
       const cleanCpf = formData.cpf.replace(/\D/g, "");
       
@@ -166,7 +164,6 @@ export function PasswordsPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Tem certeza que deseja excluir esta senha?')) return;
 
-    const supabase = getAdminClient();
     try {
       const { error } = await supabase
         .from('senhas')

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getAdminClient } from "@/integrations/supabase/admin-client";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -50,7 +50,6 @@ export function RequestsPage() {
   }, [requerimentos, statusFilter]);
 
   const loadRequests = async () => {
-    const supabase = getAdminClient();
     setIsLoading(true);
     try {
       const { data, error } = await supabase
@@ -75,7 +74,6 @@ export function RequestsPage() {
   const handleUpdateStatus = async () => {
     if (!selectedRequest || !newStatus) return;
 
-    const supabase = getAdminClient();
     try {
       const { error } = await supabase
         .from("requerimentos")

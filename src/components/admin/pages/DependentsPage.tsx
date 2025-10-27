@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search, UserPlus } from "lucide-react";
-import { getAdminClient } from "@/integrations/supabase/admin-client";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Dependent {
   matricula: number;
@@ -38,7 +38,6 @@ export function DependentsPage() {
     setLoading(true);
     setHasSearched(true);
 
-    const supabase = getAdminClient();
     try {
       let query = supabase.from("caddep").select(`
           matricula, nrodep, nome, parent, situacao, dtnasc, sexo, cpf, nomemae, email,
