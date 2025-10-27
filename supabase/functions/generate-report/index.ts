@@ -74,15 +74,19 @@ Deno.serve(async (req) => {
     if (geradoPorSigla) {
       console.log('Verificando admin para sigla:', geradoPorSigla)
       
-      const { data: adminSession, error: sessionError } = await supabase
+      // Buscar a sessão mais recente ativa
+      const { data: adminSessions, error: sessionError } = await supabase
         .from('admin_sessions')
         .select('sigla, is_active, expires_at')
         .eq('sigla', geradoPorSigla)
         .eq('is_active', true)
         .gt('expires_at', new Date().toISOString())
-        .maybeSingle()
+        .order('created_at', { ascending: false })
+        .limit(1)
 
-      console.log('Resultado da busca de sessão:', { adminSession, sessionError })
+      console.log('Resultado da busca de sessão:', { adminSessions, sessionError, count: adminSessions?.length })
+
+      const adminSession = adminSessions && adminSessions.length > 0 ? adminSessions[0] : null
 
       if (adminSession) {
         const { data: usuario, error: userError } = await supabase
