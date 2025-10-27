@@ -72,7 +72,9 @@ Deno.serve(async (req) => {
     // Verificar se é admin
     let isAdmin = false
     if (geradoPorSigla) {
-      const { data: adminSession } = await supabase
+      console.log('Verificando admin para sigla:', geradoPorSigla)
+      
+      const { data: adminSession, error: sessionError } = await supabase
         .from('admin_sessions')
         .select('sigla, is_active, expires_at')
         .eq('sigla', geradoPorSigla)
@@ -80,18 +82,28 @@ Deno.serve(async (req) => {
         .gt('expires_at', new Date().toISOString())
         .maybeSingle()
 
+      console.log('Resultado da busca de sessão:', { adminSession, sessionError })
+
       if (adminSession) {
-        const { data: usuario } = await supabase
+        const { data: usuario, error: userError } = await supabase
           .from('usuarios')
           .select('cargo')
           .eq('sigla', geradoPorSigla)
           .maybeSingle()
 
+        console.log('Resultado da busca de usuário:', { usuario, userError })
+
         if (usuario && ['GERENTE', 'DESENVOLVEDOR', 'ANALISTA DE SISTEMAS'].includes(usuario.cargo)) {
           isAdmin = true
-          console.log('Usuário admin validado:', geradoPorSigla)
+          console.log('Usuário admin validado:', geradoPorSigla, 'cargo:', usuario.cargo)
+        } else {
+          console.log('Usuário não é admin ou não encontrado')
         }
+      } else {
+        console.log('Sessão admin não encontrada ou inválida')
       }
+    } else {
+      console.log('Nenhuma sigla fornecida para verificação de admin')
     }
 
     // Se não é admin, verificar se está acessando própria matrícula
