@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { NewsModal } from "@/components/modals/NewsModal";
-import { supabase } from "@/integrations/supabase/client";
+import { getAdminClient } from "@/integrations/supabase/admin-client";
 import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -31,6 +31,7 @@ export function NewsPage() {
   const { toast } = useToast();
 
   const loadNoticias = async () => {
+    const supabase = getAdminClient();
     try {
       const { data, error } = await supabase
         .from('noticias')
@@ -61,6 +62,7 @@ export function NewsPage() {
   };
 
   const handleDelete = async (id: string) => {
+    const supabase = getAdminClient();
     try {
       const { error } = await supabase
         .from('noticias')
@@ -86,6 +88,7 @@ export function NewsPage() {
   };
 
   const togglePublish = async (noticia: Noticia) => {
+    const supabase = getAdminClient();
     try {
       const newPublishedState = !noticia.publicado;
       const { error } = await supabase

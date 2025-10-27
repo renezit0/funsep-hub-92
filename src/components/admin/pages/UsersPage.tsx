@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search, UserCog, Shield, Pencil, UserPlus, Filter } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { getAdminClient } from "@/integrations/supabase/admin-client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { EditUserModal } from "@/components/modals/EditUserModal";
@@ -39,6 +39,7 @@ export function UsersPage() {
   }, []);
 
   const loadUsers = async () => {
+    const supabase = getAdminClient();
     try {
       const { data, error } = await supabase
         .from('usuarios')

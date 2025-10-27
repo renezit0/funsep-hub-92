@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Search, Filter, Users, Eye } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { getAdminClient } from "@/integrations/supabase/admin-client";
 
 interface Beneficiary {
   matricula: number;
@@ -38,6 +38,7 @@ export function BeneficiariesPage() {
     setLoading(true);
     setHasSearched(true);
     
+    const supabase = getAdminClient();
     try {
       let query = supabase
         .from('cadben')

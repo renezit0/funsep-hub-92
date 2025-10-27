@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, UserPlus, UserCog } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { getAdminClient } from "@/integrations/supabase/admin-client";
 
 interface DashboardStats {
   beneficiariosAtivos: number;
@@ -22,6 +22,7 @@ export function DashboardPage() {
   }, []);
 
   const loadStats = async () => {
+    const supabase = getAdminClient();
     try {
       // Contar beneficiários ativos (situacao = 1 ou 2)
       const { count: beneficiariosAtivos } = await supabase

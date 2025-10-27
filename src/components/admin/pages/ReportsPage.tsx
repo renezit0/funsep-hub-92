@@ -20,7 +20,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
+import { getAdminClient } from "@/integrations/supabase/admin-client";
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -74,6 +74,7 @@ export function ReportsPage() {
   }, []);
 
   const loadCompanies = async () => {
+    const supabase = getAdminClient();
     try {
       const { data, error } = await supabase
         .from('tabempresas')
@@ -93,6 +94,7 @@ export function ReportsPage() {
   };
 
   const searchBeneficiaries = async () => {
+    const supabase = getAdminClient();
     setLoading(true);
     try {
       let query = supabase
@@ -212,6 +214,7 @@ export function ReportsPage() {
         geradoPorMatricula
       });
 
+      const supabase = getAdminClient();
       const { data, error } = await supabase.functions.invoke('generate-report', {
         body: {
           matricula: selectedBeneficiary.matricula,

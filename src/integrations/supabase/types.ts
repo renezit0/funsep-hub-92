@@ -865,9 +865,12 @@ export type Database = {
         Returns: string
       }
       current_user_is_admin: { Args: never; Returns: boolean }
+      get_current_admin_sigla: { Args: never; Returns: string }
+      get_current_admin_token: { Args: never; Returns: string }
       is_active_session: { Args: { _sigla: string }; Returns: boolean }
       is_admin_session: { Args: { _sigla: string }; Returns: boolean }
       is_admin_user: { Args: { _sigla: string }; Returns: boolean }
+      is_authenticated_admin: { Args: never; Returns: boolean }
       matricula_has_active_session: {
         Args: { _matricula: number }
         Returns: boolean
