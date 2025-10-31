@@ -30,7 +30,7 @@ export function ClassicFormsView() {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6 print:block">
       {/* Sidebar */}
       <aside className="bg-card rounded-lg border p-6 h-fit lg:sticky lg:top-6 print:hidden">
         <h2 className="text-lg font-semibold mb-4 text-primary border-b-2 border-primary/20 pb-3">
@@ -55,7 +55,7 @@ export function ClassicFormsView() {
       </aside>
 
       {/* Content */}
-      <main className="bg-card rounded-lg border p-8 min-h-[500px]" id="printable-content">
+      <main className="bg-card rounded-lg border p-8 min-h-[500px] print:border-0 print:shadow-none print:p-0" id="printable-content">
         {activeForm === "exclusao-associado" && <ExclusaoAssociadoClassic onPrint={handlePrint} />}
         {activeForm === "exclusao-dependente" && <ExclusaoDependenteClassic onPrint={handlePrint} />}
         {activeForm === "inclusao-associado" && <InclusaoAssociadoClassic onPrint={handlePrint} />}

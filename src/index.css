@@ -253,17 +253,24 @@ All colors MUST be HSL.
 
   body {
     background: white !important;
-    color: black !important;
+    color: #000 !important;
   }
 
-  /* Hide all navigation, sidebar and UI elements */
+  /* Hide only UI elements - keep all content visible */
   aside,
   header,
   nav,
   .print\:hidden,
-  [class*="sidebar"],
-  [class*="tabs"] {
+  [role="tablist"],
+  button {
     display: none !important;
+  }
+
+  /* Show main content */
+  main,
+  #printable-content {
+    display: block !important;
+    visibility: visible !important;
   }
 
   /* Make printable content full width */
@@ -278,15 +285,42 @@ All colors MUST be HSL.
     background: white !important;
   }
 
-  /* Optimize text for print */
-  body, p, div, span, label {
-    color: black !important;
+  /* Fix grid layout in print */
+  .grid {
+    display: block !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Ensure content is visible */
+  .space-y-6,
+  .space-y-4,
+  .space-y-2 {
+    display: block !important;
+  }
+
+  /* Optimize text for print - force black color on everything */
+  *,
+  body,
+  p,
+  div,
+  span,
+  label,
+  strong,
+  h1,
+  h2,
+  h3,
+  input,
+  textarea {
+    color: #000 !important;
+    -webkit-text-fill-color: #000 !important;
+  }
+
+  body, p, div, span, label, strong {
     font-size: 11pt !important;
     line-height: 1.5 !important;
   }
 
   h1, h2, h3 {
-    color: black !important;
     font-size: 13pt !important;
     font-weight: bold !important;
     page-break-after: avoid;
