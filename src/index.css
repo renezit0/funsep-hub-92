@@ -243,3 +243,132 @@ All colors MUST be HSL.
     @apply fill-primary;
   }
 }
+
+/* Print Styles for Classic Forms */
+@media print {
+  @page {
+    margin: 2cm;
+    size: A4;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  /* Hide all navigation, sidebar and UI elements */
+  aside,
+  header,
+  nav,
+  .print\:hidden,
+  [class*="sidebar"],
+  [class*="tabs"] {
+    display: none !important;
+  }
+
+  /* Make printable content full width */
+  #printable-content,
+  main {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 1cm !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: white !important;
+  }
+
+  /* Optimize text for print */
+  body, p, div, span, label {
+    color: black !important;
+    font-size: 11pt !important;
+    line-height: 1.5 !important;
+  }
+
+  h1, h2, h3 {
+    color: black !important;
+    font-size: 13pt !important;
+    font-weight: bold !important;
+    page-break-after: avoid;
+  }
+
+  /* Show input values for print */
+  input, textarea {
+    border: none !important;
+    border-bottom: 1px solid black !important;
+    background: transparent !important;
+    color: black !important;
+    padding: 2px 4px !important;
+    font-size: 11pt !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+  }
+
+  input[type="email"],
+  input[type="tel"],
+  input[type="text"] {
+    display: inline-block !important;
+  }
+
+  /* Print checkboxes properly */
+  input[type="checkbox"] {
+    -webkit-appearance: checkbox !important;
+    appearance: checkbox !important;
+    border: 1px solid black !important;
+    width: 14px !important;
+    height: 14px !important;
+  }
+
+  /* Signature lines and borders */
+  .border-t,
+  [class*="border-t"] {
+    border-top: 1px solid black !important;
+  }
+
+  /* Info boxes and alerts */
+  [class*="bg-accent"],
+  [class*="bg-warning"],
+  [class*="border-l-4"] {
+    background: #f5f5f5 !important;
+    border: 1px solid #999 !important;
+    padding: 8px !important;
+    page-break-inside: avoid;
+  }
+
+  /* Labels */
+  label {
+    font-weight: 600 !important;
+  }
+
+  /* Avoid page breaks inside elements */
+  p, div, section, .space-y-6 > div {
+    page-break-inside: avoid;
+  }
+
+  /* Page breaks before major sections if needed */
+  .page-break {
+    page-break-after: always;
+  }
+
+  /* Ensure grid layouts work in print */
+  .grid {
+    display: block !important;
+  }
+
+  .grid > * {
+    margin-bottom: 8px !important;
+  }
+
+  /* Spacing adjustments */
+  .space-y-6 > * + * {
+    margin-top: 12pt !important;
+  }
+
+  .space-y-4 > * + * {
+    margin-top: 8pt !important;
+  }
+
+  .space-y-2 > * + * {
+    margin-top: 4pt !important;
+  }
+}
