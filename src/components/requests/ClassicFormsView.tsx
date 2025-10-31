@@ -26,7 +26,14 @@ export function ClassicFormsView() {
   const [activeForm, setActiveForm] = useState("exclusao-associado");
 
   const handlePrint = () => {
+    const printContent = document.getElementById('printable-content');
+    if (!printContent) return;
+    
+    const originalContent = document.body.innerHTML;
+    document.body.innerHTML = printContent.innerHTML;
     window.print();
+    document.body.innerHTML = originalContent;
+    window.location.reload();
   };
 
   return (
@@ -43,7 +50,7 @@ export function ClassicFormsView() {
               onClick={() => setActiveForm(form.id)}
               className={cn(
                 "w-full text-left px-4 py-3 rounded-md transition-all text-sm flex items-center gap-2",
-                "hover:bg-accent/50 hover:translate-x-1",
+                "hover:bg-primary/10 hover:translate-x-1",
                 activeForm === form.id && "bg-primary text-primary-foreground font-semibold"
               )}
             >
@@ -124,8 +131,8 @@ function ExclusaoAssociadoClassic({ onPrint }: { onPrint: () => void }) {
         <p>Assinatura</p>
       </div>
 
-      <div className="bg-warning/10 border-l-4 border-warning p-4 rounded">
-        <strong className="text-warning-foreground">
+      <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
+        <strong className="text-yellow-900">
           ATENÇÃO: TODOS OS CAMPOS DEVEM SER PREENCHIDOS, PARA ANDAMENTO DA SOLICITAÇÃO.
         </strong>
       </div>
@@ -188,8 +195,8 @@ function ExclusaoDependenteClassic({ onPrint }: { onPrint: () => void }) {
         <p>Assinatura</p>
       </div>
 
-      <div className="bg-warning/10 border-l-4 border-warning p-4 rounded">
-        <strong className="text-warning-foreground">
+      <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
+        <strong className="text-yellow-900">
           ATENÇÃO: TODOS OS CAMPOS DEVEM SER PREENCHIDOS, PARA ANDAMENTO DA SOLICITAÇÃO.
         </strong>
       </div>
@@ -257,8 +264,8 @@ function InclusaoAssociadoClassic({ onPrint }: { onPrint: () => void }) {
         <p>Assinatura</p>
       </div>
 
-      <div className="bg-warning/10 border-l-4 border-warning p-4 rounded">
-        <strong className="text-warning-foreground">
+      <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
+        <strong className="text-yellow-900">
           ATENÇÃO: TODOS OS CAMPOS DEVEM SER PREENCHIDOS, PARA ANDAMENTO DA SOLICITAÇÃO.
         </strong>
       </div>
@@ -423,8 +430,8 @@ function InclusaoDependenteClassic({ onPrint }: { onPrint: () => void }) {
         <p>Associado</p>
       </div>
 
-      <div className="bg-warning/10 border-l-4 border-warning p-4 rounded">
-        <strong className="text-warning-foreground">
+      <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
+        <strong className="text-yellow-900">
           ATENÇÃO: TODOS OS CAMPOS DEVEM SER PREENCHIDOS, PARA ANDAMENTO DA SOLICITAÇÃO.
         </strong>
       </div>
@@ -508,8 +515,8 @@ function InclusaoRecemNascidoClassic({ onPrint }: { onPrint: () => void }) {
         <p>Associado</p>
       </div>
 
-      <div className="bg-warning/10 border-l-4 border-warning p-4 rounded">
-        <strong className="text-warning-foreground">
+      <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
+        <strong className="text-yellow-900">
           ATENÇÃO: TODOS OS CAMPOS DEVEM SER PREENCHIDOS, PARA ANDAMENTO DA SOLICITAÇÃO.
         </strong>
       </div>
@@ -573,8 +580,8 @@ function InscricaoPensionistaClassic({ onPrint }: { onPrint: () => void }) {
         <p>Assinatura</p>
       </div>
 
-      <div className="bg-warning/10 border-l-4 border-warning p-4 rounded">
-        <strong className="text-warning-foreground">
+      <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
+        <strong className="text-yellow-900">
           ATENÇÃO: TODOS OS CAMPOS DEVEM SER PREENCHIDOS, PARA ANDAMENTO DA SOLICITAÇÃO.
         </strong>
       </div>
@@ -655,8 +662,8 @@ function Requerimento21AnosClassic({ onPrint }: { onPrint: () => void }) {
         <p>Assinatura - RG nº</p>
       </div>
 
-      <div className="bg-warning/10 border-l-4 border-warning p-4 rounded">
-        <strong className="text-warning-foreground">
+      <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
+        <strong className="text-yellow-900">
           ATENÇÃO: TODOS OS CAMPOS DEVEM SER PREENCHIDOS, PARA ANDAMENTO DA SOLICITAÇÃO.
         </strong>
       </div>
@@ -723,8 +730,8 @@ function RequerimentoAuxilioClassic({ onPrint }: { onPrint: () => void }) {
         <p>Assinatura</p>
       </div>
 
-      <div className="bg-warning/10 border-l-4 border-warning p-4 rounded">
-        <strong className="text-warning-foreground">
+      <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
+        <strong className="text-yellow-900">
           ATENÇÃO: TODOS OS CAMPOS DEVEM SER PREENCHIDOS, PARA ANDAMENTO DA SOLICITAÇÃO.
         </strong>
       </div>
@@ -1060,8 +1067,8 @@ function TermoOpcaoClassic({ onPrint }: { onPrint: () => void }) {
         <p>Titular</p>
       </div>
 
-      <div className="bg-warning/10 border-l-4 border-warning p-4 rounded">
-        <strong className="text-warning-foreground">
+      <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
+        <strong className="text-yellow-900">
           ATENÇÃO: TODOS OS CAMPOS DEVEM SER PREENCHIDOS, PARA ANDAMENTO DA SOLICITAÇÃO.
         </strong>
       </div>
@@ -1179,8 +1186,8 @@ function TermoCompromissoClassic({ onPrint }: { onPrint: () => void }) {
         <p>Assinatura</p>
       </div>
 
-      <div className="bg-warning/10 border-l-4 border-warning p-4 rounded">
-        <strong className="text-warning-foreground">
+      <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
+        <strong className="text-yellow-900">
           ATENÇÃO: TODOS OS CAMPOS DEVEM SER PREENCHIDOS, PARA ANDAMENTO DA SOLICITAÇÃO.
         </strong>
       </div>

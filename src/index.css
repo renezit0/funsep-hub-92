@@ -327,12 +327,18 @@ All colors MUST be HSL.
 
   /* Info boxes and alerts */
   [class*="bg-accent"],
-  [class*="bg-warning"],
+  [class*="bg-yellow"],
   [class*="border-l-4"] {
-    background: #f5f5f5 !important;
-    border: 1px solid #999 !important;
+    background: #fffbeb !important;
+    border: 1px solid #f59e0b !important;
+    border-left: 4px solid #f59e0b !important;
     padding: 8px !important;
     page-break-inside: avoid;
+  }
+
+  /* Alert text colors */
+  [class*="text-yellow"] {
+    color: #78350f !important;
   }
 
   /* Labels */
