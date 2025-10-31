@@ -292,22 +292,40 @@ All colors MUST be HSL.
     page-break-after: avoid;
   }
 
-  /* Show input values for print */
+  /* Show input values for print - IMPORTANT */
   input, textarea {
     border: none !important;
     border-bottom: 1px solid black !important;
-    background: transparent !important;
+    background: white !important;
     color: black !important;
     padding: 2px 4px !important;
     font-size: 11pt !important;
     -webkit-appearance: none !important;
     appearance: none !important;
+    font-family: inherit !important;
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
+  }
+
+  /* Ensure placeholder doesn't show in print */
+  input::placeholder,
+  textarea::placeholder {
+    opacity: 0 !important;
+    color: transparent !important;
   }
 
   input[type="email"],
   input[type="tel"],
-  input[type="text"] {
+  input[type="text"],
+  input[type="date"] {
     display: inline-block !important;
+    min-width: 50px !important;
+  }
+
+  textarea {
+    border: 1px solid black !important;
+    min-height: 60px !important;
+    display: block !important;
   }
 
   /* Print checkboxes properly */
@@ -317,12 +335,35 @@ All colors MUST be HSL.
     border: 1px solid black !important;
     width: 14px !important;
     height: 14px !important;
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
+  }
+
+  input[type="checkbox"]:checked::before {
+    content: "✓" !important;
+    display: block !important;
+    text-align: center !important;
+    font-weight: bold !important;
   }
 
   /* Signature lines and borders */
   .border-t,
   [class*="border-t"] {
     border-top: 1px solid black !important;
+  }
+
+  /* Add spacing before signature section */
+  .my-10,
+  .my-16,
+  .print\\:my-20 {
+    margin-top: 80pt !important;
+    margin-bottom: 20pt !important;
+  }
+
+  /* Date section spacing */
+  .space-y-2:has(+ .my-10),
+  .space-y-2:has(+ .my-16) {
+    margin-bottom: 30pt !important;
   }
 
   /* Info boxes and alerts */

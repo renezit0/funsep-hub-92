@@ -126,7 +126,7 @@ function ExclusaoAssociadoClassic({ onPrint }: { onPrint: () => void }) {
         </div>
       </div>
 
-      <div className="my-10 text-center">
+      <div className="my-16 text-center print:my-20">
         <div className="border-t border-foreground w-72 mx-auto mb-2"></div>
         <p>Assinatura</p>
       </div>
@@ -190,7 +190,7 @@ function ExclusaoDependenteClassic({ onPrint }: { onPrint: () => void }) {
         </div>
       </div>
 
-      <div className="my-10 text-center">
+      <div className="my-16 text-center print:my-20">
         <div className="border-t border-foreground w-72 mx-auto mb-2"></div>
         <p>Assinatura</p>
       </div>
@@ -259,7 +259,7 @@ function InclusaoAssociadoClassic({ onPrint }: { onPrint: () => void }) {
         </div>
       </div>
 
-      <div className="my-10 text-center">
+      <div className="my-16 text-center print:my-20">
         <div className="border-t border-foreground w-72 mx-auto mb-2"></div>
         <p>Assinatura</p>
       </div>
@@ -425,7 +425,7 @@ function InclusaoDependenteClassic({ onPrint }: { onPrint: () => void }) {
         </div>
       </div>
 
-      <div className="my-10 text-center">
+      <div className="my-16 text-center print:my-20">
         <div className="border-t border-foreground w-72 mx-auto mb-2"></div>
         <p>Associado</p>
       </div>
@@ -510,7 +510,7 @@ function InclusaoRecemNascidoClassic({ onPrint }: { onPrint: () => void }) {
         </div>
       </div>
 
-      <div className="my-10 text-center">
+      <div className="my-16 text-center print:my-20">
         <div className="border-t border-foreground w-72 mx-auto mb-2"></div>
         <p>Associado</p>
       </div>
@@ -575,7 +575,7 @@ function InscricaoPensionistaClassic({ onPrint }: { onPrint: () => void }) {
         </div>
       </div>
 
-      <div className="my-10 text-center">
+      <div className="my-16 text-center print:my-20">
         <div className="border-t border-foreground w-72 mx-auto mb-2"></div>
         <p>Assinatura</p>
       </div>
@@ -657,7 +657,7 @@ function Requerimento21AnosClassic({ onPrint }: { onPrint: () => void }) {
         </div>
       </div>
 
-      <div className="my-10 text-center">
+      <div className="my-16 text-center print:my-20">
         <div className="border-t border-foreground w-72 mx-auto mb-2"></div>
         <p>Assinatura - RG nº</p>
       </div>
@@ -725,7 +725,7 @@ function RequerimentoAuxilioClassic({ onPrint }: { onPrint: () => void }) {
         </div>
       </div>
 
-      <div className="my-10 text-center">
+      <div className="my-16 text-center print:my-20">
         <div className="border-t border-foreground w-72 mx-auto mb-2"></div>
         <p>Assinatura</p>
       </div>
@@ -808,7 +808,7 @@ function RequerimentoDiversosClassic({ onPrint }: { onPrint: () => void }) {
         </div>
       </div>
 
-      <div className="my-10 text-center">
+      <div className="my-16 text-center print:my-20">
         <div className="border-t border-foreground w-72 mx-auto mb-2"></div>
         <p>Assinatura</p>
       </div>
@@ -967,7 +967,7 @@ function RequerimentoReembolsoClassic({ onPrint }: { onPrint: () => void }) {
         </div>
       </div>
 
-      <div className="my-10 text-center">
+      <div className="my-16 text-center print:my-20">
         <div className="border-t border-foreground w-72 mx-auto mb-2"></div>
         <p>Associado</p>
       </div>
@@ -1062,7 +1062,7 @@ function TermoOpcaoClassic({ onPrint }: { onPrint: () => void }) {
         </div>
       </div>
 
-      <div className="my-10 text-center">
+      <div className="my-16 text-center print:my-20">
         <div className="border-t border-foreground w-72 mx-auto mb-2"></div>
         <p>Titular</p>
       </div>
@@ -1134,7 +1134,7 @@ function TermoCienciaClassic({ onPrint }: { onPrint: () => void }) {
         </div>
       </div>
 
-      <div className="my-10 text-center">
+      <div className="my-16 text-center print:my-20">
         <div className="border-t border-foreground w-72 mx-auto mb-2"></div>
         <p>RG Nº</p>
       </div>
@@ -1181,7 +1181,7 @@ function TermoCompromissoClassic({ onPrint }: { onPrint: () => void }) {
         </div>
       </div>
 
-      <div className="my-10 text-center">
+      <div className="my-16 text-center print:my-20">
         <div className="border-t border-foreground w-72 mx-auto mb-2"></div>
         <p>Assinatura</p>
       </div>
