@@ -7,11 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, Send, AlertCircle } from "lucide-react";
+import { FileText, Send, AlertCircle, Lock } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { RequestDocumentUpload } from "@/components/RequestDocumentUpload";
+import { ClassicFormsView } from "@/components/requests/ClassicFormsView";
 import { ExclusaoAssociadoForm } from "@/components/requests/ExclusaoAssociadoForm";
 import { ExclusaoDependenteForm } from "@/components/requests/ExclusaoDependenteForm";
 import { InclusaoAssociadoForm } from "@/components/requests/InclusaoAssociadoForm";
@@ -287,22 +289,35 @@ export function RequestsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-3 text-xl">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <FileText className="h-6 w-6 text-primary" />
-              </div>
-              Requerimentos
-            </CardTitle>
-            <CardDescription>
-              Envie seus requerimentos para a administração do FUNSEP
-            </CardDescription>
-          </CardHeader>
-        </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-3 text-xl">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <FileText className="h-6 w-6 text-primary" />
+            </div>
+            Requerimentos
+          </CardTitle>
+          <CardDescription>
+            Envie seus requerimentos para a administração do FUNSEP
+          </CardDescription>
+        </CardHeader>
+      </Card>
 
-        <Card>
+      <Tabs defaultValue="classic" className="w-full">
+        <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
+          <TabsTrigger value="classic">Formulários Clássicos</TabsTrigger>
+          <TabsTrigger value="digital" disabled className="gap-2">
+            <Lock className="h-4 w-4" />
+            Sistema Digital (Em breve)
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="classic" className="mt-6">
+          <ClassicFormsView />
+        </TabsContent>
+
+        <TabsContent value="digital" className="mt-6">
+          <Card>
           <CardHeader>
             <CardTitle>Novo Requerimento</CardTitle>
             <CardDescription>
@@ -376,7 +391,8 @@ export function RequestsPage() {
             </form>
           </CardContent>
         </Card>
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
