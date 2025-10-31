@@ -292,12 +292,12 @@ All colors MUST be HSL.
     page-break-after: avoid;
   }
 
-  /* Show input values for print - IMPORTANT */
-  input, textarea {
+  /* Show input values for print - CRITICAL */
+  input, textarea, select {
     border: none !important;
-    border-bottom: 1px solid black !important;
+    border-bottom: 1px solid #000 !important;
     background: white !important;
-    color: black !important;
+    color: #000 !important;
     padding: 2px 4px !important;
     font-size: 11pt !important;
     -webkit-appearance: none !important;
@@ -307,11 +307,19 @@ All colors MUST be HSL.
     -webkit-print-color-adjust: exact !important;
   }
 
-  /* Ensure placeholder doesn't show in print */
+  /* Force display of input values */
+  input:not([type="checkbox"]) {
+    -webkit-text-fill-color: #000 !important;
+    color: #000 !important;
+    opacity: 1 !important;
+  }
+
+  /* Remove placeholder in print */
   input::placeholder,
   textarea::placeholder {
     opacity: 0 !important;
     color: transparent !important;
+    display: none !important;
   }
 
   input[type="email"],
@@ -319,51 +327,44 @@ All colors MUST be HSL.
   input[type="text"],
   input[type="date"] {
     display: inline-block !important;
-    min-width: 50px !important;
+    min-width: 100px !important;
   }
 
   textarea {
-    border: 1px solid black !important;
-    min-height: 60px !important;
+    border: 1px solid #000 !important;
+    min-height: 80px !important;
     display: block !important;
+    width: 100% !important;
   }
 
-  /* Print checkboxes properly */
+  /* Print checkboxes */
   input[type="checkbox"] {
     -webkit-appearance: checkbox !important;
     appearance: checkbox !important;
-    border: 1px solid black !important;
-    width: 14px !important;
-    height: 14px !important;
+    border: 1px solid #000 !important;
+    width: 16px !important;
+    height: 16px !important;
     print-color-adjust: exact !important;
     -webkit-print-color-adjust: exact !important;
   }
 
-  input[type="checkbox"]:checked::before {
-    content: "✓" !important;
-    display: block !important;
-    text-align: center !important;
-    font-weight: bold !important;
-  }
-
-  /* Signature lines and borders */
+  /* Signature lines */
   .border-t,
   [class*="border-t"] {
-    border-top: 1px solid black !important;
+    border-top: 1px solid #000 !important;
   }
 
-  /* Add spacing before signature section */
-  .my-10,
+  /* Spacing for signature area */
   .my-16,
   .print\\:my-20 {
-    margin-top: 80pt !important;
-    margin-bottom: 20pt !important;
+    margin-top: 100pt !important;
+    margin-bottom: 30pt !important;
+    page-break-inside: avoid !important;
   }
 
-  /* Date section spacing */
-  .space-y-2:has(+ .my-10),
-  .space-y-2:has(+ .my-16) {
-    margin-bottom: 30pt !important;
+  /* Signature line width */
+  .w-72 {
+    width: 300px !important;
   }
 
   /* Info boxes and alerts */

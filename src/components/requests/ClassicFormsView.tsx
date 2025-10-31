@@ -26,14 +26,7 @@ export function ClassicFormsView() {
   const [activeForm, setActiveForm] = useState("exclusao-associado");
 
   const handlePrint = () => {
-    const printContent = document.getElementById('printable-content');
-    if (!printContent) return;
-    
-    const originalContent = document.body.innerHTML;
-    document.body.innerHTML = printContent.innerHTML;
     window.print();
-    document.body.innerHTML = originalContent;
-    window.location.reload();
   };
 
   return (
@@ -89,8 +82,9 @@ function ExclusaoAssociadoClassic({ onPrint }: { onPrint: () => void }) {
         AOS ILUSTRÍSSIMOS DIRETORES DO FUNDO DE SAÚDE DOS SERVIDORES DO PODER JUDICIÁRIO DO PARANÁ
       </h2>
 
-      <div className="text-right">
-        <Input className="inline-block w-96" placeholder="Nome completo" />
+      <div className="space-y-2">
+        <Label>Nome Completo:</Label>
+        <Input className="w-full" placeholder="Nome completo" />
       </div>
 
       <div className="space-y-2">
@@ -153,8 +147,9 @@ function ExclusaoDependenteClassic({ onPrint }: { onPrint: () => void }) {
         AOS ILUSTRÍSSIMOS DIRETORES DO FUNDO DE SAÚDE DOS SERVIDORES DO PODER JUDICIÁRIO DO PARANÁ
       </h2>
 
-      <div className="text-right">
-        <Input className="inline-block w-96" placeholder="Nome completo" />
+      <div className="space-y-2">
+        <Label>Nome Completo:</Label>
+        <Input className="w-full" placeholder="Nome completo" />
       </div>
 
       <div className="space-y-2">
@@ -217,8 +212,9 @@ function InclusaoAssociadoClassic({ onPrint }: { onPrint: () => void }) {
         ILUSTRÍSSIMOS DIRETORES DO FUNDO DE SAÚDE DOS SERVIDORES DO PODER JUDICIÁRIO DO PARANÁ
       </h2>
 
-      <div className="text-right">
-        <Input className="inline-block w-96" placeholder="Nome completo" />
+      <div className="space-y-2">
+        <Label>Nome Completo:</Label>
+        <Input className="w-full" placeholder="Nome completo" />
       </div>
 
       <div className="space-y-2">
@@ -367,8 +363,9 @@ function InclusaoDependenteClassic({ onPrint }: { onPrint: () => void }) {
         AOS ILUSTRÍSSIMOS DIRETORES DO FUNDO DE SAÚDE DOS SERVIDORES DO PODER JUDICIÁRIO DO PARANÁ
       </h2>
 
-      <div className="text-right">
-        <Input className="inline-block w-96" placeholder="Nome completo do titular" />
+      <div className="space-y-2">
+        <Label>Nome Completo do Titular:</Label>
+        <Input className="w-full" placeholder="Nome completo do titular" />
       </div>
 
       <div className="space-y-2">
@@ -459,8 +456,9 @@ function InclusaoRecemNascidoClassic({ onPrint }: { onPrint: () => void }) {
         AO ILMO. SR. DIRETOR DO FUNDO DE SAÚDE DOS SERVIDORES DO PODER JUDICIÁRIO
       </h2>
 
-      <div className="text-right">
-        <Input className="inline-block w-96" placeholder="Nome completo do titular" />
+      <div className="space-y-2">
+        <Label>Nome Completo do Titular:</Label>
+        <Input className="w-full" placeholder="Nome completo do titular" />
       </div>
 
       <div className="space-y-2">
@@ -543,8 +541,9 @@ function InscricaoPensionistaClassic({ onPrint }: { onPrint: () => void }) {
         AOS ILUSTRÍSSIMOS DIRETORES DO FUNDO DE SAÚDE DOS SERVIDORES DO PODER JUDICIÁRIO DO PARANÁ
       </h2>
 
-      <div className="text-right">
-        <Input className="inline-block w-96" placeholder="Nome completo" />
+      <div className="space-y-2">
+        <Label>Nome Completo:</Label>
+        <Input className="w-full" placeholder="Nome completo" />
       </div>
 
       <div className="space-y-2">
@@ -767,8 +766,9 @@ function RequerimentoDiversosClassic({ onPrint }: { onPrint: () => void }) {
         AOS ILUSTRÍSSIMOS DIRETORES DO FUNDO DE SAÚDE DOS SERVIDORES DO PODER JUDICIÁRIO DO PARANÁ
       </h2>
 
-      <div className="text-right">
-        <Input className="inline-block w-96" placeholder="Nome completo" />
+      <div className="space-y-2">
+        <Label>Nome Completo:</Label>
+        <Input className="w-full" placeholder="Nome completo" />
       </div>
 
       <div className="space-y-2">
@@ -1155,8 +1155,9 @@ function TermoCompromissoClassic({ onPrint }: { onPrint: () => void }) {
         TERMO DE COMPROMISSO
       </h2>
 
-      <div className="text-right">
-        <Input className="inline-block w-96" placeholder="Nome completo" />
+      <div className="space-y-2">
+        <Label>Nome Completo:</Label>
+        <Input className="w-full" placeholder="Nome completo" />
       </div>
 
       <div className="space-y-2">
