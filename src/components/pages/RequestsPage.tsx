@@ -143,6 +143,15 @@ export function RequestsPage() {
       return;
     }
 
+    if (!formData.telefone || formData.telefone.trim() === "") {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "O telefone para contato é obrigatório.",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
