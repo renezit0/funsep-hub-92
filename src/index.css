@@ -13,54 +13,54 @@ All colors MUST be HSL.
     --primary-foreground: 0 0% 100%;
     --primary-light: 214 88% 60%;
     --primary-dark: 214 88% 40%;
-    
+
     /* Background System */
     --background: 0 0% 100%;
     --foreground: 222 47% 11%;
     --bg-secondary: 220 14% 96%;
     --bg-tertiary: 220 14% 93%;
-    
+
     /* Card System */
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
-    
+
     /* UI Components */
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-    
+
     --secondary: 220 14% 96%;
     --secondary-foreground: 222 47% 11%;
-    
+
     --muted: 220 14% 96%;
     --muted-foreground: 220 9% 46%;
-    
+
     --accent: 220 14% 96%;
     --accent-foreground: 222 47% 11%;
-    
+
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    
+
     --success: 142 76% 36%;
     --success-foreground: 0 0% 98%;
-    
+
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 98%;
-    
+
     --info: 199 89% 48%;
     --info-foreground: 0 0% 98%;
-    
+
     /* Borders and Inputs */
     --border: 220 13% 91%;
     --input: 220 13% 91%;
     --ring: 214 88% 50%;
-    
+
     /* Radius */
     --radius: 0.75rem;
-    
+
     /* Layout */
     --sidebar-width: 280px;
     --header-height: 64px;
-    
+
     /* Sidebar Specific */
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 222 47% 11%;
@@ -70,17 +70,17 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 222 47% 11%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 214 88% 50%;
-    
+
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(214 88% 50%), hsl(214 88% 60%));
     --gradient-subtle: linear-gradient(180deg, hsl(220 14% 98%), hsl(220 14% 96%));
-    
+
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 hsl(220 43% 11% / 0.05);
     --shadow-md: 0 4px 6px -1px hsl(220 43% 11% / 0.1);
     --shadow-lg: 0 10px 15px -3px hsl(220 43% 11% / 0.1);
     --shadow-glow: 0 0 40px hsl(214 88% 50% / 0.2);
-    
+
     /* Transitions */
     --transition-base: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-colors: color, background-color, border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -140,24 +140,25 @@ All colors MUST be HSL.
   /* Mobile optimizations */
   @media (max-width: 768px) {
     /* Better touch targets */
-    button, [role="button"] {
+    button,
+    [role="button"] {
       min-height: 44px;
     }
-    
+
     /* Better scrollable areas */
     .overflow-x-auto {
       scrollbar-width: thin;
       scrollbar-color: hsl(var(--muted)) transparent;
     }
-    
+
     .overflow-x-auto::-webkit-scrollbar {
       height: 4px;
     }
-    
+
     .overflow-x-auto::-webkit-scrollbar-track {
       background: transparent;
     }
-    
+
     .overflow-x-auto::-webkit-scrollbar-thumb {
       background: hsl(var(--muted));
       border-radius: 2px;
@@ -172,12 +173,12 @@ All colors MUST be HSL.
 
   /* Hide scrollbar but keep functionality */
   .scrollbar-hide {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;     /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
   }
-  
+
   .scrollbar-hide::-webkit-scrollbar {
-    display: none;             /* Chrome, Safari and Opera */
+    display: none; /* Chrome, Safari and Opera */
   }
 }
 
@@ -187,44 +188,44 @@ All colors MUST be HSL.
     @apply border-border;
     font-family: inherit;
   }
-  
+
   .ql-toolbar {
     @apply border-border bg-muted/30;
     border-radius: 0.5rem 0.5rem 0 0;
   }
-  
+
   .ql-editor {
     @apply min-h-[300px] text-foreground;
     font-size: 1rem;
     line-height: 1.6;
   }
-  
+
   .ql-editor.ql-blank::before {
     @apply text-muted-foreground;
     font-style: normal;
   }
-  
+
   .ql-snow .ql-stroke {
     @apply stroke-foreground;
   }
-  
+
   .ql-snow .ql-fill {
     @apply fill-foreground;
   }
-  
+
   .ql-snow .ql-picker-label {
     @apply text-foreground;
   }
-  
+
   .ql-toolbar button:hover,
   .ql-toolbar button:focus {
     @apply bg-accent;
   }
-  
+
   .ql-toolbar button.ql-active {
     @apply bg-primary/10;
   }
-  
+
   .ql-snow.ql-toolbar button:hover .ql-stroke,
   .ql-snow .ql-toolbar button:hover .ql-stroke,
   .ql-snow.ql-toolbar button:focus .ql-stroke,
@@ -233,7 +234,7 @@ All colors MUST be HSL.
   .ql-snow .ql-toolbar button.ql-active .ql-stroke {
     @apply stroke-primary;
   }
-  
+
   .ql-snow.ql-toolbar button:hover .ql-fill,
   .ql-snow .ql-toolbar button:hover .ql-fill,
   .ql-snow.ql-toolbar button:focus .ql-fill,
@@ -259,6 +260,7 @@ All colors MUST be HSL.
   /* Hide only UI elements - keep all content visible */
   aside,
   header,
+  cardHeader,
   nav,
   .print\:hidden,
   [role="tablist"],
@@ -315,19 +317,28 @@ All colors MUST be HSL.
     -webkit-text-fill-color: #000 !important;
   }
 
-  body, p, div, span, label, strong {
+  body,
+  p,
+  div,
+  span,
+  label,
+  strong {
     font-size: 11pt !important;
     line-height: 1.5 !important;
   }
 
-  h1, h2, h3 {
+  h1,
+  h2,
+  h3 {
     font-size: 13pt !important;
     font-weight: bold !important;
     page-break-after: avoid;
   }
 
   /* Show input values for print - CRITICAL */
-  input, textarea, select {
+  input,
+  textarea,
+  select {
     border: none !important;
     border-bottom: 1px solid #000 !important;
     background: white !important;
@@ -423,7 +434,10 @@ All colors MUST be HSL.
   }
 
   /* Avoid page breaks inside elements */
-  p, div, section, .space-y-6 > div {
+  p,
+  div,
+  section,
+  .space-y-6 > div {
     page-break-inside: avoid;
   }
 
