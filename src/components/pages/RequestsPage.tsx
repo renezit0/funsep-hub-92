@@ -300,7 +300,7 @@ export function RequestsPage() {
 
   return (
     <div className="space-y-6">
-      <CardHd>
+      <Tabs>
         <CardHeader>
           <CardTitle className="flex items-center gap-3 text-xl">
             <div className="p-2 rounded-lg bg-primary/10">
@@ -310,7 +310,7 @@ export function RequestsPage() {
           </CardTitle>
           <CardDescription>Envie seus requerimentos para a administração do FUNSEP</CardDescription>
         </CardHeader>
-      </CardHd>
+      </Tabs>
 
       <Tabs defaultValue="classic" className="w-full">
         <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
