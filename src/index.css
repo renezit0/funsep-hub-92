@@ -260,6 +260,7 @@ All colors MUST be HSL.
   /* Hide only UI elements - keep all content visible */
   aside,
   header,
+  cardHeader,
   nav,
   .print\:hidden,
   [role="tablist"],

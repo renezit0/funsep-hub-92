@@ -122,9 +122,9 @@ export function RequestsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const selectedReqType = requestTypes.find((t) => t.value === selectedType);
-
+    
+    const selectedReqType = requestTypes.find(t => t.value === selectedType);
+    
     if (!session && selectedReqType?.requiresLogin) {
       toast({
         variant: "destructive",
@@ -205,40 +205,36 @@ export function RequestsPage() {
     switch (selectedType) {
       case "exclusao_associado":
         return <ExclusaoAssociadoForm formData={formData} updateFormData={updateFormData} />;
-
+      
       case "exclusao_dependente":
         return <ExclusaoDependenteForm {...props} />;
-
+      
       case "inclusao_associado":
         return <InclusaoAssociadoForm {...props} />;
-
+      
       case "inclusao_dependente":
         return <InclusaoDependenteForm {...props} />;
-
+      
       case "inclusao_recem_nascido":
         return <InclusaoRecemNascidoForm {...props} />;
-
+      
       case "inscricao_pensionista":
         return <InscricaoPensionistaForm {...props} />;
-
+      
       case "requerimento_21_anos":
         return <Requerimento21AnosForm {...props} />;
-
+      
       case "requerimento_auxilio_saude":
         return <RequerimentoAuxilioSaudeForm {...props} />;
-
+      
       case "requerimento_reembolso":
         return (
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Nome do Titular *</Label>
-              <Input
-                value={formData.nome_titular || formData.nome}
-                onChange={(e) => updateFormData("nome_titular", e.target.value)}
-                required
-              />
+              <Input value={formData.nome_titular || formData.nome} onChange={(e) => updateFormData("nome_titular", e.target.value)} required />
             </div>
-            ...
+...
             <div className="border-t pt-4 space-y-4">
               <h3 className="font-semibold">Documentos Obrigatórios</h3>
               <RequestDocumentUpload
@@ -258,13 +254,13 @@ export function RequestsPage() {
             </div>
           </div>
         );
-
+      
       case "termo_ciencia":
         return <TermoCienciaForm formData={formData} updateFormData={updateFormData} />;
-
+      
       case "termo_compromisso":
         return <TermoCompromissoForm formData={formData} updateFormData={updateFormData} />;
-
+      
       case "termo_opcao":
         return <TermoOpcaoForm formData={formData} updateFormData={updateFormData} />;
 
@@ -296,11 +292,13 @@ export function RequestsPage() {
     }
   };
 
-  const availableTypes = session ? requestTypes : requestTypes.filter((t) => !t.requiresLogin);
+  const availableTypes = session 
+    ? requestTypes 
+    : requestTypes.filter(t => !t.requiresLogin);
 
   return (
     <div className="space-y-6">
-      <Tabs>
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-3 text-xl">
             <div className="p-2 rounded-lg bg-primary/10">
@@ -308,9 +306,11 @@ export function RequestsPage() {
             </div>
             Requerimentos
           </CardTitle>
-          <CardDescription>Envie seus requerimentos para a administração do FUNSEP</CardDescription>
+          <CardDescription>
+            Envie seus requerimentos para a administração do FUNSEP
+          </CardDescription>
         </CardHeader>
-      </Tabs>
+      </Card>
 
       <Tabs defaultValue="classic" className="w-full">
         <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
@@ -327,77 +327,79 @@ export function RequestsPage() {
 
         <TabsContent value="digital" className="mt-6">
           <Card>
-            <CardHeader>
-              <CardTitle>Novo Requerimento</CardTitle>
-              <CardDescription>Preencha todos os campos obrigatórios (*) para enviar seu requerimento</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {session && (
-                  <>
-                    <div className="space-y-2">
-                      <Label>Nome Completo</Label>
-                      <Input value={session.user.nome} disabled className="bg-muted" />
-                    </div>
+          <CardHeader>
+            <CardTitle>Novo Requerimento</CardTitle>
+            <CardDescription>
+              Preencha todos os campos obrigatórios (*) para enviar seu requerimento
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {session && (
+                <>
+                  <div className="space-y-2">
+                    <Label>Nome Completo</Label>
+                    <Input value={session.user.nome} disabled className="bg-muted" />
+                  </div>
 
-                    <div className="space-y-2">
-                      <Label>Matrícula</Label>
-                      <Input value={session.user.matricula} disabled className="bg-muted" />
-                    </div>
-                  </>
-                )}
+                  <div className="space-y-2">
+                    <Label>Matrícula</Label>
+                    <Input value={session.user.matricula} disabled className="bg-muted" />
+                  </div>
+                </>
+              )}
 
-                <div className="space-y-2">
-                  <Label htmlFor="tipo">Tipo de Requerimento *</Label>
-                  <Select value={selectedType} onValueChange={setSelectedType}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o tipo de requerimento" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableTypes.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
-                          {type.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="tipo">Tipo de Requerimento *</Label>
+                <Select value={selectedType} onValueChange={setSelectedType}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o tipo de requerimento" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableTypes.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-                {selectedType && (
-                  <>
-                    <div className="space-y-2">
-                      <Label>E-mail para Contato *</Label>
-                      <Input
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => updateFormData("email", e.target.value)}
-                        placeholder="seu@email.com"
-                        required
-                      />
-                    </div>
+              {selectedType && (
+                <>
+                  <div className="space-y-2">
+                    <Label>E-mail para Contato *</Label>
+                    <Input
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => updateFormData("email", e.target.value)}
+                      placeholder="seu@email.com"
+                      required
+                    />
+                  </div>
 
-                    <div className="space-y-2">
-                      <Label>Telefone para Contato *</Label>
-                      <Input
-                        type="tel"
-                        value={formData.telefone}
-                        onChange={(e) => updateFormData("telefone", e.target.value)}
-                        placeholder="(41) 99999-9999"
-                        required
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <Label>Telefone para Contato *</Label>
+                    <Input
+                      type="tel"
+                      value={formData.telefone}
+                      onChange={(e) => updateFormData("telefone", e.target.value)}
+                      placeholder="(41) 99999-9999"
+                      required
+                    />
+                  </div>
 
-                    {renderFormFields()}
-                  </>
-                )}
+                  {renderFormFields()}
+                </>
+              )}
 
-                <Button type="submit" disabled={isSubmitting || !selectedType} className="w-full">
-                  <Send className="h-4 w-4 mr-2" />
-                  {isSubmitting ? "Enviando..." : "Enviar Requerimento"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+              <Button type="submit" disabled={isSubmitting || !selectedType} className="w-full">
+                <Send className="h-4 w-4 mr-2" />
+                {isSubmitting ? "Enviando..." : "Enviar Requerimento"}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
         </TabsContent>
       </Tabs>
     </div>
