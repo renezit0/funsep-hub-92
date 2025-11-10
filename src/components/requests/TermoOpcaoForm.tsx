@@ -67,6 +67,17 @@ export function TermoOpcaoForm({ formData, updateFormData }: FormProps) {
         />
       </div>
 
+      <div className="space-y-2">
+        <Label>Telefone para Contato *</Label>
+        <Input 
+          type="tel"
+          value={formData.telefone || ""} 
+          onChange={(e) => updateFormData("telefone", e.target.value)} 
+          placeholder="(41) 99999-9999"
+          required 
+        />
+      </div>
+
       <div className="border-t pt-4 space-y-4">
         <Label className="font-semibold">Opção de Acomodação do Titular *</Label>
         <RadioGroup 

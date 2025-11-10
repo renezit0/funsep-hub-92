@@ -62,6 +62,17 @@ export function Requerimento21AnosForm({ formData, updateFormData, handleDocumen
       </div>
 
       <div className="space-y-2">
+        <Label>Telefone para Contato *</Label>
+        <Input 
+          type="tel"
+          value={formData.telefone || ""} 
+          onChange={(e) => updateFormData("telefone", e.target.value)} 
+          placeholder="(41) 99999-9999"
+          required 
+        />
+      </div>
+
+      <div className="space-y-2">
         <Label>Declaração *</Label>
         <Textarea
           value={formData.declaracao || ""}

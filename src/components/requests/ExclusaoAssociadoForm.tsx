@@ -28,6 +28,17 @@ export function ExclusaoAssociadoForm({ formData, updateFormData }: FormProps) {
       </div>
 
       <div className="space-y-2">
+        <Label>Telefone para Contato *</Label>
+        <Input 
+          type="tel"
+          value={formData.telefone || ""} 
+          onChange={(e) => updateFormData("telefone", e.target.value)} 
+          placeholder="(41) 99999-9999"
+          required 
+        />
+      </div>
+
+      <div className="space-y-2">
         <Label>Data *</Label>
         <Input 
           type="date" 

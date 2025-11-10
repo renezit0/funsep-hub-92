@@ -57,6 +57,17 @@ export function TermoCienciaForm({ formData, updateFormData }: FormProps) {
         />
       </div>
 
+      <div className="space-y-2">
+        <Label>Telefone para Contato *</Label>
+        <Input 
+          type="tel"
+          value={formData.telefone || ""} 
+          onChange={(e) => updateFormData("telefone", e.target.value)} 
+          placeholder="(41) 99999-9999"
+          required 
+        />
+      </div>
+
       <div className="space-y-3 border-t pt-4">
         <Label className="font-semibold">Declarações de Ciência *</Label>
         <div className="space-y-2">

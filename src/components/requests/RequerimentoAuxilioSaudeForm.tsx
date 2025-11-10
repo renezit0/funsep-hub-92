@@ -50,6 +50,17 @@ export function RequerimentoAuxilioSaudeForm({ formData, updateFormData, handleD
         />
       </div>
 
+      <div className="space-y-2">
+        <Label>Telefone para Contato *</Label>
+        <Input 
+          type="tel"
+          value={formData.telefone || ""} 
+          onChange={(e) => updateFormData("telefone", e.target.value)} 
+          placeholder="(41) 99999-9999"
+          required 
+        />
+      </div>
+
       <div className="border-t pt-4 space-y-4">
         <h3 className="font-semibold">Documentos Obrigatórios</h3>
         <RequestDocumentUpload
