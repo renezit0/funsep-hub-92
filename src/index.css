@@ -247,70 +247,58 @@ All colors MUST be HSL.
 /* Print Styles for Classic Forms */
 @media print {
   @page {
-    size: A4 portrait;
-    margin: 2cm 1.5cm;
+    margin: 2cm;
+    size: A4;
   }
 
-  * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-
-  html, body {
-    width: 210mm;
-    height: 297mm;
-    margin: 0;
-    padding: 0;
+  body {
     background: white !important;
     color: #000 !important;
   }
 
-  /* Hide only UI elements */
+  /* Hide only UI elements - keep all content visible */
   aside,
   header,
   nav,
   .print\:hidden,
   [role="tablist"],
-  button,
-  [class*="sidebar"] {
+  button {
     display: none !important;
   }
 
-  /* Show and format main content */
+  /* Show main content */
   main,
   #printable-content {
     display: block !important;
     visibility: visible !important;
+  }
+
+  /* Make printable content full width */
+  #printable-content,
+  main {
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
-    padding: 0 !important;
+    padding: 1cm !important;
     box-shadow: none !important;
     border: none !important;
     background: white !important;
-    page-break-inside: avoid;
   }
 
-  /* Fix grid layout */
+  /* Fix grid layout in print */
   .grid {
     display: block !important;
     grid-template-columns: 1fr !important;
   }
 
-  /* Ensure spacing is visible */
-  .space-y-6 > * + * {
-    margin-top: 1.5rem !important;
+  /* Ensure content is visible */
+  .space-y-6,
+  .space-y-4,
+  .space-y-2 {
+    display: block !important;
   }
 
-  .space-y-4 > * + * {
-    margin-top: 1rem !important;
-  }
-
-  .space-y-2 > * + * {
-    margin-top: 0.5rem !important;
-  }
-
-  /* Force black text on everything */
+  /* Optimize text for print - force black color on everything */
   *,
   body,
   p,
@@ -320,73 +308,76 @@ All colors MUST be HSL.
   strong,
   h1,
   h2,
-  h3 {
+  h3,
+  input,
+  textarea {
     color: #000 !important;
     -webkit-text-fill-color: #000 !important;
   }
 
   body, p, div, span, label, strong {
-    font-size: 12pt !important;
-    line-height: 1.6 !important;
+    font-size: 11pt !important;
+    line-height: 1.5 !important;
   }
 
   h1, h2, h3 {
-    font-size: 14pt !important;
+    font-size: 13pt !important;
     font-weight: bold !important;
     page-break-after: avoid;
-    margin-bottom: 12pt !important;
   }
 
-  /* CRITICAL: Force input values to show */
-  input:not([type="checkbox"]):not([type="radio"]),
-  textarea,
-  select {
+  /* Show input values for print - CRITICAL */
+  input, textarea, select {
     border: none !important;
     border-bottom: 1px solid #000 !important;
-    background: transparent !important;
+    background: white !important;
     color: #000 !important;
-    -webkit-text-fill-color: #000 !important;
-    padding: 4px 2px !important;
-    font-size: 12pt !important;
+    padding: 2px 4px !important;
+    font-size: 11pt !important;
     -webkit-appearance: none !important;
     appearance: none !important;
     font-family: inherit !important;
-    display: inline-block !important;
-    opacity: 1 !important;
-    width: auto !important;
-    min-width: 200px !important;
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
   }
 
-  /* Full width inputs */
-  input.w-full,
-  textarea {
-    width: 100% !important;
-    display: block !important;
+  /* Force display of input values */
+  input:not([type="checkbox"]) {
+    -webkit-text-fill-color: #000 !important;
+    color: #000 !important;
+    opacity: 1 !important;
+  }
+
+  /* Remove placeholder in print */
+  input::placeholder,
+  textarea::placeholder {
+    opacity: 0 !important;
+    color: transparent !important;
+    display: none !important;
+  }
+
+  input[type="email"],
+  input[type="tel"],
+  input[type="text"],
+  input[type="date"] {
+    display: inline-block !important;
+    min-width: 100px !important;
   }
 
   textarea {
     border: 1px solid #000 !important;
-    min-height: 100px !important;
-    padding: 8px !important;
+    min-height: 80px !important;
+    display: block !important;
+    width: 100% !important;
   }
 
-  /* Hide placeholders */
-  input::placeholder,
-  textarea::placeholder,
-  input::-webkit-input-placeholder,
-  textarea::-webkit-input-placeholder {
-    opacity: 0 !important;
-    color: transparent !important;
-  }
-
-  /* Checkboxes visible */
-  input[type="checkbox"],
-  input[type="radio"] {
+  /* Print checkboxes */
+  input[type="checkbox"] {
     -webkit-appearance: checkbox !important;
     appearance: checkbox !important;
-    border: 2px solid #000 !important;
-    width: 18px !important;
-    height: 18px !important;
+    border: 1px solid #000 !important;
+    width: 16px !important;
+    height: 16px !important;
     print-color-adjust: exact !important;
     -webkit-print-color-adjust: exact !important;
   }
@@ -400,8 +391,8 @@ All colors MUST be HSL.
   /* Spacing for signature area */
   .my-16,
   .print\\:my-20 {
-    margin-top: 80pt !important;
-    margin-bottom: 20pt !important;
+    margin-top: 100pt !important;
+    margin-bottom: 30pt !important;
     page-break-inside: avoid !important;
   }
 
@@ -429,33 +420,37 @@ All colors MUST be HSL.
   /* Labels */
   label {
     font-weight: 600 !important;
-    display: inline-block !important;
-    margin-bottom: 4px !important;
   }
 
   /* Avoid page breaks inside elements */
-  p, div, section, .space-y-6 > div, .space-y-4 > div {
+  p, div, section, .space-y-6 > div {
     page-break-inside: avoid;
   }
 
+  /* Page breaks before major sections if needed */
+  .page-break {
+    page-break-after: always;
+  }
+
   /* Ensure grid layouts work in print */
-  .grid-cols-2 {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    gap: 1rem !important;
+  .grid {
+    display: block !important;
   }
 
-  .grid-cols-3 {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr 1fr !important;
-    gap: 1rem !important;
+  .grid > * {
+    margin-bottom: 8px !important;
   }
 
-  /* Remove box shadows and borders from cards */
-  .rounded-lg,
-  .border {
-    border: none !important;
-    box-shadow: none !important;
-    border-radius: 0 !important;
+  /* Spacing adjustments */
+  .space-y-6 > * + * {
+    margin-top: 12pt !important;
+  }
+
+  .space-y-4 > * + * {
+    margin-top: 8pt !important;
+  }
+
+  .space-y-2 > * + * {
+    margin-top: 4pt !important;
   }
 }
