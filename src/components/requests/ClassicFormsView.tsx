@@ -29,7 +29,7 @@ export function ClassicFormsView() {
   const [activeForm, setActiveForm] = useState("exclusao-associado");
   const { toast } = useToast();
 
-  const handlePrint = async () => {
+  const handlePrint = () => {
     const content = document.getElementById("printable-content");
     if (!content) {
       toast({
@@ -40,77 +40,135 @@ export function ClassicFormsView() {
       return;
     }
 
-    try {
-      toast({
-        title: "Gerando PDF...",
-        description: "Aguarde enquanto preparamos seu documento.",
-      });
-
-      // Aguarda um pouco para garantir que tudo está renderizado
-      await new Promise(resolve => setTimeout(resolve, 300));
-
-      // Captura o conteúdo como imagem com configurações otimizadas
-      const canvas = await html2canvas(content, {
-        scale: 2,
-        useCORS: true,
-        logging: true,
-        allowTaint: true,
-        backgroundColor: "#ffffff",
-        windowWidth: content.scrollWidth,
-        windowHeight: content.scrollHeight,
-        scrollY: -window.scrollY,
-        scrollX: -window.scrollX,
-      });
-
-      console.log("Canvas gerado:", canvas.width, "x", canvas.height);
-
-      if (canvas.width === 0 || canvas.height === 0) {
-        throw new Error("Canvas vazio");
-      }
-
-      // Dimensões A4 em mm
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: "a4",
-      });
-
-      const imgWidth = 210; // A4 width in mm
-      const pageHeight = 297; // A4 height in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
-
-      const imgData = canvas.toDataURL("image/png");
-      
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      // Adiciona páginas extras se necessário
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
-
-      // Abre o PDF em nova aba
-      const pdfBlob = pdf.output("blob");
-      const pdfUrl = URL.createObjectURL(pdfBlob);
-      window.open(pdfUrl, "_blank");
-
-      toast({
-        title: "PDF gerado!",
-        description: "O documento foi aberto em uma nova aba.",
-      });
-    } catch (error) {
-      console.error("Erro ao gerar PDF:", error);
+    // Cria uma nova janela com o conteúdo
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
       toast({
         variant: "destructive",
-        title: "Erro ao gerar PDF",
-        description: "Não foi possível gerar o documento. Tente novamente.",
+        title: "Erro",
+        description: "Bloqueador de pop-ups ativado. Permita pop-ups para gerar o PDF.",
       });
+      return;
     }
+
+    // Clona o conteúdo
+    const clonedContent = content.cloneNode(true) as HTMLElement;
+
+    // Escreve o HTML na nova janela
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Requerimento FUNSEP</title>
+          <style>
+            @page {
+              size: A4;
+              margin: 2cm;
+            }
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+            body {
+              font-family: Arial, sans-serif;
+              font-size: 11pt;
+              line-height: 1.5;
+              color: #000;
+              background: white;
+            }
+            h2 {
+              font-size: 13pt;
+              margin-bottom: 1em;
+              color: #1e40af;
+              text-align: center;
+            }
+            label {
+              font-weight: 600;
+              display: block;
+              margin-top: 0.5em;
+              margin-bottom: 0.3em;
+            }
+            input, textarea {
+              border: none;
+              border-bottom: 1px solid #000;
+              width: 100%;
+              padding: 2px 4px;
+              font-family: inherit;
+              font-size: 11pt;
+            }
+            .space-y-6 > * + * {
+              margin-top: 1.5em;
+            }
+            .space-y-4 > * + * {
+              margin-top: 1em;
+            }
+            .space-y-2 > * + * {
+              margin-top: 0.5em;
+            }
+            .grid {
+              display: grid;
+              gap: 1em;
+            }
+            .grid-cols-2 {
+              grid-template-columns: 1fr 1fr;
+            }
+            .grid-cols-3 {
+              grid-template-columns: 1fr 1fr 1fr;
+            }
+            .my-16 {
+              margin-top: 4em;
+              margin-bottom: 2em;
+            }
+            .border-t {
+              border-top: 1px solid #000;
+              padding-top: 0.5em;
+            }
+            .w-72 {
+              width: 18em;
+              margin: 0 auto;
+            }
+            .text-center {
+              text-align: center;
+            }
+            .bg-yellow-50 {
+              background-color: #fffbeb;
+              border-left: 4px solid #f59e0b;
+              padding: 0.5em;
+              margin: 1em 0;
+            }
+            .leading-relaxed {
+              line-height: 1.7;
+              text-align: justify;
+            }
+            .inline-block {
+              display: inline-block;
+            }
+            button {
+              display: none;
+            }
+          </style>
+        </head>
+        <body>
+          ${clonedContent.innerHTML}
+        </body>
+      </html>
+    `);
+
+    printWindow.document.close();
+    
+    // Aguarda o carregamento e dispara a impressão
+    printWindow.onload = () => {
+      setTimeout(() => {
+        printWindow.print();
+      }, 250);
+    };
+
+    toast({
+      title: "Janela de impressão aberta",
+      description: "Você pode salvar como PDF usando a opção 'Salvar como PDF' na impressora.",
+    });
   };
 
   return (
