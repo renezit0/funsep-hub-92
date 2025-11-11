@@ -5,6 +5,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import { useToast } from "@/hooks/use-toast";
 
 const forms = [
   { id: "exclusao-associado", title: "Exclusão de Associado" },
@@ -24,9 +27,66 @@ const forms = [
 
 export function ClassicFormsView() {
   const [activeForm, setActiveForm] = useState("exclusao-associado");
+  const { toast } = useToast();
 
-  const handlePrint = () => {
-    window.print();
+  const handlePrint = async () => {
+    const content = document.getElementById("printable-content");
+    if (!content) return;
+
+    try {
+      toast({
+        title: "Gerando PDF...",
+        description: "Aguarde enquanto preparamos seu documento.",
+      });
+
+      // Captura o conteúdo como imagem
+      const canvas = await html2canvas(content, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        windowWidth: 1200,
+      });
+
+      // Dimensões A4 em mm
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 297; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      const imgData = canvas.toDataURL("image/png");
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      // Adiciona páginas extras se necessário
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      // Abre o PDF em nova aba
+      pdf.output("dataurlnewwindow");
+
+      toast({
+        title: "PDF gerado!",
+        description: "O documento foi aberto em uma nova aba.",
+      });
+    } catch (error) {
+      console.error("Erro ao gerar PDF:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao gerar PDF",
+        description: "Não foi possível gerar o documento. Tente novamente.",
+      });
+    }
   };
 
   return (
