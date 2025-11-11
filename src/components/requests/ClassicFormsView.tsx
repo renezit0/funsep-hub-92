@@ -31,7 +31,14 @@ export function ClassicFormsView() {
 
   const handlePrint = async () => {
     const content = document.getElementById("printable-content");
-    if (!content) return;
+    if (!content) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Conteúdo não encontrado.",
+      });
+      return;
+    }
 
     try {
       toast({
@@ -39,13 +46,27 @@ export function ClassicFormsView() {
         description: "Aguarde enquanto preparamos seu documento.",
       });
 
-      // Captura o conteúdo como imagem
+      // Aguarda um pouco para garantir que tudo está renderizado
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      // Captura o conteúdo como imagem com configurações otimizadas
       const canvas = await html2canvas(content, {
         scale: 2,
         useCORS: true,
-        logging: false,
-        windowWidth: 1200,
+        logging: true,
+        allowTaint: true,
+        backgroundColor: "#ffffff",
+        windowWidth: content.scrollWidth,
+        windowHeight: content.scrollHeight,
+        scrollY: -window.scrollY,
+        scrollX: -window.scrollX,
       });
+
+      console.log("Canvas gerado:", canvas.width, "x", canvas.height);
+
+      if (canvas.width === 0 || canvas.height === 0) {
+        throw new Error("Canvas vazio");
+      }
 
       // Dimensões A4 em mm
       const pdf = new jsPDF({
@@ -61,6 +82,7 @@ export function ClassicFormsView() {
       let position = 0;
 
       const imgData = canvas.toDataURL("image/png");
+      
       pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
 
@@ -73,7 +95,9 @@ export function ClassicFormsView() {
       }
 
       // Abre o PDF em nova aba
-      pdf.output("dataurlnewwindow");
+      const pdfBlob = pdf.output("blob");
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+      window.open(pdfUrl, "_blank");
 
       toast({
         title: "PDF gerado!",
