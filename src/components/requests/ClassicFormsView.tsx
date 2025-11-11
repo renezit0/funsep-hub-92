@@ -53,6 +53,26 @@ export function ClassicFormsView() {
 
     // Clona o conteúdo
     const clonedContent = content.cloneNode(true) as HTMLElement;
+    
+    // Captura todos os valores dos inputs e textareas
+    const originalInputs = content.querySelectorAll("input, textarea");
+    const clonedInputs = clonedContent.querySelectorAll("input, textarea");
+    
+    originalInputs.forEach((input, index) => {
+      const clonedInput = clonedInputs[index] as HTMLInputElement | HTMLTextAreaElement;
+      if (input instanceof HTMLInputElement) {
+        if (input.type === "checkbox" || input.type === "radio") {
+          clonedInput.setAttribute("checked", input.checked ? "checked" : "");
+          if (input.checked) {
+            (clonedInput as HTMLInputElement).checked = true;
+          }
+        } else {
+          clonedInput.setAttribute("value", input.value);
+        }
+      } else if (input instanceof HTMLTextAreaElement) {
+        clonedInput.textContent = input.value;
+      }
+    });
 
     // Escreve o HTML na nova janela
     printWindow.document.write(`
@@ -77,6 +97,14 @@ export function ClassicFormsView() {
               line-height: 1.5;
               color: #000;
               background: white;
+              width: 210mm;
+              max-width: 210mm;
+              margin: 0 auto;
+              padding: 2cm;
+            }
+            #printable-content {
+              width: 210mm;
+              max-width: 210mm;
             }
             h2 {
               font-size: 13pt;
@@ -97,6 +125,13 @@ export function ClassicFormsView() {
               padding: 2px 4px;
               font-family: inherit;
               font-size: 11pt;
+              background: white;
+              color: #000;
+              display: inline-block;
+            }
+            input[type="checkbox"] {
+              width: auto;
+              border: 1px solid #000;
             }
             .space-y-6 > * + * {
               margin-top: 1.5em;
