@@ -298,7 +298,7 @@ export function RequestsPage() {
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="print:hidden">
         <CardHeader>
           <CardTitle className="flex items-center gap-3 text-xl">
             <div className="p-2 rounded-lg bg-primary/10">
@@ -313,7 +313,7 @@ export function RequestsPage() {
       </Card>
 
       <Tabs defaultValue="classic" className="w-full">
-        <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
+        <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 print:hidden">
           <TabsTrigger value="classic">Formulários Clássicos</TabsTrigger>
           <TabsTrigger value="digital" disabled className="gap-2">
             <Lock className="h-4 w-4" />
