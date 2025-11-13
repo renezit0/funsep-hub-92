@@ -82,9 +82,15 @@ export function ClassicFormsView() {
           <meta charset="utf-8">
           <title>Requerimento FUNSEP</title>
           <style>
-            @page {
-              size: A4;
-              margin: 2cm;
+            @media print {
+              @page {
+                size: A4;
+                margin: 0;
+              }
+              body {
+                margin: 0 !important;
+                padding: 1cm !important;
+              }
             }
             * {
               margin: 0;
@@ -100,7 +106,7 @@ export function ClassicFormsView() {
               width: 210mm;
               max-width: 210mm;
               margin: 0 auto;
-              padding: 2cm;
+              padding: 1cm;
             }
             #printable-content {
               width: 210mm;
