@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, Send, AlertCircle, Lock } from "lucide-react";
+import { FileText, Send, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { RequestDocumentUpload } from "@/components/RequestDocumentUpload";
 import { ClassicFormsView } from "@/components/requests/ClassicFormsView";
@@ -315,10 +315,7 @@ export function RequestsPage() {
       <Tabs defaultValue="classic" className="w-full">
         <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 print:hidden">
           <TabsTrigger value="classic">Formulários Clássicos</TabsTrigger>
-          <TabsTrigger value="digital" disabled className="gap-2">
-            <Lock className="h-4 w-4" />
-            Sistema Digital (Em breve)
-          </TabsTrigger>
+          <TabsTrigger value="digital">Sistema Digital</TabsTrigger>
         </TabsList>
 
         <TabsContent value="classic" className="mt-6">
